@@ -1,0 +1,90 @@
+/* 1. Βασικές ρυθμίσεις για να καλύψουμε όλο το ύψος του παραθύρου. */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;            /* Το html και body έχουν ύψος 100%. */
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;     /* Εναρμονισμένο box-sizing για όλα τα στοιχεία. */
+}
+
+/* 2. Μετατρέπουμε το body σε flex container κατακόρυφης διάταξης. */
+body {
+  display: flex;
+  flex-direction: column;  /* Στοιβάζουμε header, nav, main, footer κάθετα. */
+  min-height: 100%;        /* Εξασφαλίζουμε ότι το body μπορεί να γεμίσει το παράθυρο. */
+  font-family: sans-serif;
+}
+
+/* Κεφαλίδα */
+.site-header {
+  background-color: #333;
+  color: #fff;
+  padding: 1rem;
+}
+
+/* Πλοήγηση */
+.site-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  background-color: #444;
+}
+
+.site-nav li {
+  margin: 0;
+}
+
+.site-nav a {
+  display: block;
+  padding: 1rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  background-color: #666; 
+}
+
+/* 3. Το main (.content) γίνεται flex item που θα «απλωθεί» για να καλύψει το υπόλοιπο ύψος. */
+.content {
+  display: flex;       /* Οριζόντια διάταξη main-section + sidebar */
+  flex: 1;             /* Πολύ σημαντικό: επιτρέπει στη main περιοχή να μεγαλώσει κάθετα */
+  gap: 1rem;           /* Απόσταση μεταξύ main-section και sidebar */
+  padding: 1rem;
+  background-color: #f7f7f7;
+}
+
+/* Κύριο περιεχόμενο */
+.main-section {
+  flex: 3;
+  background-color: #f2f2f2;
+  padding: 1rem;
+}
+
+/* Πλάγια στήλη */
+.sidebar {
+  flex: 1;
+  background-color: #e2e2e2;
+  padding: 1rem;
+}
+
+/* Υποσέλιδο */
+.site-footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* 4. Ανταπόκριση σε μικρές οθόνες */
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column; /* Σε μικρή οθόνη, κάθετη στοίχιση main & sidebar */
+  }
+}
