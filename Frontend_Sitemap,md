@@ -1,0 +1,92 @@
+## Frontend Layout 
+
+Pages to create based on the requirements of the App.
+
+### Part 1: Welcome page set up
+1. WelcomePage
+    - app title
+    - short description
+    - buttons: Log in / Sign up / Continue as Guest
+
+2. LoginPage
+    - username
+    - password
+    - login button
+
+3. RegisterPage
+    - all required fields(Username, password, password confirmation, Full name, email, phone, full address, AFM)
+    - Error messages if a required field is empty
+    - submit button
+
+4. PendingApprovalPage
+    “Your registration is waiting for admin approval”
+
+
+### Part 2: Main functionality 
+
+5. HomePage
+    - navigation bar
+    - featured/recent events
+    - quick search
+    - (recommended section placeholder for the bonus Part)
+
+6. EventsPage
+    - filter sidebar
+    - paginated event cards/table
+    - search bar
+
+7. EventDetailsPage
+    - title, description, categories
+    - venue/address/date/time
+    - ticket types
+    - (image gallery)
+    - map placeholder
+    - booking section placeholder
+
+8. MyEventsPage
+    - organizer’s created events
+    - options: create, edit, cancel, delete, see bookings
+
+9. CreateEditEventPage
+    - event form
+    - ticket types sub-form
+    - media upload placeholder
+
+10. MyReservationsPage
+    - list of booked events
+    - booking status
+
+11. SettingsPage
+    - account info
+    - password change
+    - preferences
+
+12. AdminUsersPage
+    - list of users
+    - user details
+    - approve/reject signup requests
+
+13. MessagesPage
+    - inbox
+    - sent
+    - unread indicator
+
+
+## General Structure
+```
+/
+ /login
+ /register
+ /pending-approval
+ /home
+ /events
+ /events/:id
+ /my-events
+ /my-events/new
+ /my-events/:id/edit
+ /my-reservations
+ /messages
+ /settings
+ /admin/users
+ /admin/users/:id
+ ```
