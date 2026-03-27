@@ -1,0 +1,28 @@
+import type { EventItem } from "../types/event";
+
+export const mockEvents: EventItem[] = [
+  {
+    id: "ev-101",
+    title: "Athens Indie Night",
+    category: ["Music", "Live Performance"],
+    type: "Concert",
+    city: "Athens",
+    venue: "City Hall Stage",
+    date: "2026-04-10 20:30",
+    priceFrom: 15,
+    description: "A live indie concert with local bands and guest performers.",
+    status: "PUBLISHED",
+  },
+  {
+    id: "ev-102",
+    title: "Frontend Design Workshop",
+    category: ["Technology", "Workshop"],
+    type: "Seminar",
+    city: "Thessaloniki",
+    venue: "Innovation Hub",
+    date: "2026-04-18 17:00",
+    priceFrom: 0,
+    description: "A practical workshop on layout systems, components, and UX basics.",
+    status: "PUBLISHED",
+  },
+];
