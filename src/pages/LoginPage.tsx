@@ -15,6 +15,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       {/* Username */}
       <div>
         <label>Username</label>
+        <br></br>
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -25,6 +26,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       {/* Password */}
       <div>
         <label>Password</label>
+        <br></br>
         <input
           type="password"
           value={password}
