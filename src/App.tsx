@@ -1,21 +1,23 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import EventsPage from "./pages/EventsPage"
-import LoginPage from "./pages/LoginPage"
 import WelcomePage from "./pages/WelcomePage"
+import './styles/index.css'
 
-type Page = "welcome" | "login" | "events";
+
+type Page = "welcome" | "events";
 
 export default function App() {
-    const [page, setPage] = useState<Page>("welcome");
+    const [page, setPage] = useState<Page>("events");
 
-    return (
+    return(
         <div>
-            <Navbar onNavigate={ (nextPage) => setPage(nextPage as Page)} />
-
-            {page === "welcome" && <WelcomePage />}
-            {page === "login" && <LoginPage />}
+            {/* navigate bar  */}
+            <Navbar onNavigate={(NextPage) => setPage(NextPage as Page)} />
+            
+            {/* Page content */}
             {page === "events" && <EventsPage />}
+            {page === "welcome" && <WelcomePage />}
         </div>
-    );
+    )
 }
