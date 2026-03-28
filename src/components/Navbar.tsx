@@ -4,7 +4,7 @@ type NavbarProps = {
 
 export default function Navbar({ onNavigate }: NavbarProps) {
     return (
-        <nav>
+        <nav className="navbar">
             <button onClick={() => onNavigate("welcome")}>Home</button>
             <button onClick={() => onNavigate("events")}>Browse Events</button>
             <button onClick={() => onNavigate("login")}>Login</button>

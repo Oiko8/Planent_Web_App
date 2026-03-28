@@ -1,5 +1,5 @@
 export default function RegisterPage() {
     return(
-        <h1>Sign up</h1>
+        <h1 className="header">Sign up</h1>
     );
 }

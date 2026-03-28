@@ -9,8 +9,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [password, setPassword] = useState<string>("");
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="login-body">
+      <h1 className="header">Login</h1>
 
       {/* Username */}
       <div>
@@ -38,7 +38,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         Login
       </button>
 
-      {/* Sign up link */}
+      {/* Sign up */}
       <p>
         Don't have an account?{" "}
         <button onClick={() => onNavigate("register")}>

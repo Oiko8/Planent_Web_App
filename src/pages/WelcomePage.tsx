@@ -1,5 +1,5 @@
 export default function WelcomePage() {
     return(
-        <h1>Welcome Page</h1>
+        <h1 className="header">Welcome Page</h1>
     );
 }

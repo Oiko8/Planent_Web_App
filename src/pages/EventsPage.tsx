@@ -19,15 +19,14 @@ export default function EventsPage() {
 
   return (
     <div>
-      <h1>Browse events</h1>
+      <h1 className="header">Browse events</h1>
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search events"
-      />
-
-      <div>
+      <div className="event-body">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search events"
+        />
         {filteredEvents.map((event) => (
           <EventCard
             key={event.id}
