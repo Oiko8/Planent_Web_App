@@ -27,13 +27,15 @@ export default function EventsPage() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search events"
         />
-        {filteredEvents.map((event) => (
-          <EventCard
-            key={event.id}
-            event={event}
-            onOpen={() => console.log("Open event", event.id)}
-          />
-        ))}
+        <div className="event-body-grid">
+          {filteredEvents.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              onOpen={() => console.log("Open event", event.id)}
+            />
+          ))} 
+        </div>
       </div>
     </div>
   );

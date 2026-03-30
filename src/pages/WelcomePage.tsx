@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import EventCard from "../components/EventCard";
 import { mockEvents } from "../data/mockEvents";
 
@@ -8,7 +7,7 @@ type WelcomePageProps = {
 
 export default function WelcomePage({ onNavigate }: WelcomePageProps) {
 
-    const featuredEvents = mockEvents.slice(0, 3);
+    const featuredEvents = mockEvents.slice(0, 2);
 
     return(
         <div className="welcome-page">
@@ -21,7 +20,7 @@ export default function WelcomePage({ onNavigate }: WelcomePageProps) {
             <section className="featured-events">
                 <h2>Famous events</h2>
 
-                <div className="event-body">
+                <div className="featured-events-grid">
                 {featuredEvents.map((event) => (
                     <EventCard
                     key={event.id}

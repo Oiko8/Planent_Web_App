@@ -103,6 +103,14 @@ html {
   text-align: center;
 }
 
+.event-body-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
 .borderless-button-event {
   background: none;
   border: none;
@@ -148,4 +156,13 @@ html {
 .featured-events h2 {
   margin-bottom: 1.5rem;
 }
+
+.featured-events-grid {
+  display: grid;
+  grid-template-columns: repeat(1 minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 2rem auto 0;
+}
+
 
