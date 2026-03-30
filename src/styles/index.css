@@ -111,6 +111,18 @@ html {
   margin: 0 auto;
 }
 
+.category-section {
+  margin-top: 3rem;
+}
+
+.category-title {
+  text-align: left;
+  max-width: 1000px;
+  margin: 0 auto 1rem;
+  padding-left: 0.5rem;
+}
+
+
 .borderless-button-event {
   background: none;
   border: none;
@@ -121,6 +133,8 @@ html {
   text-transform: lowercase;
   cursor: pointer;
 }
+
+
 
 
 /* Login */

@@ -17,6 +17,8 @@ export default function EventsPage() {
     );
   }, [search]);
 
+  const categories = ["Music", "Workshop", "Sports", "Theater", "Festival"];
+
   return (
     <div>
       <h1 className="header">Browse events</h1>
@@ -27,16 +29,30 @@ export default function EventsPage() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search events"
         />
-        <div className="event-body-grid">
-          {filteredEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onOpen={() => console.log("Open event", event.id)}
-            />
-          ))} 
-        </div>
       </div>
+
+      {categories.map((category) => {
+        const categoryEvents = filteredEvents.filter((event) => 
+          event.category.includes(category)
+        );
+
+        return (
+          <section className="category-section" key={category}>
+            <h2 className="category-title">{category}</h2>
+
+            <div className="event-body-grid">
+              {categoryEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onOpen={() => console.log("Open event", event.id)}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      }
+      )}
     </div>
   );
 }
