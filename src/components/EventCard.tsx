@@ -12,7 +12,7 @@ export default function EventCard({ event, onOpen }: EventCardProps) {
             <h3>{event.title}</h3>
             <p>{event.type} - {event.city} - {event.date}</p>
             <p>{event.description}</p>
-            <button onClick={onOpen}>More</button>
+            <button className="borderless-button-event" onClick={onOpen}>More...</button>
         </div>
     );
 }

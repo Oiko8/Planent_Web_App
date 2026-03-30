@@ -18,7 +18,7 @@ export default function App() {
             <Navbar onNavigate={(NextPage) => setPage(NextPage as Page)} />
             
             {/* Page content */}
-            {page === "welcome" && <WelcomePage />}
+            {page === "welcome" && <WelcomePage onNavigate={(nextPage) => setPage(nextPage as Page)} />}
             
             {page === "events" && <EventsPage />}
 
