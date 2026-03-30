@@ -103,6 +103,17 @@ html {
   text-align: center;
 }
 
+.borderless-button-event {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  cursor: pointer;
+}
+
 
 /* Login */
 .login-body {
@@ -112,5 +123,29 @@ html {
 /* Register */
 .register-body {
   text-align: center;
+}
+
+
+/* Welcome Page Styling */
+.welcome-page {
+  text-align: center;
+  padding: 2rem;
+}
+
+.welcome-text {
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+  color: #cbd5e1;
+}
+
+.welcome-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.featured-events h2 {
+  margin-bottom: 1.5rem;
 }
 
