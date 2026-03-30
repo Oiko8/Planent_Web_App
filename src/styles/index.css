@@ -41,12 +41,36 @@ html {
   top: 0;
   z-index: 50;
   display: flex;
-  gap: 1.5rem;
+  gap: 2.0rem;
   padding: 0.9rem 1.5rem;
-  justify-content: center;
-  background: rgba(2, 6, 23, 0.96);
+  justify-content: left;
+  /* background: rgba(2, 6, 23, 0.96); */
   border-bottom: 1px solid #1e293b;
   backdrop-filter: blur(10px);
+  background-color: #020617; /* just in case for transparent background */
+  background: transparent;  
+ 
+}
+
+.navbar-home {
+  justify-content: left;
+  text-decoration: none;
+}
+
+.navbar-search {
+  margin-left: auto;
+  justify-content: right; 
+}
+
+.borderless-button {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 .nav-link {
@@ -90,248 +114,3 @@ html {
   text-align: center;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-}
-
-.hero-subtitle {
-  margin-top: 0.7rem;
-  font-size: 1rem;
-  color: #9ca3af;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-/* sections offset ώστε να μην τα κρύβει το navbar */
-.section {
-  margin-top: 2.5rem;
-  scroll-margin-top: 80px; /* πολύ σημαντικό */
-}
-
-
-/* Header πάνω από τα sections */
-.site-header {
-  padding-top: 2.2rem;
-  padding-bottom: 1rem;
-  text-align: center;
-}
-
-.site-name {
-  margin: 0;
-  font-size: 2.1rem;
-  letter-spacing: 0.03em;
-}
-
-.site-role {
-  margin: 0.4rem 0 0;
-  font-size: 0.95rem;
-  color: #9ca3af;
-}
-
-/* Κεντρικό περιεχόμενο */
-.site-main {
-  padding-bottom: 3rem;
-}
-
-/* Sections */
-.section {
-  margin-top: 2.5rem;
-}
-
-.section-title {
-  font-size: 1.35rem;
-  margin: 0 0 0.7rem;
-  font-weight: 600;
-  color: #e5e7eb;
-}
-
-.section-subtitle {
-  font-size: 0.95rem;
-  margin: 0.7rem 0 0.3rem;
-  color: #cbd5e1;
-}
-
-.section-text {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #d1d5db;
-  margin: 0.2rem 0;
-  max-width: 70ch;
-}
-
-/* Λίστες */
-.section-list {
-  margin: 0.3rem 0 0.6rem;
-  padding-left: 1.2rem;
-  font-size: 0.95rem;
-  color: #d1d5db;
-}
-
-.section-list li {
-  margin: 0.15rem 0;
-}
-
-/* Skills tags */
-.tags {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.tags li {
-  font-size: 0.8rem;
-  padding: 0.22rem 0.7rem;
-  border-radius: 999px;
-  background: #020617;
-  border: 1px solid #1f2937;
-  color: #e5e7eb;
-}
-
-/* Contact block */
-.contact-block {
-  margin-top: 0.5rem;
-}
-
-/* Links */
-a.link {
-  color: #93c5fd;
-  text-decoration: none;
-}
-
-a.link:hover {
-  text-decoration: underline;
-}
-
-/* Smooth scroll για το menu */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Mobile */
-@media (max-width: 640px) {
-  .navbar {
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    padding-inline: 1rem;
-  }
-
-  .site-header,
-  .site-main {
-    padding-inline: 1rem;
-  }
-
-  .site-name {
-    font-size: 1.8rem;
-  }
-}
-
-.hero-header {
-  text-align: center;
-  padding-top: 3rem;
-  padding-bottom: 2.5rem;
-}
-
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-}
-
-.hero-subtitle {
-  margin-top: 0.7rem;
-  font-size: 1rem;
-  color: #9ca3af;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-/* ABOUT SECTION LAYOUT */
-.about-section {
-  margin-top: 3rem;
-}
-
-.about-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-/* PHOTO */
-.about-photo-wrapper {
-  flex-shrink: 0;
-}
-
-.about-photo {
-  width: 250px;
-  height: 250px;
-  object-fit: cover;
-
-  /* ΚΥΚΛΙΚΗ */
-  border-radius: 50%;
-
-  /* ΛΕΠΤΟ ΛΕΥΚΟ ΠΕΡΙΓΡΑΜΜΑ */
-  border: 2px solid #ffffff;
-
-  /* ΑΣΠΡΟΜΑΥΡΗ */
-  filter: grayscale(100%);
-
-  /* Μικρή σκιά για να φαίνεται καθαρά στο dark */
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
-}
-
-/* TEXT */
-.about-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-/* Mobile responsive */
-@media (max-width: 640px) {
-  .about-wrapper {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .about-photo {
-    width: 150px;
-    height: 150px;
-  }
-
-  .about-content {
-    text-align: center;
-  }
-}
