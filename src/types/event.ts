@@ -1,9 +1,11 @@
 export type EventStatus = "PUBLISHED" | "DRAFT" | "CANCELLED";
 
+export type EventCategory = "Music" | "Workshop" | "Sports" | "Theater" | "Festival" | "Live Performance" | "Technology";
+
 export type EventItem = {
     id: string;
     title: string;
-    category: string[];
+    category: EventCategory[];   
     type: string;
     city: string;
     venue: string;

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import EventCard from "../components/EventCard";
 import { mockEvents } from "../data/mockEvents";
+import type { EventCategory } from "../types/event";
 
 export default function EventsPage() {
   const [search, setSearch] = useState("");
@@ -17,7 +18,7 @@ export default function EventsPage() {
     );
   }, [search]);
 
-  const categories = ["Music", "Workshop", "Sports", "Theater", "Festival"];
+  const categories: EventCategory[] = ["Music", "Workshop", "Sports", "Theater", "Festival"];
 
   return (
     <div>
