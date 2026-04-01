@@ -1,6 +1,6 @@
 export type EventStatus = "PUBLISHED" | "DRAFT" | "CANCELLED";
 
-export type EventCategory = "Music" | "Workshop" | "Sports" | "Theater" | "Festival" | "Live Performance" | "Technology";
+export type EventCategory = "Music" | "Workshop" | "Sports" | "Theater" | "Festival" | "Live Performance" | "Technology" | "Culture" | "Other";
 
 export type EventItem = {
     id: string;

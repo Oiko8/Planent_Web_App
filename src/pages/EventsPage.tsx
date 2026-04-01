@@ -18,7 +18,7 @@ export default function EventsPage() {
     );
   }, [search]);
 
-  const categories: EventCategory[] = ["Music", "Workshop", "Sports", "Theater", "Festival"];
+  const categories: EventCategory[] = ["Music", "Workshop", "Sports", "Theater", "Festival", "Culture", "Technology", "Other"];
 
   return (
     <div>

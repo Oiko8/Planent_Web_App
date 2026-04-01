@@ -5,9 +5,10 @@ import EventsPage from "./pages/EventsPage"
 import WelcomePage from "./pages/WelcomePage"
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import PendingApprovalPage from "./pages/PendingApprovalPage";
 
 
-type Page = "welcome" | "events" | "login" | "register";
+type Page = "welcome" | "events" | "login" | "register" | "pendingApproval";
 
 export default function App() {
     const [page, setPage] = useState<Page>("welcome");
@@ -24,7 +25,10 @@ export default function App() {
 
             {page === "login" && <LoginPage onNavigate={(nextPage) => setPage(nextPage as Page)}/>}
 
-            {page === "register" && <RegisterPage />}
+            {page === "register" && <RegisterPage onNavigate={(nextPage) => setPage(nextPage as Page)}/> }
+            
+            {page === "pendingApproval" && <PendingApprovalPage onNavigate={(nextPage) => setPage(nextPage as Page)}/> }
+            
         </div>
     )
 }

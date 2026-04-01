@@ -135,8 +135,6 @@ html {
 }
 
 
-
-
 /* Login */
 .login-body {
   text-align: center;
@@ -147,8 +145,30 @@ html {
   text-align: center;
 }
 
+.register-button {
+  /* margin-top: 0.5rem; */
+  border: none;
+  background: #5c636f;
+  letter-spacing: normal;
+  cursor: pointer;
+}
 
-/* Welcome Page Styling */
+.register-error-message {
+  color: #f87171;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  min-height: 24px; /* Ensure consistent height for error messages */
+}
+
+
+/* Pending Approval Page */
+.pending-approval-body {
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Welcome Page */
 .welcome-page {
   text-align: center;
   padding: 2rem;
