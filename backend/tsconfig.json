@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "rootDir": "./src",
     "outDir": "./dist",
     "module": "nodenext",
     "target": "esnext",
@@ -15,8 +14,11 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "lib": ["ESNext"]
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "prisma.config.ts"]
+  "include": ["src/**/*", ".env", "prisma.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }
