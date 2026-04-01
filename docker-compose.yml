@@ -1,7 +1,7 @@
 services:
-  prod:
+  frontend-prod:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "8080:80"
@@ -9,9 +9,9 @@ services:
       - NODE_ENV=production
  
  
-  dev:
+  frontend-dev:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
       - "5173:5173"
@@ -20,14 +20,14 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./src
+          path: ./frontend/src
           target: /app/src
           ignore:
             - node_modules/
         - action: rebuild
-          path: ./package.json
+          path: ./frontend/package.json
           target: /app/package.json
         - action: rebuild
-          path: ./vite.config.js
+          path: ./frontend/vite.config.js
           target: /app/vite.config.js
         
