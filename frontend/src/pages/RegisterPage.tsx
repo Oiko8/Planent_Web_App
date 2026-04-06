@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { RegisterFormData } from "../types/registerData";
+import axios from "axios";
 
 type RegisterPageProps = {
     onNavigate: (page: string) => void;
@@ -23,7 +24,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
 
     const [errorMessage, setErrorMessage] = useState("");
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
         if (
@@ -45,7 +46,14 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
         }
 
         setErrorMessage("");
-        console.log("Register form submitted:", formData);
+
+        // console.log("Register form submitted:", formData);
+        const reponse = await axios.post("http://localhost:5000/register", formData, {
+        headers: {
+            "Content-Type": "application/json",
+        },
+        });
+        console.log("Server response:", reponse.data);
 
         // Go to approval page in case of success
         onNavigate("pendingApproval");
