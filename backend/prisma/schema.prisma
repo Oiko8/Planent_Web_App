@@ -1,12 +1,145 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
+}
+
+model Booking {
+  booking_id        Int                    @id @default(autoincrement())
+  attendee_id       Int
+  ticket_type_id    Int
+  booking_time      DateTime               @db.DateTime(0)
+  number_of_tickets Int
+  total_cost        Decimal                @db.Decimal(10, 2)
+  booking_status    Booking_booking_status @default(PENDING)
+  Event_Ticket_Type Event_Ticket_Type      @relation(fields: [ticket_type_id], references: [ticket_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Booking_Event_TicketType1")
+  User              User                   @relation(fields: [attendee_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Booking_User1")
+
+  @@index([ticket_type_id], map: "fk_Booking_Event_TicketType1_idx")
+  @@index([attendee_id], map: "fk_Booking_User1_idx")
+}
+
+model Category {
+  category_id    Int              @id @default(autoincrement())
+  category_name  String           @unique(map: "category_name_UNIQUE") @db.VarChar(100)
+  Event_Category Event_Category[]
+}
+
+model Event {
+  event_id          Int                 @id @default(autoincrement())
+  organizer_id      Int
+  title             String              @db.VarChar(100)
+  event_type        String              @db.VarChar(100)
+  venue             String              @db.VarChar(100)
+  country           String              @db.VarChar(50)
+  city              String              @db.VarChar(50)
+  address           String              @db.VarChar(255)
+  latitude          Decimal             @db.Decimal(10, 8)
+  longitude         Decimal             @db.Decimal(11, 8)
+  start_datetime    DateTime            @db.DateTime(0)
+  end_datetime      DateTime            @db.DateTime(0)
+  capacity          Int
+  status            Event_status        @default(DRAFT)
+  description       String?             @db.LongText
+  User              User                @relation(fields: [organizer_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Event_User")
+  Event_Category    Event_Category[]
+  Event_Media       Event_Media[]
+  Event_Ticket_Type Event_Ticket_Type[]
+  Message           Message[]
+
+  @@index([organizer_id], map: "fk_Event_User")
+  @@index([country, city], map: "location")
+  @@index([start_datetime], map: "start_datetime")
+  @@index([status], map: "status")
+  @@fulltext([title, description], map: "text")
+}
+
+model Event_Category {
+  event_id    Int
+  category_id Int
+  Category    Category @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Event_has_Category_Category1")
+  Event       Event    @relation(fields: [event_id], references: [event_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Event_has_Category_Event1")
+
+  @@id([event_id, category_id])
+  @@index([category_id], map: "fk_Event_has_Category_Category1_idx")
+  @@index([event_id], map: "fk_Event_has_Category_Event1_idx")
+}
+
+model Event_Media {
+  photo_id  Int    @id @default(autoincrement())
+  event_id  Int
+  photo_url String @db.VarChar(255)
+  Event     Event  @relation(fields: [event_id], references: [event_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Event_Media_Event1")
+
+  @@index([event_id], map: "fk_Event_Media_Event1_idx")
+}
+
+model Event_Ticket_Type {
+  ticket_type_id Int       @id @default(autoincrement())
+  event_id       Int
+  name           String    @db.VarChar(60)
+  price          Decimal   @db.Decimal(10, 2)
+  quantity       Int
+  available      Int
+  Booking        Booking[]
+  Event          Event     @relation(fields: [event_id], references: [event_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Event_TicketType_Event1")
+
+  @@index([event_id], map: "fk_Event_TicketType_Event1_idx")
+  @@index([price], map: "price")
+}
+
+model Message {
+  message_id                     Int    @id @default(autoincrement())
+  sender_id                      Int
+  receiver_id                    Int
+  event_id                       Int?
+  body                           String @db.LongText
+  is_read                        Int    @default(0) @db.TinyInt
+  deleted_by_sender              Int    @default(0) @db.TinyInt
+  deleted_by_receiver            Int    @default(0) @db.TinyInt
+  Event                          Event? @relation(fields: [event_id], references: [event_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Message_Event1")
+  User_Message_sender_idToUser   User   @relation("Message_sender_idToUser", fields: [sender_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Message_User1")
+  User_Message_receiver_idToUser User   @relation("Message_receiver_idToUser", fields: [receiver_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Message_User2")
+
+  @@index([event_id], map: "fk_Message_Event1_idx")
+  @@index([sender_id], map: "fk_Message_User1_idx")
+  @@index([receiver_id], map: "fk_Message_User2_idx")
+}
+
+model User {
+  user_id                           Int       @id @default(autoincrement())
+  username                          String    @unique(map: "username_UNIQUE") @db.VarChar(50)
+  password                          String    @db.VarChar(255)
+  is_admin                          Int       @default(0) @db.TinyInt
+  is_approved                       Int       @default(0) @db.TinyInt
+  first_name                        String    @db.VarChar(100)
+  last_name                         String    @db.VarChar(100)
+  email                             String    @db.VarChar(100)
+  phone                             String    @db.VarChar(20)
+  country                           String    @db.VarChar(50)
+  city                              String    @db.VarChar(50)
+  address                           String    @db.VarChar(255)
+  zipcode                           String    @db.VarChar(20)
+  latitude                          Decimal   @db.Decimal(10, 8)
+  longitude                         Decimal   @db.Decimal(11, 8)
+  afm                               String    @db.Char(9)
+  Booking                           Booking[]
+  Event                             Event[]
+  Message_Message_sender_idToUser   Message[] @relation("Message_sender_idToUser")
+  Message_Message_receiver_idToUser Message[] @relation("Message_receiver_idToUser")
+}
+
+enum Booking_booking_status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum Event_status {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+  CANCELLED
 }
