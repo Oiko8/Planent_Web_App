@@ -8,7 +8,8 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "seed": "tsx src/config/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.7.0",

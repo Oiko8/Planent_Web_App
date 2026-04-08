@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 const { prisma } = await import("../lib/prisma.js");
 
 async function main() {
