@@ -1,18 +1,4 @@
-# backend
-.env
-.env.local
-.env.*.local
 backend/.env
-backend/src/generated/
-
-# frontend
-frontend/node_modules/
-frontend/dist/
-
-
-# others
-node_modules/
-**/node_modules/
 .docker-data/
 .vscode/
 .idea/

@@ -1,5 +1,5 @@
 services:
-  frontend-prod:
+  prod:
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=production
  
-  frontend-dev:
+  dev:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
@@ -29,25 +29,3 @@ services:
         - action: rebuild
           path: ./frontend/vite.config.js
           target: /app/vite.config.js
-        
-
-
-  backend-dev:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
-    ports:
-      - "5000:5000"
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend/src:/app/src
-
-  backend-prod:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
-    env_file:
-      - ./backend/.env
