@@ -34,9 +34,13 @@ public class Booking {
     @Column(name = "total_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalCost;
 
-    @ColumnDefault("'PENDING'")
-    @Lob
+    @Enumerated(EnumType.STRING)
     @Column(name = "booking_status", nullable = false)
-    private String bookingStatus;
+    private BookingStatus bookingStatus = BookingStatus.PENDING;
 
+    public enum BookingStatus {
+        PENDING,
+        CONFIRMED,
+        CANCELLED
+    }
 }

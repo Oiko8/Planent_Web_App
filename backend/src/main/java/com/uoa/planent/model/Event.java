@@ -60,10 +60,12 @@ public class Event {
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
-    @ColumnDefault("'DRAFT'")
-    @Lob
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private EventStatus status = EventStatus.DRAFT;
+    public enum EventStatus {
+        DRAFT, PUBLISHED, CANCELLED
+    }
 
     @Lob
     @Column(name = "description")
