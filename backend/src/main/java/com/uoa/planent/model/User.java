@@ -1,8 +1,7 @@
 package com.uoa.planent.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -11,10 +10,13 @@ import java.util.Set;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "User", uniqueConstraints = {
         @UniqueConstraint(name = "username_UNIQUE", columnNames = {"username"})
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,13 +29,12 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ColumnDefault("0")
-    @Column(name = "is_admin", nullable = false)
-    private Byte isAdmin;
+    @Column(name = "is_admin", columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean isAdmin = false;
 
     @ColumnDefault("0")
-    @Column(name = "is_approved", nullable = false)
-    private Byte isApproved;
+    @Column(name = "is_approved", columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean isApproved = false;
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;

@@ -1,15 +1,17 @@
 package com.uoa.planent.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "Event", indexes = {
         @Index(name = "text", columnList = "title, description"),
@@ -17,6 +19,8 @@ import java.time.Instant;
         @Index(name = "start_datetime", columnList = "start_datetime"),
         @Index(name = "status", columnList = "status")
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +64,7 @@ public class Event {
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
+    @Builder.Default // init correctly when using the builder
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private EventStatus status = EventStatus.DRAFT;
@@ -68,7 +73,45 @@ public class Event {
     }
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "LONGTEXT")
     private String description;
+
+
+
+    // map event to its categories, media and ticket types to avoid querying those tables separately
+    // cascade will automatically save any new categories, media or ticket type objects to the corresponding tables
+    // orphan removal will remove them when the event gets deleted or when they are removed from the set
+    @Builder.Default
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EventMedia> media = new LinkedHashSet<>();
+    public void addMedia(EventMedia media){
+        this.media.add(media);
+        media.setEvent(this);
+    }
+    public void removeMedia(EventMedia media){
+        this.media.remove(media);
+    }
+
+    @Builder.Default
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EventCategory> categories = new LinkedHashSet<>();
+    public void addCategory(EventCategory category){
+        this.categories.add(category);
+        category.setEvent(this);
+    }
+    public void removeCategory(EventCategory category){
+        this.categories.remove(category);
+    }
+
+    @Builder.Default
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EventTicketType> ticketTypes = new LinkedHashSet<>();
+    public void addTicketType(EventTicketType ticketType){
+        this.ticketTypes.add(ticketType);
+        ticketType.setEvent(this);
+    }
+    public void removeTicketType(EventTicketType ticketType){
+        this.ticketTypes.remove(ticketType);
+    }
 
 }

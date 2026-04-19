@@ -32,19 +32,16 @@ public class Message {
     private Event event;
 
     @Lob
-    @Column(name = "body", nullable = false)
+    @Column(name = "body", columnDefinition = "LONGTEXT", nullable = false)
     private String body;
 
-    @ColumnDefault("0")
-    @Column(name = "is_read", nullable = false)
-    private Byte isRead;
+    @Column(name = "is_read", columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean isRead = false;
 
-    @ColumnDefault("0")
-    @Column(name = "deleted_by_sender", nullable = false)
-    private Byte deletedBySender;
+    @Column(name = "deleted_by_sender", columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean deletedBySender = false;
 
-    @ColumnDefault("0")
-    @Column(name = "deleted_by_receiver", nullable = false)
-    private Byte deletedByReceiver;
+    @Column(name = "deleted_by_receiver", columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean deletedByReceiver = false;
 
 }
