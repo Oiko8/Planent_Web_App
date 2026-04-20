@@ -45,6 +45,7 @@ public class PlanentApplication {
                         .afm("123456789")
                         .build();
 
+
                 userRepository.save(admin);
                 logger.info("First (admin) user created!");
             }
