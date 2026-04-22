@@ -3,7 +3,7 @@ package com.uoa.planent.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+// import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,6 +27,10 @@ public class Booking {
 
     @Column(name = "booking_time", nullable = false)
     private Instant bookingTime;
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_type_id", nullable = false)
+    private EventTicketType ticketType;
 
     @Column(name = "number_of_tickets", nullable = false)
     private Integer numberOfTickets;
