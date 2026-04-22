@@ -2,7 +2,7 @@ package com.uoa.planent.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+// import lombok.Setter;
 
 @Getter
 @AllArgsConstructor

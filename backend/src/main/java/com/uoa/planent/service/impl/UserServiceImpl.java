@@ -1,5 +1,8 @@
 package com.uoa.planent.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +56,61 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(()->new RuntimeException("User not found"));
 
         return UserMapper.toResponse(user);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+            .stream()
+            .map(UserMapper::toResponse)
+            .collect(Collectors.toList());
+    } 
+
+    @Override
+    public UserResponse approveUser(Integer userId) {
+                User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        user.setIsApproved(true);
+        User savedUser = userRepository.save(user);
+        return UserMapper.toResponse(savedUser);
+    }
+
+        @Override
+    public void rejectUser(Integer userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        userRepository.delete(user);
+    }
+
+    @Override
+    public UserResponse updateUser(Integer userId, UserRegisterRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setCountry(request.getCountry());
+        user.setCity(request.getCity());
+        user.setAddress(request.getAddress());
+        user.setZipcode(request.getZipcode());
+        user.setLatitude(request.getLatitude());
+        user.setLongitude(request.getLongitude());
+        user.setAfm(request.getAfm());
+        User savedUser = userRepository.save(user);
+        return UserMapper.toResponse(savedUser);
+    }
+
+    @Override
+    public void deleteUser(Integer userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        userRepository.delete(user);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
 }
