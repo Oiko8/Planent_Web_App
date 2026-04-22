@@ -17,7 +17,7 @@ public class EventTicketType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticket_type_id", nullable = false)
-    private Integer id;
+    private Integer id; // TicketTypeId , better
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "event_id", nullable = false)

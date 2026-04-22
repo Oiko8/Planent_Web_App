@@ -29,9 +29,11 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Builder.Default
     @Column(name = "is_admin", columnDefinition = "TINYINT(1)", nullable = false)
     private Boolean isAdmin = false;
 
+    @Builder.Default
     @ColumnDefault("0")
     @Column(name = "is_approved", columnDefinition = "TINYINT(1)", nullable = false)
     private Boolean isApproved = false;
@@ -69,15 +71,19 @@ public class User {
     @Column(name = "afm", nullable = false, length = 9)
     private String afm;
 
+    @Builder.Default
     @OneToMany(mappedBy = "attendee")
     private Set<Booking> bookings = new LinkedHashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "organizer")
     private Set<Event> events = new LinkedHashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "sender")
     private Set<Message> sentMessages = new LinkedHashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "receiver")
     private Set<Message> receivedMessages = new LinkedHashSet<>();
 
