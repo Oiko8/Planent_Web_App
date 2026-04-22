@@ -28,6 +28,10 @@ public class Booking {
     @Column(name = "booking_time", nullable = false)
     private Instant bookingTime;
 
+    @ManyToOne
+    @JoinColumn(name = "ticket_type_id", nullable = false)
+    private EventTicketType ticketType;
+
     @Column(name = "number_of_tickets", nullable = false)
     private Integer numberOfTickets;
 
