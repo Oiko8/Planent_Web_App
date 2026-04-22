@@ -1,11 +1,12 @@
 package com.uoa.planent.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
-@Setter
 public class UserLoginRequest {
-    private String username;
-    private String password;
+    final String username;
+    final String password;
 }

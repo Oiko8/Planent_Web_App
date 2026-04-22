@@ -1,7 +1,7 @@
 package com.uoa.planent.controller;
 
-import com.uoa.planent.dto.LoginRequest;
-import com.uoa.planent.dto.LoginResponse;
+import com.uoa.planent.dto.UserLoginRequest;
+import com.uoa.planent.dto.UserLoginResponse;
 import com.uoa.planent.security.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -36,7 +36,7 @@ public class LoginController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody @Valid LoginRequest request){
+    public UserLoginResponse login(@RequestBody @Valid UserLoginRequest request){
         UsernamePasswordAuthenticationToken authToken = UsernamePasswordAuthenticationToken.unauthenticated(request.getUsername(), request.getPassword());
         Authentication authentication = authenticationManager.authenticate(authToken);
 
@@ -45,6 +45,6 @@ public class LoginController {
         }
 
         String token = jwtUtil.generate(request.getUsername(), jwtTtl);
-        return new LoginResponse(token, jwtUtil.extractCreatedAt(token), jwtUtil.extractExpirationDate(token));
+        return new UserLoginResponse(token, jwtUtil.extractCreatedAt(token), jwtUtil.extractExpirationDate(token));
     }
 }
