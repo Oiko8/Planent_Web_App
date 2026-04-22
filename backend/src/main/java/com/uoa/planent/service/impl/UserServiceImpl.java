@@ -94,8 +94,6 @@ public class UserServiceImpl implements UserService {
         user.setCity(request.getCity());
         user.setAddress(request.getAddress());
         user.setZipcode(request.getZipcode());
-        user.setLatitude(request.getLatitude());
-        user.setLongitude(request.getLongitude());
         user.setAfm(request.getAfm());
         User savedUser = userRepository.save(user);
         return UserMapper.toResponse(savedUser);
