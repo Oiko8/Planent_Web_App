@@ -20,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
         String role = user.getIsAdmin() ? "ADMIN" : "USER";
 
-        // return (server-side) their data to authenticate
+        // return database user data to authenticate
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())

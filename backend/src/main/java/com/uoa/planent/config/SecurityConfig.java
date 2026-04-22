@@ -1,5 +1,7 @@
 package com.uoa.planent.config;
 
+import com.uoa.planent.security.JwtUtil;
+import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +22,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.crypto.SecretKey;
 import java.util.List;
 
 @Configuration
@@ -27,6 +30,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SecurityConfig {
 
+    private final SecurityConfigProperties configProperties;
     private final UserDetailsService userDetailsService;
 
     @Bean
@@ -73,5 +77,12 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config)  {
         return config.getAuthenticationManager();
+    }
+
+
+    @Bean
+    public JwtUtil jwtUtil() {
+        final SecretKey secretKey = Keys.hmacShaKeyFor(configProperties.getJwtSecretKey().getBytes());
+        return new JwtUtil(secretKey);
     }
 }
