@@ -36,14 +36,11 @@ public class LoginController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/login")
-    public UserLoginResponse login(@RequestBody @Valid UserLoginRequest request){
+    public UserLoginResponse login(@RequestBody @Valid UserLoginRequest request) {
         UsernamePasswordAuthenticationToken authToken = UsernamePasswordAuthenticationToken.unauthenticated(request.getUsername(), request.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authToken);
+        authenticationManager.authenticate(authToken); // will throw exception if unsuccessful
 
-        if (!authentication.isAuthenticated()) {
-            throw new UsernameNotFoundException("Failed to authenticate");
-        }
-
+        // authenticated so send back a jwt token
         String token = jwtUtil.generate(request.getUsername(), jwtTtl);
         return new UserLoginResponse(token, jwtUtil.extractCreatedAt(token), jwtUtil.extractExpirationDate(token));
     }
