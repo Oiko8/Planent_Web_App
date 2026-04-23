@@ -24,7 +24,7 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(User user) {
         String roleName = user.getIsAdmin() ? "ADMIN" : "USER";
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roleName));
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
 
         return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), user.getIsApproved(), authorities);
     }

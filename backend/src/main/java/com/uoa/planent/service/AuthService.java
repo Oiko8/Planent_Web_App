@@ -1,7 +1,7 @@
 package com.uoa.planent.service;
 
-import com.uoa.planent.dto.auth.UserLoginRequest;
-import com.uoa.planent.dto.auth.UserLoginResponse;
+import com.uoa.planent.dto.user.UserLoginRequest;
+import com.uoa.planent.dto.user.UserLoginResponse;
 import com.uoa.planent.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

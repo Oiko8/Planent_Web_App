@@ -1,4 +1,4 @@
-package com.uoa.planent.dto.auth;
+package com.uoa.planent.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

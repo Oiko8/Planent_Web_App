@@ -1,6 +1,5 @@
 package com.uoa.planent.dto;
 
-import com.uoa.planent.dto.auth.UserRegisterResponse;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
@@ -24,7 +23,7 @@ public class EventResponse {
     private Integer capacity;
     private String status;
     private String description;
-    private UserRegisterResponse organizer;
+    //private UserRegisterResponse organizer;
     private List<CategoryResponse> categories;
     private List<TicketTypeResponse> ticketTypes;
 }

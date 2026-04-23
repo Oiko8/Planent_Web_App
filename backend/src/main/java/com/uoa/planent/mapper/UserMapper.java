@@ -1,8 +1,7 @@
 package com.uoa.planent.mapper;
 
 import com.uoa.planent.dto.user.UserDataResponse;
-import com.uoa.planent.dto.auth.UserRegisterRequest;
-import com.uoa.planent.dto.auth.UserRegisterResponse;
+import com.uoa.planent.dto.user.UserRegisterRequest;
 import com.uoa.planent.model.User;
 
 public class UserMapper {
@@ -26,14 +25,6 @@ public class UserMapper {
         return user;
     }
 
-    // User → UserRegisterResponse (for register)
-    public static UserRegisterResponse toRegisterResponse(User user) {
-        UserRegisterResponse response = new UserRegisterResponse();
-        response.setMessage("User registered successfully. Awaiting approval from admin.");
-        response.setUserId(user.getId());
-        response.setUsername(user.getUsername());
-        return response;
-    }
 
     // User → UserDataResponse (for all of user's data, except sensitive info)
     public static UserDataResponse toDataResponse(User user) {

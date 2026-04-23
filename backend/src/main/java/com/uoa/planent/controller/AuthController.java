@@ -1,18 +1,18 @@
 package com.uoa.planent.controller;
 
-import com.uoa.planent.dto.auth.UserLoginRequest;
-import com.uoa.planent.dto.auth.UserLoginResponse;
-import com.uoa.planent.dto.auth.UserRegisterRequest;
-import com.uoa.planent.dto.auth.UserRegisterResponse;
+import com.uoa.planent.dto.user.UserDataResponse;
+import com.uoa.planent.dto.user.UserLoginRequest;
+import com.uoa.planent.dto.user.UserLoginResponse;
+import com.uoa.planent.dto.user.UserRegisterRequest;
 import com.uoa.planent.service.AuthService;
 import com.uoa.planent.service.UserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponse> register(@RequestBody @Valid UserRegisterRequest request) {
+    public ResponseEntity<UserDataResponse> register(@RequestBody @Valid UserRegisterRequest request) {
         return new ResponseEntity<>(userService.register(request), HttpStatus.CREATED);
     }
 }

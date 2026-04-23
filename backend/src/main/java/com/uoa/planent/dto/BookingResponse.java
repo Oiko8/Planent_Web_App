@@ -1,7 +1,6 @@
 package com.uoa.planent.dto;
 
 
-import com.uoa.planent.dto.auth.UserRegisterResponse;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class BookingResponse {
     private Integer bookingId;
-    private UserRegisterResponse attendee;
+    //private UserRegisterResponse attendee;
     private TicketTypeResponse ticketType;
     private LocalDateTime bookingTime;
     private Integer numberOfTickets;

@@ -1,7 +1,6 @@
 package com.uoa.planent.dto;
 
 
-import com.uoa.planent.dto.auth.UserRegisterResponse;
 import lombok.Getter;
 import lombok.Setter;
 // import java.time.LocalDateTime;
@@ -10,8 +9,8 @@ import lombok.Setter;
 @Setter
 public class MessageResponse {
     private Integer messageId;
-    private UserRegisterResponse sender;
-    private UserRegisterResponse receiver;
+    //private UserRegisterResponse sender;
+    //private UserRegisterResponse receiver;
     private Integer eventId;
     private String body;
     private boolean isRead;
