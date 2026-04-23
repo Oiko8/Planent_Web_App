@@ -1,5 +1,6 @@
 package com.uoa.planent.config;
 
+import com.uoa.planent.security.JwtAuthFilter;
 import com.uoa.planent.security.JwtUtil;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,11 +34,12 @@ public class SecurityConfig {
 
     private final SecurityConfigProperties configProperties;
     private final UserDetailsService userDetailsService;
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
-                .csrf(AbstractHttpConfigurer::disable) // disable csrf
+                .csrf(AbstractHttpConfigurer::disable) // disable csrf since server is stateless
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // cors config
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless server since this is an api that sends jsons
 
@@ -44,8 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll() // allow all authentication paths
                         .anyRequest().authenticated())
 
-                .authenticationProvider(authenticationProvider()); // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match
-
+                .authenticationProvider(authenticationProvider()) // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // authenticate automatically with a json web token
         return http.build();
     }
 
