@@ -1,4 +1,4 @@
-package com.uoa.planent.dto;
+package com.uoa.planent.dto.user;
 
 import lombok.Getter;
 import lombok.Setter;

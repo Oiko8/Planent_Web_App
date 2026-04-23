@@ -1,8 +1,8 @@
 package com.uoa.planent.mapper;
 
-import com.uoa.planent.dto.UserDataResponse;
-import com.uoa.planent.dto.UserRegisterRequest;
-import com.uoa.planent.dto.UserRegisterResponse;
+import com.uoa.planent.dto.user.UserDataResponse;
+import com.uoa.planent.dto.auth.UserRegisterRequest;
+import com.uoa.planent.dto.auth.UserRegisterResponse;
 import com.uoa.planent.model.User;
 
 public class UserMapper {

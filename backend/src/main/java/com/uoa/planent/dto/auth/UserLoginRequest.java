@@ -1,4 +1,4 @@
-package com.uoa.planent.dto;
+package com.uoa.planent.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

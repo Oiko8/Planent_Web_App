@@ -1,5 +1,6 @@
 package com.uoa.planent.dto;
 
+import com.uoa.planent.dto.auth.UserRegisterResponse;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
