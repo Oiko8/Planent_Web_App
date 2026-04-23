@@ -1,14 +1,17 @@
 package com.uoa.planent.dto;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
-public class UserResponse {
+public class UserDataResponse {
     private Integer userId;
     private String username;
+    private Boolean isAdmin;
+    private Boolean isApproved;
     private String firstName;
     private String lastName;
     private String email;
@@ -17,9 +20,7 @@ public class UserResponse {
     private String city;
     private String address;
     private String zipcode;
-    private java.math.BigDecimal latitude;
-    private java.math.BigDecimal longitude;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private String afm;
-    private boolean isAdmin;
-    private boolean isApproved;
 }

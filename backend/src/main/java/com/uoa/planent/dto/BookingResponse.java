@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class BookingResponse {
     private Integer bookingId;
-    private UserResponse attendee;
+    private UserRegisterResponse attendee;
     private TicketTypeResponse ticketType;
     private LocalDateTime bookingTime;
     private Integer numberOfTickets;

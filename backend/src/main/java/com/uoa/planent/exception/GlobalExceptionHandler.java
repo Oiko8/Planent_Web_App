@@ -1,5 +1,6 @@
 package com.uoa.planent.exception;
 
+import jakarta.validation.ValidationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DisabledException.class)
     public ProblemDetail handleDisabledAccount(DisabledException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Account is not yet enabled by an administrator.");
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ProblemDetail handleValidationException(ValidationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
 
         return problemDetail;
     }

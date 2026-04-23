@@ -8,7 +8,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Getter
 public class UserLoginResponse {
-    final String jwtToken;
-    final Date createdAt;
-    final Date expirationDate;
+    private final String jwtToken;
+    private final Date createdAt;
+    private final Date expirationDate;
 }

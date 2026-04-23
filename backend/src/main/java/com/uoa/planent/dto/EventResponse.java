@@ -23,7 +23,7 @@ public class EventResponse {
     private Integer capacity;
     private String status;
     private String description;
-    private UserResponse organizer;
+    private UserRegisterResponse organizer;
     private List<CategoryResponse> categories;
     private List<TicketTypeResponse> ticketTypes;
 }

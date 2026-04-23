@@ -2,33 +2,27 @@ package com.uoa.planent.controller;
 
 import com.uoa.planent.dto.UserLoginRequest;
 import com.uoa.planent.dto.UserLoginResponse;
+import com.uoa.planent.dto.UserRegisterRequest;
+import com.uoa.planent.dto.UserRegisterResponse;
 import com.uoa.planent.security.JwtUtil;
+import com.uoa.planent.service.UserService;
 import jakarta.validation.Valid;
-// import lombok.AllArgsConstructor;
-// import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class LoginController {
+@RequestMapping("/auth")
+public class AuthController {
 
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final Integer jwtTtl;
-    public LoginController(
-            AuthenticationManager authenticationManager,
-            JwtUtil jwtUtil,
-            @Value("${application.security.jwt-ttl}") Integer jwtTtl) {
-
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil, @Value("${application.security.jwt-ttl}") Integer jwtTtl) {
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.jwtTtl = jwtTtl;
@@ -43,5 +37,12 @@ public class LoginController {
         // authenticated so send back a jwt token
         String token = jwtUtil.generate(request.getUsername(), jwtTtl);
         return new UserLoginResponse(token, jwtUtil.extractCreatedAt(token), jwtUtil.extractExpirationDate(token));
+    }
+
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/register")
+    public UserRegisterResponse register(@RequestBody @Valid UserRegisterRequest request){
+        return userService.register(request);
     }
 }

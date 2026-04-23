@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 public class MessageResponse {
     private Integer messageId;
-    private UserResponse sender;
-    private UserResponse receiver;
+    private UserRegisterResponse sender;
+    private UserRegisterResponse receiver;
     private Integer eventId;
     private String body;
     private boolean isRead;

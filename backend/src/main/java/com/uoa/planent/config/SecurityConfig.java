@@ -41,8 +41,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless server since this is an api that sends jsons
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll() // allow logjn
-                        .requestMatchers("/register").permitAll() // allow register
+                        .requestMatchers("/auth/**").permitAll() // allow all authentication paths
                         .anyRequest().authenticated())
 
                 .authenticationProvider(authenticationProvider()); // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match
