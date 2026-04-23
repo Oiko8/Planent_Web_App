@@ -49,7 +49,7 @@ public class UserService {
 
 
     @Transactional // override with write to write to database
-    public UserDataResponse register(UserRegisterRequest request) {
+    public UserDataResponse registerUser(UserRegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ValidationException("Username already exists.");
         }
@@ -97,6 +97,11 @@ public class UserService {
 
     @Transactional
     public void rejectUser(Integer userId) {
+        deleteUser(userId);
+    }
+
+    @Transactional
+    public void deleteUser(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
         userRepository.delete(user);
     }
@@ -118,16 +123,6 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return UserMapper.toDataResponse(savedUser);
-    }
-
-    @Transactional
-    public void deleteUser(Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
-        userRepository.delete(user);
-    }
-
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
     }
 
 }
