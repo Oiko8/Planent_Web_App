@@ -31,6 +31,8 @@ public class UserMapper {
         UserDataResponse response = new UserDataResponse();
         response.setUserId(user.getId());
         response.setUsername(user.getUsername());
+        response.setIsApproved(user.getIsApproved());
+        response.setIsAdmin(user.getIsAdmin());
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
         response.setEmail(user.getEmail());

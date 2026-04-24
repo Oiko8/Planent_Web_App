@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.JwtException;
+
 import java.io.IOException;
 
 @Component
@@ -35,7 +37,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // get token and username from Bearer in the authorization header
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+            try {
+                username = jwtUtil.extractUsername(jwt);
+            } catch (JwtException e) {
+                // malformed or expired token — skip authentication
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         // got token and username and isnt already logged in
