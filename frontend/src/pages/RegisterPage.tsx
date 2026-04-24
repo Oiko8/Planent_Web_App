@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { RegisterFormData } from "../types/registerData";
-import axios from "axios";
+
+import api from "../api/axiosConfig"
 
 type RegisterPageProps = {
     onNavigate: (page: string) => void;
@@ -14,11 +15,11 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
         firstName: "",
         lastName: "",
         email: "",
-        phoneNumber: "",
+        phone: "",
         country: "",
         city: "",
         address: "",
-        zipCode: "",
+        zipcode: "",
         afm: "",
     });
 
@@ -34,7 +35,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
             !formData.firstName ||
             !formData.lastName ||
             !formData.email ||
-            !formData.phoneNumber
+            !formData.phone
         ) {
             setErrorMessage("Please fill in all required fields.");
             return;
@@ -47,16 +48,15 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
 
         setErrorMessage("");
 
-        // console.log("Register form submitted:", formData);
-        const reponse = await axios.post("http://localhost:5000/register", formData, {
-        headers: {
-            "Content-Type": "application/json",
-        },
-        });
-        console.log("Server response:", reponse.data);
-
-        // Go to approval page in case of success
-        onNavigate("pendingApproval");
+        try {
+            await api.post("/auth/register", formData);
+            onNavigate("pendingApproval");
+        } 
+        catch (error:any) {
+            const message = error.response?.data?.detail
+            ?? "Registration failed. Please try again.";
+            setErrorMessage(message);
+        }
     }
 
     function handleChange(field: keyof RegisterFormData, value: string) {
@@ -122,6 +122,70 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
             </div>
             <br></br>
 
+             <div>
+                <label>Country</label>
+                <input
+                value={formData.country}
+                onChange={(e) => handleChange("country", e.target.value)}
+                placeholder="Enter country"
+                />
+            </div>
+
+            <br></br>
+             <div>
+                <label>City</label>
+                <input
+                value={formData.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                placeholder="Enter city"
+                />
+            </div>
+            <br></br>
+
+            <div>
+                <label>Address</label>
+                <input
+                value={formData.address}
+                onChange={(e) => handleChange("address", e.target.value)}
+                placeholder="Enter address"
+                />
+            </div>
+            <br></br>
+
+            <div>
+                <label>Zipcode</label>
+                <input
+                value={formData.zipcode}
+                onChange={(e) => handleChange("zipcode", e.target.value)}
+                placeholder="Enter zipcode"
+                />
+            </div>
+            <br></br>
+
+            {/* AFM */}
+            <div>
+                <label>AFM</label>
+                <input
+                value={formData.afm}
+                onChange={(e) => handleChange("afm", e.target.value)}
+                placeholder="Enter phone number"
+                />
+            </div>
+            <br></br>
+
+
+            {/* Phone Number */}
+            <div>
+                <label>Phone Number</label>
+                <input
+                value={formData.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                placeholder="Enter phone number"
+                />
+            </div>
+            <br></br>
+
+
             {/* Email */}
             <div>
                 <label>Email</label>
@@ -133,16 +197,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
             </div>
             <br></br>
 
-            {/* Phone Number */}
-            <div>
-                <label>Phone Number</label>
-                <input
-                value={formData.phoneNumber}
-                onChange={(e) => handleChange("phoneNumber", e.target.value)}
-                placeholder="Enter phone number"
-                />
-            </div>
-            
+
             {/* checking the error Message */}
             {<p className="register-error-message">{errorMessage || "\u00A0"}</p>}
 

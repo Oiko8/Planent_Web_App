@@ -5,10 +5,10 @@ export type RegisterFormData = {
     firstName: string;
     lastName: string;
     email: string;
-    phoneNumber: string;
+    phone: string;
     country: string;
     city: string;
     address: string;
-    zipCode: string;
+    zipcode: string;
     afm: string;
 };
