@@ -1,16 +1,33 @@
 export type EventStatus = "PUBLISHED" | "DRAFT" | "CANCELLED";
 
-export type EventCategory = "Music" | "Workshop" | "Sports" | "Theater" | "Festival" | "Live Performance" | "Technology" | "Culture" | "Other";
+export type CategoryResponse = {
+    categoryId: number;
+    categoryName: string;
+};
+
+export type TicketTypeResponse = {
+    ticketTypeId: number;
+    name: string;
+    price: number;
+    quantity: number;
+    available: number;
+};
 
 export type EventItem = {
-    id: string;
+    eventId: number;
     title: string;
-    category: EventCategory[];   
-    type: string;
-    city: string;
+    eventType: string;
     venue: string;
-    date: string;
-    priceFrom: number;
-    description: string;
+    country: string;
+    city: string;
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+    startDatetime: string;
+    endDatetime: string;
+    capacity: number;
     status: EventStatus;
+    description: string;
+    categories: CategoryResponse[];
+    ticketTypes: TicketTypeResponse[];
 };

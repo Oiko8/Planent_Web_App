@@ -1,15 +1,29 @@
+import { useEffect, useState } from "react";
 import EventCard from "../components/EventCard";
-import { mockEvents } from "../data/mockEvents";
+import type { EventItem } from "../types/event";
+import api from "../api/axiosConfig";
 
 type WelcomePageProps = {
     onNavigate: (page: string) => void;
 };
 
 export default function WelcomePage({ onNavigate }: WelcomePageProps) {
+    const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
 
-    const featuredEvents = mockEvents.slice(0, 2);
+    useEffect(() => {
+        async function fetchFeaturedEvents() {
+            try {
+                const response = await api.get("/events");
+                // take only the first 2 events to feature
+                setFeaturedEvents(response.data.slice(0, 2));
+            } catch (err) {
+                // silently fail — featured events are not critical
+            }
+        }
+        fetchFeaturedEvents();
+    }, []);
 
-    return(
+    return (
         <div className="welcome-page">
             <section className="welcome-header">
                 <h1 className="welcome-title">Welcome to Planent: a world full of events</h1>
@@ -19,19 +33,20 @@ export default function WelcomePage({ onNavigate }: WelcomePageProps) {
 
             <section className="featured-events">
                 <h2>Famous events</h2>
-
                 <div className="featured-events-grid">
-                {featuredEvents.map((event) => (
-                    <EventCard
-                    key={event.id}
-                    event={event}
-                    onOpen={() => onNavigate("events")}
-                    />
-                ))}
+                    {featuredEvents.length > 0 ? (
+                        featuredEvents.map((event) => (
+                            <EventCard
+                                key={event.eventId}
+                                event={event}
+                                onOpen={() => onNavigate("events")}
+                            />
+                        ))
+                    ) : (
+                        <p>No featured events at the moment.</p>
+                    )}
                 </div>
             </section>
-
         </div>
-        
     );
 }

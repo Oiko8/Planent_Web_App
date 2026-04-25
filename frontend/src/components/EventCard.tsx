@@ -5,12 +5,11 @@ type EventCardProps = {
     onOpen: () => void;
 };
 
-
 export default function EventCard({ event, onOpen }: EventCardProps) {
     return (
         <div>
             <h3>{event.title}</h3>
-            <p>{event.type} - {event.city} - {event.date}</p>
+            <p>{event.eventType} - {event.city} - {event.startDatetime}</p>
             <p>{event.description}</p>
             <button className="borderless-button-event" onClick={onOpen}>More...</button>
         </div>

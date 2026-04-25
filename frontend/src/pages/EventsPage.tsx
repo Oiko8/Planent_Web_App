@@ -1,24 +1,54 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import EventCard from "../components/EventCard";
-import { mockEvents } from "../data/mockEvents";
-import type { EventCategory } from "../types/event";
+import { EventItem } from "../types/event";
+import api from "../api/axiosConfig";
+
+const CATEGORIES = ["Music", "Workshop", "Sports", "Theater", "Festival", "Culture", "Technology", "Other"];
+
 
 export default function EventsPage() {
-  const [search, setSearch] = useState("");
+    const [events, setEvents] = useState<EventItem[]>([]);
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-  const filteredEvents = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return mockEvents;
+    // Fetch the events from the api
+    useEffect(() => {
+        async function fetchEvents() {
+            try {
+                const response = await api.get("/events");
+                setEvents(response.data);
+            }
+            catch (err) {
+                setError("Failed to load events. Please try again.");
+            }
+            finally {
+                setLoading(false);
+            }
+        }
 
-    return mockEvents.filter((event) =>
-      [event.title, event.city, event.venue, event.type, event.description, ...event.category]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [search]);
+        fetchEvents();
+    }, []);
 
-  const categories: EventCategory[] = ["Music", "Workshop", "Sports", "Theater", "Festival", "Culture", "Technology", "Other"];
+
+
+
+  
+    const filteredEvents = useMemo(() => {
+        const q = search.toLowerCase().trim();
+        if (!q) return events;
+
+        return events.filter((event) =>
+            [event.title, event.city, event.venue, event.eventType, event.description,
+            ...event.categories.map(c => c.categoryName)]
+            .join(" ")
+            .toLowerCase()
+            .includes(q)
+        );
+    }, [search]);
+
+  if (loading) return <p>Loading events...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div>
@@ -32,28 +62,28 @@ export default function EventsPage() {
         />
       </div>
 
-      {categories.map((category) => {
-        const categoryEvents = filteredEvents.filter((event) => 
-          event.category.includes(category)
+      {CATEGORIES.map((category) => {
+        const categoryEvents = filteredEvents.filter((event) =>
+          event.categories.some(c => c.categoryName === category)
         );
+
+        if (categoryEvents.length === 0) return null;
 
         return (
           <section className="category-section" key={category}>
             <h2 className="category-title">{category}</h2>
-
             <div className="event-body-grid">
               {categoryEvents.map((event) => (
                 <EventCard
-                  key={event.id}
+                  key={event.eventId}
                   event={event}
-                  onOpen={() => console.log("Open event", event.id)}
+                  onOpen={() => console.log("Open event", event.eventId)}
                 />
               ))}
             </div>
           </section>
         );
-      }
-      )}
+      })}
     </div>
   );
 }
