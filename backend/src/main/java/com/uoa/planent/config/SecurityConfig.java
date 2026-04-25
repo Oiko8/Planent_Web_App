@@ -49,7 +49,7 @@ public class SecurityConfig {
 
                 // api endpoint permissions
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // allow all authentication paths
+                        .requestMatchers("/auth/**", "/events/**").permitAll() // allow all authentication paths
                         .anyRequest().authenticated())
 
                 .authenticationProvider(authenticationProvider) // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match
