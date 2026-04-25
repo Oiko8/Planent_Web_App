@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class UserUpdateRequest {
 
-    // all fields are optional in an update request
+    // all fields are optional (nullable) in an update request
     // will update only given fields
 
     @Size(max = 100, message = "First name too long")

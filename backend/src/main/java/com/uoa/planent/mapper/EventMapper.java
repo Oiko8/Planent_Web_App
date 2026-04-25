@@ -5,7 +5,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import com.uoa.planent.dto.CategoryResponse;
-import com.uoa.planent.dto.EventResponse;
+import com.uoa.planent.dto.event.EventResponse;
 import com.uoa.planent.dto.TicketTypeResponse;
 import com.uoa.planent.model.Event;
 import com.uoa.planent.model.EventCategory;

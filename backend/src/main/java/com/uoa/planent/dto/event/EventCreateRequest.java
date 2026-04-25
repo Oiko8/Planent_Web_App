@@ -1,5 +1,7 @@
-package com.uoa.planent.dto;
+package com.uoa.planent.dto.event;
 
+
+import com.uoa.planent.dto.TicketTypeRequest;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
@@ -8,8 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class EventResponse {
-    private Integer eventId;
+public class EventCreateRequest {
     private String title;
     private String eventType;
     private String venue;
@@ -21,9 +22,7 @@ public class EventResponse {
     private LocalDateTime startDatetime;
     private LocalDateTime endDatetime;
     private Integer capacity;
-    private String status;
     private String description;
-    //private UserRegisterResponse organizer;
-    private List<CategoryResponse> categories;
-    private List<TicketTypeResponse> ticketTypes;
+    private List<Integer> categoryIds;
+    private List<TicketTypeRequest> ticketTypes;
 }

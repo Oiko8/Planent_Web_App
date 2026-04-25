@@ -1,4 +1,4 @@
-package com.uoa.planent.dto;
+package com.uoa.planent.dto.event;
 
 
 import lombok.Getter;

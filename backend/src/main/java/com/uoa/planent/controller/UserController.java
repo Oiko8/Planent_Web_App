@@ -24,7 +24,7 @@ public class UserController {
     // by default (from security config), all following endpoints require the user to be authenticated
 
 
-    // current user and admin endpoints
+    // currently authenticated user and admin endpoints
 
     @GetMapping("/me")
     public ResponseEntity<UserDataResponse> getMyUser(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){

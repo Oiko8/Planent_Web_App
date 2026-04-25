@@ -46,7 +46,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        // got token and username and isnt already logged in
+        // got token and username + isnt already logged in
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
