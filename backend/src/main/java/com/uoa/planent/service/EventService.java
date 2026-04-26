@@ -48,6 +48,11 @@ public class EventService {
     }
 
 
+    public Page<EventResponse> getMyEvents(Integer organizerId, Pageable pageable){
+        return eventRepository.findAllByOrganizerId(organizerId, pageable).map(EventMapper::toResponse);
+    }
+
+
 
     public Page<EventResponse> searchPublishedEvents(EventSearchRequest request, Pageable pageable) {
         if (request.getStartDate() != null && request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())){

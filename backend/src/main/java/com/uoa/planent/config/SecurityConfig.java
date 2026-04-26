@@ -52,7 +52,8 @@ public class SecurityConfig {
                 // api endpoint permissions
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll() // authentication by anyone
-                        .requestMatchers(HttpMethod.GET, "/events/**").permitAll() // get requests on events by everyone
+                        .requestMatchers(HttpMethod.GET, "/events/my-events").authenticated() // authenticated to see my events
+                        .requestMatchers(HttpMethod.GET, "/events/**").permitAll() // rest of the get requests on events by everyone
                         .anyRequest().authenticated())
 
                 // authorization
