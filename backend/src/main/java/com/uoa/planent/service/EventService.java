@@ -8,6 +8,7 @@ import com.uoa.planent.repository.CategoryRepository;
 import com.uoa.planent.repository.EventRepository;
 import com.uoa.planent.repository.UserRepository;
 import com.uoa.planent.specification.EventSpecifications;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,28 +27,35 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    public List<EventResponse> getAllEvents() {
-        return eventRepository.findAll()
+    public List<EventResponse> getAllPublishedEvents() {
+        return eventRepository.findAllByStatus(Event.EventStatus.PUBLISHED)
             .stream()
             .map(EventMapper::toResponse)
             .toList();
     }
 
-    public EventResponse getEventById(Integer eventId) {
+    public EventResponse getEventById(Integer eventId, @Nullable Integer currentUserId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
+
+        // if its a draft event, return it only if the current user is the organizer
+        if (event.getStatus() == Event.EventStatus.DRAFT) {
+            if (currentUserId == null || !event.getOrganizer().getId().equals(currentUserId)){
+                throw new ResourceNotFoundException("Event with ID '" + eventId + "' not found.");
+            }
+        }
 
         return EventMapper.toResponse(event);
     }
 
 
 
-    public Page<EventResponse> searchEvents(EventSearchRequest request, Pageable pageable) {
+    public Page<EventResponse> searchPublishedEvents(EventSearchRequest request, Pageable pageable) {
         if (request.getStartDate() != null && request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())){
             throw new IllegalArgumentException("Start date cannot be after end date.");
         }
 
         // dynamically add the filters
-        Specification<Event> spec = Specification.where(EventSpecifications.isPublished()); // search for published events only
+        Specification<Event> spec = Specification.where(EventSpecifications.isPublished()); // published events only
 
         if (request.getText() != null && !request.getText().trim().isEmpty()) {
             spec = spec.and(EventSpecifications.hasText(request.getText().trim()));

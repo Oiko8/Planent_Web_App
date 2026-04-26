@@ -28,19 +28,21 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<List<EventResponse>> getAllEvents() {
-        return ResponseEntity.ok(eventService.getAllEvents());
+    public ResponseEntity<List<EventResponse>> getAllPublishedEvents() {
+        return ResponseEntity.ok(eventService.getAllPublishedEvents());
     }
 
+    // returns draft events only to the organizer of that event
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventResponse> getEventById(@PathVariable Integer eventId){
-        return ResponseEntity.ok(eventService.getEventById(eventId));
+    public ResponseEntity<EventResponse> getEventById(@PathVariable Integer eventId, @AuthenticationPrincipal UserDetailsImpl currentUser){
+        Integer currentUserId = (currentUser != null) ? currentUser.getId() : null; // null when not signed in
+        return ResponseEntity.ok(eventService.getEventById(eventId, currentUserId));
     }
 
 
     @GetMapping("/search")
-    public ResponseEntity<Page<EventResponse>> searchEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
-        return ResponseEntity.ok(eventService.searchEvents(request, pageable));
+    public ResponseEntity<Page<EventResponse>> searchPublishedEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
+        return ResponseEntity.ok(eventService.searchPublishedEvents(request, pageable));
     }
 
     @PostMapping
