@@ -1,6 +1,7 @@
 package com.uoa.planent.dto;
 
 
+import com.uoa.planent.dto.event.TicketTypeResponse;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;

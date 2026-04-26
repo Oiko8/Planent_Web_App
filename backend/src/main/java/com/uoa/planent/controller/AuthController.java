@@ -1,6 +1,6 @@
 package com.uoa.planent.controller;
 
-import com.uoa.planent.dto.user.UserDataResponse;
+import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserLoginRequest;
 import com.uoa.planent.dto.user.UserLoginResponse;
 import com.uoa.planent.dto.user.UserRegisterRequest;
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDataResponse> register(@RequestBody @Valid UserRegisterRequest request) {
+    public ResponseEntity<UserResponse> register(@RequestBody @Valid UserRegisterRequest request) {
         return new ResponseEntity<>(userService.registerUser(request), HttpStatus.CREATED);
     }
 }

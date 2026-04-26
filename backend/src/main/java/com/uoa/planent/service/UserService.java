@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.uoa.planent.dto.user.UserDataResponse;
+import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserUpdateRequest;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.security.UserDetailsImpl;
@@ -49,7 +49,7 @@ public class UserService {
 
 
     @Transactional // override with write to write to database
-    public UserDataResponse registerUser(UserRegisterRequest request) {
+    public UserResponse registerUser(UserRegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ValidationException("Username already exists.");
         }
@@ -68,19 +68,19 @@ public class UserService {
 
     }
 
-    public UserDataResponse getUserById(Integer userId) {
+    public UserResponse getUserById(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
         
         return UserMapper.toDataResponse(user);
     }
 
-    public UserDataResponse getUserByUsername(String username) {
+    public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User with username '" + username + "' not found."));
 
         return UserMapper.toDataResponse(user);
     }
 
-    public List<UserDataResponse> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
             .stream()
             .map(UserMapper::toDataResponse)
@@ -88,7 +88,7 @@ public class UserService {
     } 
 
     @Transactional
-    public UserDataResponse approveUser(Integer userId) {
+    public UserResponse approveUser(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
         user.setIsApproved(true);
         User savedUser = userRepository.save(user);
@@ -107,7 +107,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDataResponse updateUser(Integer userId, UserUpdateRequest request) {
+    public UserResponse updateUser(Integer userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
 
         // update only the non-null (given) fields

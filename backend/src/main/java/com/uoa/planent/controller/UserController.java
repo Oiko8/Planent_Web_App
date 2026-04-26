@@ -1,6 +1,6 @@
 package com.uoa.planent.controller;
 
-import com.uoa.planent.dto.user.UserDataResponse;
+import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserUpdateRequest;
 import com.uoa.planent.security.UserDetailsImpl;
 import com.uoa.planent.service.UserService;
@@ -27,20 +27,20 @@ public class UserController {
     // currently authenticated user and admin endpoints
 
     @GetMapping("/me")
-    public ResponseEntity<UserDataResponse> getMyUser(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
+    public ResponseEntity<UserResponse> getMyUser(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
         return ResponseEntity.ok(userService.getUserById(currentUser.getId()));
     }
 
     @GetMapping("/{userId}")
     @PreAuthorize("@userService.isUserOwner(#userId)")
-    public ResponseEntity<UserDataResponse> getUserById(@PathVariable Integer userId){
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Integer userId){
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
 
     @PutMapping("/{userId}")
     @PreAuthorize("@userService.isUserOwner(#userId)")
-    public ResponseEntity<UserDataResponse> updateUser(@PathVariable Integer userId, @RequestBody @Valid UserUpdateRequest request){
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Integer userId, @RequestBody @Valid UserUpdateRequest request){
         return ResponseEntity.ok(userService.updateUser(userId, request));
 
     }
@@ -52,14 +52,14 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDataResponse>> getAllUsers() {
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
 
     @PostMapping("/{userId}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDataResponse> approveUser(@PathVariable Integer userId){
+    public ResponseEntity<UserResponse> approveUser(@PathVariable Integer userId){
         return ResponseEntity.ok(userService.approveUser(userId));
     }
 

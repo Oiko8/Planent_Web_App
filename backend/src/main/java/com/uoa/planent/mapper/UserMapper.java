@@ -1,6 +1,6 @@
 package com.uoa.planent.mapper;
 
-import com.uoa.planent.dto.user.UserDataResponse;
+import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserRegisterRequest;
 import com.uoa.planent.model.User;
 
@@ -27,8 +27,8 @@ public class UserMapper {
 
 
     // User → UserDataResponse (for all of user's data, except sensitive info)
-    public static UserDataResponse toDataResponse(User user) {
-        UserDataResponse response = new UserDataResponse();
+    public static UserResponse toDataResponse(User user) {
+        UserResponse response = new UserResponse();
         response.setUserId(user.getId());
         response.setUsername(user.getUsername());
         response.setIsApproved(user.getIsApproved());

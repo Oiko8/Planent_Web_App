@@ -69,7 +69,7 @@ public class Event {
     @Column(name = "status", nullable = false, length = 20)
     private EventStatus status = EventStatus.DRAFT;
     public enum EventStatus {
-        DRAFT, PUBLISHED, CANCELLED
+        DRAFT, PUBLISHED, COMPLETED, CANCELLED
     }
 
     @Lob
@@ -79,7 +79,7 @@ public class Event {
 
 
     // map event to its categories, media and ticket types to avoid querying those tables separately
-    // cascade will automatically save any new categories, media or ticket type objects to the corresponding tables
+    // cascade will automatically save any new categories, media or ticket type objects to the corresponding tables (EventMedia, EventCategory, EventTicketType)
     // orphan removal will remove them when the event gets deleted or when they are removed from the set
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)

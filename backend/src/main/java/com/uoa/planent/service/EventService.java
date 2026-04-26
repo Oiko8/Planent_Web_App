@@ -1,14 +1,13 @@
 package com.uoa.planent.service;
 
-import com.uoa.planent.dto.event.EventResponse;
-import com.uoa.planent.dto.event.EventSearchRequest;
+import com.uoa.planent.dto.event.*;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.EventMapper;
-import com.uoa.planent.model.Event;
+import com.uoa.planent.model.*;
+import com.uoa.planent.repository.CategoryRepository;
 import com.uoa.planent.repository.EventRepository;
+import com.uoa.planent.repository.UserRepository;
 import com.uoa.planent.specification.EventSpecifications;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 
 @AllArgsConstructor
@@ -25,6 +23,8 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     public List<EventResponse> getAllEvents() {
         return eventRepository.findAll()
@@ -78,5 +78,83 @@ public class EventService {
         Page<Event> eventsPage = eventRepository.findAll(spec, pageable);
 
         return eventsPage.map(EventMapper::toResponse);
+    }
+
+
+
+    @Transactional
+    public EventResponse createEvent(EventCreateRequest request, Integer organizerId) {
+        // data checking
+        if (request.getStartDatetime().isAfter(request.getEndDatetime())){
+            throw new IllegalArgumentException("End date must be after start date");
+        }
+
+        int totalTickets = request.getTicketTypes().stream().mapToInt(TicketTypeRequest::getQuantity).sum();
+        if (totalTickets > request.getCapacity()){
+            throw new IllegalArgumentException("Total number of tickets cannot exceed the event's capacity");
+        }
+
+        // get organizer user
+        User organizer = userRepository.findById(organizerId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + organizerId + "' not found."));
+
+
+        // create the event without media/categories/media
+        Event event = Event.builder()
+                .title(request.getTitle())
+                .eventType(request.getEventType())
+                .venue(request.getVenue())
+                .city(request.getCity())
+                .country(request.getCountry())
+                .address(request.getAddress())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .startDatetime(request.getStartDatetime())
+                .endDatetime(request.getEndDatetime())
+                .capacity(request.getCapacity())
+                .description(request.getDescription())
+                .organizer(organizer)
+                .status(Event.EventStatus.DRAFT)
+                .build();
+
+        // add them now
+        // media (optional)
+        if (request.getMediaUrls() != null){
+            request.getMediaUrls().forEach(url -> {
+                EventMedia media = new EventMedia();
+                media.setPhotoUrl(url);
+                event.addMedia(media); // automatically adds event id
+            });
+        }
+
+        // categories
+        request.getCategoryIds().forEach(categoryId -> {
+            Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category with ID '" + categoryId + "' not found."));
+
+            EventCategory eventCategory = new EventCategory();
+            eventCategory.setCategory(category);
+            event.addCategory(eventCategory);
+        });
+
+        // ticket types
+        request.getTicketTypes().forEach(ticketTypeRequest -> {
+            EventTicketType ticketType = new EventTicketType();
+            ticketType.setName(ticketTypeRequest.getName());
+            ticketType.setPrice(ticketTypeRequest.getPrice());
+            ticketType.setQuantity(ticketTypeRequest.getQuantity());
+            ticketType.setAvailable(ticketTypeRequest.getQuantity());
+            event.addTicketType(ticketType);
+        });
+
+        Event savedEvent = eventRepository.save(event);
+
+        return EventMapper.toResponse(savedEvent);
+    }
+
+
+    public List<CategoryResponse> getAllCategories() {
+        return categoryRepository.findAll()
+            .stream()
+            .map(EventMapper::toCategoryResponse)
+            .toList();
     }
 }

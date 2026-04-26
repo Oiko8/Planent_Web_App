@@ -21,7 +21,7 @@ public class EventSpecifications {
             String likePattern = "%" + text + "%";
             return criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), likePattern),
-                    criteriaBuilder.equal(criteriaBuilder.lower(root.get("description")), likePattern)
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), likePattern)
             );
         };
     }
@@ -54,6 +54,6 @@ public class EventSpecifications {
     }
 
     public static Specification<Event> endsBefore(Instant date) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("endDateTime"), date);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("endDatetime"), date);
     }
 }

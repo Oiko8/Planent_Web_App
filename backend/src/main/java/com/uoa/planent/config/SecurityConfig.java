@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,6 +36,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
+                // configure server for rest api (stateless)
                 .csrf(AbstractHttpConfigurer::disable) // disable csrf since server is stateless
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // cors config
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless server since this is an api that sends jsons
@@ -49,9 +51,11 @@ public class SecurityConfig {
 
                 // api endpoint permissions
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/events/**").permitAll() // allow all authentication paths
+                        .requestMatchers("/auth/**").permitAll() // authentication by anyone
+                        .requestMatchers(HttpMethod.GET, "/events/**").permitAll() // get requests on events by everyone
                         .anyRequest().authenticated())
 
+                // authorization
                 .authenticationProvider(authenticationProvider) // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // authenticate automatically with a JSON web token
         return http.build();

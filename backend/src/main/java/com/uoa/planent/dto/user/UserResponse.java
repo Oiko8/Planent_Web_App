@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class UserDataResponse {
+public class UserResponse {
     private Integer userId;
     private String username;
     private Boolean isAdmin;

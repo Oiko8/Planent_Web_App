@@ -1,11 +1,10 @@
 package com.uoa.planent.dto.event;
 
-import com.uoa.planent.dto.CategoryResponse;
-import com.uoa.planent.dto.TicketTypeResponse;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -20,12 +19,13 @@ public class EventResponse {
     private String address;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private LocalDateTime startDatetime;
-    private LocalDateTime endDatetime;
+    private Instant startDatetime;
+    private Instant endDatetime;
     private Integer capacity;
     private String status;
     private String description;
-    //private UserRegisterResponse organizer;
+    private Integer organizerId;
+    @Nullable private List<MediaResponse> media = null;
     private List<CategoryResponse> categories;
     private List<TicketTypeResponse> ticketTypes;
 }

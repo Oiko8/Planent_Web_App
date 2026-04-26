@@ -1,4 +1,4 @@
-package com.uoa.planent.dto;
+package com.uoa.planent.dto.event;
 
 
 import lombok.Getter;
@@ -7,8 +7,10 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class TicketTypeRequest {
+public class TicketTypeResponse {
+    private Integer ticketTypeId;
     private String name;
     private BigDecimal price;
     private Integer quantity;
+    private Integer available;
 }
