@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import EventCard from "../components/EventCard";
 import type { EventItem } from "../types/event";
 import api from "../api/axiosConfig";
+import { useNavigate } from "react-router-dom";
 
-type WelcomePageProps = {
-    onNavigate: (page: string) => void;
-};
 
-export default function WelcomePage({ onNavigate }: WelcomePageProps) {
+export default function WelcomePage() {
     const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
+    const navigate = useNavigate()
 
     useEffect(() => {
         async function fetchFeaturedEvents() {
@@ -28,7 +27,7 @@ export default function WelcomePage({ onNavigate }: WelcomePageProps) {
             <section className="welcome-header">
                 <h1 className="welcome-title">Welcome to Planent: a world full of events</h1>
                 <p className="welcome-description">Discover and book tickets for the best events in town.</p>
-                <button className="welcome-button" onClick={() => onNavigate("events")}>Browse events</button>
+                <button className="welcome-button" onClick={() => navigate("/events")}>Browse events</button>
             </section>
 
             <section className="featured-events">
@@ -39,7 +38,7 @@ export default function WelcomePage({ onNavigate }: WelcomePageProps) {
                             <EventCard
                                 key={event.eventId}
                                 event={event}
-                                onOpen={() => onNavigate("events")}
+                                onOpen={() => navigate("/events")}
                             />
                         ))
                     ) : (

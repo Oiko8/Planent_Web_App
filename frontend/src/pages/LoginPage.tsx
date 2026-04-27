@@ -1,18 +1,17 @@
 import { useState } from "react";
 import api from "../api/axiosConfig";
 import { useAuth } from "../context/AuthContext";
-
-type LoginPageProps = {
-    onNavigate: (page: string) => void;
-}
+import { useNavigate } from "react-router-dom";
 
 
-export default function LoginPage({ onNavigate }: LoginPageProps) {
+export default function LoginPage() {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     const { login } = useAuth(); // returns the whole auth context
+
+    const navigate = useNavigate()
 
     async function handleLogin() {
         if (!username || !password) {
@@ -20,32 +19,32 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         return;
         }
 
-    setErrorMessage("");
-    localStorage.removeItem("token");
+        setErrorMessage("");
+        localStorage.removeItem("token");
 
-    try {
-        // 1. Login and get the token
-        const loginResponse = await api.post("/auth/login", { username, password });
-        const token = loginResponse.data.jwtToken;
-        
-        // 2. Store the token in localStorage for the rest of the session
-        localStorage.setItem("token", token);
-        console.log("Token stored:", localStorage.getItem("token"));
+        try {
+            // 1. Login and get the token
+            const loginResponse = await api.post("/auth/login", { username, password });
+            const token = loginResponse.data.jwtToken;
+            
+            // 2. Store the token in localStorage for the rest of the session
+            localStorage.setItem("token", token);
+            console.log("Token stored:", localStorage.getItem("token"));
 
-        // 3. fetch the current user
-        const userResponse = await api.get("/users/me");
-        const user = userResponse.data;
+            // 3. fetch the current user
+            const userResponse = await api.get("/users/me");
+            const user = userResponse.data;
 
-        // 4. store user in the Auth context
-        login(user);
+            // 4. store user in the Auth context
+            login(user);
 
 
-        // 5. navigate based on approval status
-        if (user.isApproved) {
-            onNavigate("welcome");
-        } else {
-            onNavigate("pendingApproval");
-        }
+            // 5. navigate based on approval status
+            if (user.isApproved) {
+                navigate("/");
+            } else {
+                navigate("/pendingApproval");
+            }
 
         }
         catch ( error:any ){
@@ -57,7 +56,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             const message = error.response?.data?.detail;
 
             if (status === 403 && message === "Account is not yet enabled by an administrator.") {
-                onNavigate("pendingApproval");
+                navigate("/pendingApproval");
                 return;
             }
 
@@ -97,7 +96,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
         <p>
             Don't have an account?{" "}
-            <button className="login-button" onClick={() => onNavigate("register")}>Sign up</button>
+            <button className="login-button" onClick={() => navigate("/register")}>Sign up</button>
         </p>
         </div>
     );

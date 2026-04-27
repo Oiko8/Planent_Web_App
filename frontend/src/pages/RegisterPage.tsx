@@ -2,12 +2,9 @@ import { useState } from "react";
 import { RegisterFormData } from "../types/registerData";
 
 import api from "../api/axiosConfig"
+import { useNavigate } from "react-router-dom";
 
-type RegisterPageProps = {
-    onNavigate: (page: string) => void;
-};
-
-export default function RegisterPage({ onNavigate }: RegisterPageProps) {
+export default function RegisterPage() {
     const [formData, setFormData] = useState<RegisterFormData>({
         username: "",
         password: "",
@@ -24,6 +21,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     });
 
     const [errorMessage, setErrorMessage] = useState("");
+
+    const navigate = useNavigate()
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -50,7 +49,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
 
         try {
             await api.post("/auth/register", formData);
-            onNavigate("pendingApproval");
+            navigate("/pendingApproval");
         } 
         catch (error:any) {
             const message = error.response?.data?.detail

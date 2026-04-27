@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom";
 
+export default function PendingApprovalPage() {
+    const navigate = useNavigate()
 
-export default function PendingApprovalPage({ onNavigate }: { onNavigate: (page: string) => void }) {
     return(
         <div className="pending-approval-body">
             <h1>Your registration is pending approval</h1>
@@ -8,7 +10,7 @@ export default function PendingApprovalPage({ onNavigate }: { onNavigate: (page:
             <p>
                 In the meantime, feel free to explore our website and discover the exciting events we have to offer.
             </p>
-                <button onClick={() => onNavigate("welcome")}>Back to Home</button>
+                <button onClick={() => navigate("/")}>Back to Home</button>
             
         </div>
 
