@@ -27,6 +27,7 @@ public class EventMapper {
         response.setStartDatetime(event.getStartDatetime());
         response.setEndDatetime(event.getEndDatetime());
         response.setOrganizerId(event.getOrganizer().getId());
+        response.setCanDelete(event.canBeDeleted());
 
 
         // map media

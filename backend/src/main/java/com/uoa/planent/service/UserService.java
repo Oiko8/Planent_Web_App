@@ -31,20 +31,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
-    // checks if the given userId matches the one of the signed user
+    // checks if the given userId matches the one of the signed user (user)
     // or if signed in user is an admin
-    public boolean isUserOwner(Integer userId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return false;
-        }
+    public boolean isUserOwnerOrAdmin(Integer userId, UserDetailsImpl user) {
+        boolean isAdmin = user.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
+        boolean isSelf = user.getId().equals(userId);
 
-        Object principal = auth.getPrincipal();
-        if (principal instanceof UserDetailsImpl userDetails){
-            return userDetails.getId().equals(userId) ||
-                    userDetails.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
-        }
-        return false;
+        return isAdmin || isSelf;
     }
 
 

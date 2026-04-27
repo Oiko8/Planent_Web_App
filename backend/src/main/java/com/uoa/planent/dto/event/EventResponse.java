@@ -25,6 +25,7 @@ public class EventResponse {
     private String status;
     private String description;
     private Integer organizerId;
+    private Boolean canDelete;
     @Nullable private List<MediaResponse> media = null;
     private List<CategoryResponse> categories;
     private List<TicketTypeResponse> ticketTypes;

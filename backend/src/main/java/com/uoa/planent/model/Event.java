@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -77,6 +78,15 @@ public class Event {
     private String description;
 
 
+    public boolean canBeDeleted() {
+        if (this.status == EventStatus.DRAFT) {
+            return true;
+        }else if (this.status == EventStatus.PUBLISHED) {
+            return this.bookings == null || this.bookings.isEmpty();
+        }
+        return false;
+    }
+
 
     // map event to its categories, media and ticket types to avoid querying those tables separately
     // cascade will automatically save any new categories, media or ticket type objects to the corresponding tables (EventMedia, EventCategory, EventTicketType)
@@ -85,33 +95,58 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventMedia> media = new LinkedHashSet<>();
     public void addMedia(EventMedia media){
-        this.media.add(media);
         media.setEvent(this);
+        this.media.add(media);
     }
     public void removeMedia(EventMedia media){
         this.media.remove(media);
+        media.setEvent(null); // ensure link breaks + help gc
     }
 
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventCategory> categories = new LinkedHashSet<>();
-    public void addCategory(EventCategory category){
-        this.categories.add(category);
-        category.setEvent(this);
+    public void addCategory(Category category){
+        // add the composite id (key) of the join table
+        EventCategoryId eventCategoryId = new EventCategoryId();
+        eventCategoryId.setCategoryId(category.getId()); // eventId will be set by Hibernate
+
+        // create the join table's new row now
+        EventCategory eventCategory = new EventCategory();
+        eventCategory.setId(eventCategoryId);
+        eventCategory.setCategory(category);
+
+        eventCategory.setEvent(this);
+        this.categories.add(eventCategory);
     }
-    public void removeCategory(EventCategory category){
-        this.categories.remove(category);
+    public void removeCategory(Category category){
+        for (Iterator<EventCategory> iterator = this.categories.iterator(); iterator.hasNext(); ){
+            EventCategory eventCategory = iterator.next();
+
+            if (eventCategory.getCategory().getId().equals(category.getId())){
+                iterator.remove();
+                eventCategory.setEvent(null);
+                break;
+            }
+        }
     }
 
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventTicketType> ticketTypes = new LinkedHashSet<>();
     public void addTicketType(EventTicketType ticketType){
-        this.ticketTypes.add(ticketType);
         ticketType.setEvent(this);
+        this.ticketTypes.add(ticketType);
     }
     public void removeTicketType(EventTicketType ticketType){
         this.ticketTypes.remove(ticketType);
+        ticketType.setEvent(null);
     }
 
+
+
+    // also have a live link only to the bookings
+    @Builder.Default
+    @OneToMany(mappedBy = "event")
+    private Set<Booking> bookings = new LinkedHashSet<>();
 }

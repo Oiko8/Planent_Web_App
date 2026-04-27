@@ -28,19 +28,14 @@ public class EventController {
 
     private final EventService eventService;
 
+    // public endpoints
+
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAllPublishedEvents() {
         return ResponseEntity.ok(eventService.getAllPublishedEvents());
     }
 
-
-    @GetMapping("/my-events")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Page<EventResponse>> getMyEvents(@AuthenticationPrincipal UserDetailsImpl currentUser, Pageable pageable) {
-        return ResponseEntity.ok(eventService.getMyEvents(currentUser.getId(), pageable)); // authenticated == non-null user id
-    }
-
-    // returns draft events only to the organizer of that event
+    // returns draft events only to the organizer of that event (if authenticated)
     @GetMapping("/{eventId}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable Integer eventId, @AuthenticationPrincipal UserDetailsImpl currentUser){
         Integer currentUserId = (currentUser != null) ? currentUser.getId() : null; // null when not signed in
@@ -53,16 +48,38 @@ public class EventController {
         return ResponseEntity.ok(eventService.searchPublishedEvents(request, pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<EventResponse> createEvent(@RequestBody @Valid EventCreateRequest request, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, currentUser.getId()));
-    }
-
-
 
     @GetMapping("/categories")
     public ResponseEntity<List<CategoryResponse>> getAllEventCategories() {
         return ResponseEntity.ok(eventService.getAllCategories());
+    }
+
+
+
+
+
+
+    // authenticated only endpoints
+
+
+    @GetMapping("/my-events")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<EventResponse>> getMyEvents(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser, Pageable pageable) {
+        return ResponseEntity.ok(eventService.getMyEvents(currentUser.getId(), pageable)); // authenticated == non-null user id
+    }
+
+    @DeleteMapping("/{eventId}")
+    @PreAuthorize("@eventService.isOrganizer(#eventId, principal)") // organizer can delete only
+    public ResponseEntity<Void> deleteEvent(@PathVariable Integer eventId) {
+        eventService.deleteEvent(eventId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<EventResponse> createEvent(@RequestBody @Valid EventCreateRequest request, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, currentUser.getId()));
     }
 
 }

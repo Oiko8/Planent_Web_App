@@ -7,6 +7,7 @@ import com.uoa.planent.model.*;
 import com.uoa.planent.repository.CategoryRepository;
 import com.uoa.planent.repository.EventRepository;
 import com.uoa.planent.repository.UserRepository;
+import com.uoa.planent.security.UserDetailsImpl;
 import com.uoa.planent.specification.EventSpecifications;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,15 @@ public class EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+
+
+    public boolean isOrganizer(Integer eventId, UserDetailsImpl user) {
+       Event event = eventRepository.findById(eventId).orElse(null);
+
+       return event != null && user != null && event.getOrganizer().getId().equals(user.getId());
+    }
+
+
 
     public List<EventResponse> getAllPublishedEvents() {
         return eventRepository.findAllByStatus(Event.EventStatus.PUBLISHED)
@@ -100,12 +110,12 @@ public class EventService {
     public EventResponse createEvent(EventCreateRequest request, Integer organizerId) {
         // data checking
         if (request.getStartDatetime().isAfter(request.getEndDatetime())){
-            throw new IllegalArgumentException("End date must be after start date");
+            throw new IllegalArgumentException("End date must be after start date.");
         }
 
         int totalTickets = request.getTicketTypes().stream().mapToInt(TicketTypeRequest::getQuantity).sum();
         if (totalTickets > request.getCapacity()){
-            throw new IllegalArgumentException("Total number of tickets cannot exceed the event's capacity");
+            throw new IllegalArgumentException("Total number of tickets cannot exceed the event's capacity.");
         }
 
         // get organizer user
@@ -148,13 +158,7 @@ public class EventService {
             Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category with ID '" + categoryId + "' not found."));
 
-            EventCategoryId eventCategoryId = new EventCategoryId(); // added from oiko
-            eventCategoryId.setCategoryId(categoryId);               // added from oiko
-
-            EventCategory eventCategory = new EventCategory();
-            eventCategory.setId(eventCategoryId);                    // added from oiko
-            eventCategory.setCategory(category);
-            event.addCategory(eventCategory);
+            event.addCategory(category);
         });
 
         // ticket types
@@ -173,10 +177,18 @@ public class EventService {
     }
 
 
+    @Transactional
+    public void deleteEvent(Integer eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
+
+        if (!event.canBeDeleted()){
+            throw new IllegalStateException("Cannot delete an event with active bookings.");
+        }
+        eventRepository.delete(event); // cascade ALL and orphan removal will take care of media, categories and ticket types
+    }
+
+
     public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll()
-            .stream()
-            .map(EventMapper::toCategoryResponse)
-            .toList();
+        return categoryRepository.findAll().stream().map(EventMapper::toCategoryResponse).toList();
     }
 }
