@@ -98,41 +98,6 @@ html {
   padding-bottom: 2.5rem;
 }
 
-/* Event section */
-.event-body {
-  text-align: center;
-}
-
-.event-body-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
-  gap: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.category-section {
-  margin-top: 3rem;
-}
-
-.category-title {
-  text-align: left;
-  max-width: 1000px;
-  margin: 0 auto 1rem;
-  padding-left: 0.5rem;
-}
-
-
-.borderless-button-event {
-  background: none;
-  border: none;
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  font-weight: 400;
-  letter-spacing: 0.03em;
-  text-transform: lowercase;
-  cursor: pointer;
-}
 
 
 /* Login */
@@ -203,4 +168,43 @@ html {
   margin: 2rem auto 0;
 }
 
+/* Event section */
+.event-body {
+  text-align: center;
+}
 
+.event-body-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.category-section {
+  margin-top: 3rem;
+}
+
+.category-title {
+  text-align: left;
+  max-width: 1000px;
+  margin: 0 auto 1rem;
+  padding-left: 0.5rem;
+}
+
+
+.borderless-button-event {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  cursor: pointer;
+}
+
+/* Creating event */
+.event-creation-body {
+  text-align: center;
+}

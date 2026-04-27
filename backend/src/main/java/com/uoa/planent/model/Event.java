@@ -49,10 +49,10 @@ public class Event {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "latitude", nullable = false, precision = 10, scale = 8)
+    @Column(name = "latitude", nullable = true, precision = 10, scale = 8)
     private BigDecimal latitude;
 
-    @Column(name = "longitude", nullable = false, precision = 11, scale = 8)
+    @Column(name = "longitude", nullable = true, precision = 11, scale = 8)
     private BigDecimal longitude;
 
     @Column(name = "start_datetime", nullable = false)

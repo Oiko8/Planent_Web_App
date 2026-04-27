@@ -19,11 +19,12 @@ export default function Navbar() {
 
             <a className="navbar-search">
                 <button className="borderless-button" onClick={() => navigate("/events")}>&#128269;</button>
-
+                {/* <button className="borderless-button" onClick={() => navigate("/create-event")}>Create Event</button> */}
+                
                 { user ? (
                     // logged in --> show only logout option
                     <>
-                        <button className="borderless-button" onClick={() => navigate("/")}>Create Event</button>
+                        <button className="borderless-button" onClick={() => navigate("/create-event")}>Create Event</button>
                         <button className="borderless-button" onClick={handleLogout}>Logout</button>
                     </>
                 ) : (

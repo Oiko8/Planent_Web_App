@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @AllArgsConstructor
@@ -119,8 +120,11 @@ public class EventService {
                 .city(request.getCity())
                 .country(request.getCountry())
                 .address(request.getAddress())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
+                // just for testing
+                .latitude(request.getLatitude() != null ? request.getLatitude() : BigDecimal.ZERO)
+                .longitude(request.getLongitude() != null ? request.getLongitude() : BigDecimal.ZERO)
+                // .latitude(request.getLatitude())
+                // .longitude(request.getLongitude())
                 .startDatetime(request.getStartDatetime())
                 .endDatetime(request.getEndDatetime())
                 .capacity(request.getCapacity())
