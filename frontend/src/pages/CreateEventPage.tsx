@@ -71,6 +71,8 @@ export default function CreateEventPage() {
                 startDatetime: new Date(eventForm.startDatetime).toISOString(),
                 endDatetime: new Date(eventForm.endDatetime).toISOString(),
             };
+            const tokenInStorage = localStorage.getItem("token");
+            console.log("Token in storage at submit:", tokenInStorage);
             console.log("Sending payload:", payload);
             
             await api.post("/events", payload);

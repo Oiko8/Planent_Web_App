@@ -145,9 +145,14 @@ public class EventService {
 
         // categories
         request.getCategoryIds().forEach(categoryId -> {
-            Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category with ID '" + categoryId + "' not found."));
+            Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category with ID '" + categoryId + "' not found."));
+
+            EventCategoryId eventCategoryId = new EventCategoryId(); // added from oiko
+            eventCategoryId.setCategoryId(categoryId);               // added from oiko
 
             EventCategory eventCategory = new EventCategory();
+            eventCategory.setId(eventCategoryId);                    // added from oiko
             eventCategory.setCategory(category);
             event.addCategory(eventCategory);
         });
