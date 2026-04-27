@@ -38,11 +38,8 @@ public class EventService {
 
 
 
-    public List<EventResponse> getAllPublishedEvents() {
-        return eventRepository.findAllByStatus(Event.EventStatus.PUBLISHED)
-            .stream()
-            .map(EventMapper::toResponse)
-            .toList();
+    public Page<EventResponse> getAllPublishedEvents(Pageable pageable) {
+        return eventRepository.findAllByStatus(Event.EventStatus.PUBLISHED, pageable).map(EventMapper::toResponse);
     }
 
     public EventResponse getEventById(Integer eventId, @Nullable Integer currentUserId) {

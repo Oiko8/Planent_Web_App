@@ -24,7 +24,7 @@ public class UserController {
     // by default (from security config), all following endpoints require the user to be authenticated
 
 
-    // authenticated user and admin endpoints
+    // ---- authenticated user + admin endpoints ----
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -39,7 +39,7 @@ public class UserController {
     }
 
 
-    @PutMapping("/{userId}")
+    @PatchMapping("/{userId}")
     @PreAuthorize("@userService.isUserOwnerOrAdmin(#userId, principal)") // only self user or admin can update
     public ResponseEntity<UserResponse> updateUser(@PathVariable Integer userId, @RequestBody @Valid UserUpdateRequest request){
         return ResponseEntity.ok(userService.updateUser(userId, request));
@@ -49,7 +49,7 @@ public class UserController {
 
 
 
-    // admin only endpoints
+    // ---- admin only endpoints ----
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -58,13 +58,13 @@ public class UserController {
     }
 
 
-    @PostMapping("/{userId}/approve")
+    @PatchMapping("/{userId}/approve")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponse> approveUser(@PathVariable Integer userId){
         return ResponseEntity.ok(userService.approveUser(userId));
     }
 
-    @DeleteMapping("/{userId}/reject")
+    @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> rejectUser(@PathVariable Integer userId) {
         userService.rejectUser(userId); // deletes the user from the database

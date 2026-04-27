@@ -28,11 +28,11 @@ public class EventController {
 
     private final EventService eventService;
 
-    // public endpoints
+    // ---- public endpoints ----
 
     @GetMapping
-    public ResponseEntity<List<EventResponse>> getAllPublishedEvents() {
-        return ResponseEntity.ok(eventService.getAllPublishedEvents());
+    public ResponseEntity<Page<EventResponse>> getAllPublishedEvents(Pageable pageable) {
+        return ResponseEntity.ok(eventService.getAllPublishedEvents(pageable));
     }
 
     // returns draft events only to the organizer of that event (if authenticated)
@@ -59,7 +59,7 @@ public class EventController {
 
 
 
-    // authenticated only endpoints
+    // ---- authenticated only endpoints ----
 
 
     @GetMapping("/my-events")
