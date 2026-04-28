@@ -14,7 +14,7 @@ export default function WelcomePage() {
             try {
                 const response = await api.get("/events");
                 // take only the first 2 events to feature
-                setFeaturedEvents(response.data.slice(0, 2));
+                setFeaturedEvents(response.data.content.slice(0, 2));
             } catch (err) {
                 // silently fail — featured events are not critical
             }

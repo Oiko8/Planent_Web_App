@@ -78,11 +78,14 @@ public class Event {
     private String description;
 
 
+    // indirect mapping to bookings
+    // Event -> Event Ticket Types -> Booking
     public boolean canBeDeleted() {
         if (this.status == EventStatus.DRAFT) {
             return true;
-        }else if (this.status == EventStatus.PUBLISHED) {
-            return this.bookings == null || this.bookings.isEmpty();
+        } else if (this.status == EventStatus.PUBLISHED) {
+            return this.ticketTypes == null || 
+                this.ticketTypes.stream().allMatch(tt -> tt.getAvailable().equals(tt.getQuantity()));
         }
         return false;
     }
@@ -144,9 +147,9 @@ public class Event {
     }
 
 
-
+    // It didn't worl because booking has not field "event"
     // also have a live link only to the bookings
-    @Builder.Default
-    @OneToMany(mappedBy = "event")
-    private Set<Booking> bookings = new LinkedHashSet<>();
+    // @Builder.Default
+    // @OneToMany(mappedBy = "event")
+    // private Set<Booking> bookings = new LinkedHashSet<>();
 }

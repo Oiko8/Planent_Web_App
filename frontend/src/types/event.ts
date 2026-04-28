@@ -28,6 +28,19 @@ export type EventItem = {
     capacity: number;
     status: EventStatus;
     description: string;
+    organizerId: number;
+    canDelete: boolean
     categories: CategoryResponse[];
     ticketTypes: TicketTypeResponse[];
 };
+
+
+export type PageResponse<T> = {
+    content: T[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+    last: boolean;
+    first: boolean;
+}

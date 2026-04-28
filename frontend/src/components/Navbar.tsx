@@ -24,7 +24,7 @@ export default function Navbar() {
                 { user ? (
                     // logged in --> show only logout option
                     <>
-                        <button className="borderless-button" onClick={() => navigate("/create-event")}>Create Event</button>
+                        <button className="borderless-button" onClick={() => navigate("/my-events")}>My Events</button>
                         <button className="borderless-button" onClick={handleLogout}>Logout</button>
                     </>
                 ) : (

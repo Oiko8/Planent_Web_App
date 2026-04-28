@@ -19,7 +19,7 @@ export default function EventsPage() {
         async function fetchEvents() {
             try {
                 const response = await api.get("/events", { signal: controller.signal });
-                setEvents(response.data);
+                setEvents(response.data.content);
                 setLoading(false);
             } catch (err: any) {
                 if (err.name !== "CanceledError") {
@@ -59,9 +59,10 @@ export default function EventsPage() {
 
         <div className="event-body">
             <input
+            className="search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search events"
+            placeholder="🔍  Search events by title, city, type..."
             />
         </div>
 
