@@ -39,12 +39,17 @@ export default function LoginPage() {
             login(user);
 
 
-            // 5. navigate based on approval status
-            if (user.isApproved) {
-                navigate("/");
+            // 5. navigate based on approval status and based on the user status
+            if (user.isAdmin) {
+                navigate("/admin")
             } else {
-                navigate("/pendingApproval");
+                if (user.isApproved) {
+                    navigate("/");
+                } else {
+                    navigate("/pendingApproval");
+                }
             }
+
 
         }
         catch ( error:any ){

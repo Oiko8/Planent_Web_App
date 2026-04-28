@@ -520,3 +520,147 @@ html {
 .create-event-button:hover {
     background: #2563eb;
 }
+
+
+/* Admin Page */
+.admin-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 0;
+}
+
+.admin-tab {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0.6rem 1.2rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-tab:hover {
+    color: #cbd5e1;
+}
+
+.admin-tab-active {
+    color: #ffffff;
+    border-bottom: 2px solid #1d4ed8;
+}
+
+.admin-section {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.admin-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+}
+
+.admin-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #1d4ed8;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+}
+
+.admin-user-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    background: #0f172a;
+}
+
+.admin-user-pending {
+    border-color: #78350f;
+    background: #1c1917;
+}
+
+.admin-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.admin-user-username {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.admin-user-meta {
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+.admin-user-actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.admin-btn-approve {
+    padding: 0.35rem 0.9rem;
+    background: #14532d;
+    border: 1px solid #166534;
+    color: #86efac;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.admin-btn-approve:hover {
+    background: #166534;
+}
+
+.admin-btn-reject {
+    padding: 0.35rem 0.9rem;
+    background: #450a0a;
+    border: 1px solid #7f1d1d;
+    color: #fca5a5;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.admin-btn-reject:hover {
+    background: #7f1d1d;
+}
+
+.admin-empty {
+    color: #475569;
+    text-align: center;
+    padding: 2rem 0;
+}

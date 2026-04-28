@@ -49,7 +49,7 @@ export default function RegisterPage() {
 
         try {
             await api.post("/auth/register", formData);
-            navigate("/pendingApproval");
+            navigate("/pending-approval");
         } 
         catch (error:any) {
             const message = error.response?.data?.detail
@@ -167,7 +167,7 @@ export default function RegisterPage() {
                 <input
                 value={formData.afm}
                 onChange={(e) => handleChange("afm", e.target.value)}
-                placeholder="Enter phone number"
+                placeholder="Enter AFM"
                 />
             </div>
             <br></br>

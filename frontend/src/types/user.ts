@@ -1,19 +1,18 @@
-export type UserRole = "USER" | "ADMIN";
-
-export type ApprovalStatus = "PENDING" | "APPROVED";
-
+// The User type used in AuthContext (from /users/me)
 export type User = {
-  id: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  country: string;
-  city: string;
-  address: string;
-  zipCode: string;
-  afm: string;
-  role: UserRole;
-  approvalStatus: ApprovalStatus;
+    userId: number;
+    username: string;
+    isAdmin: boolean;
+    isApproved: boolean;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    country: string;
+    city: string;
+    address: string;
+    zipcode: string;
+    latitude: number | null;
+    longitude: number | null;
+    afm: string;
 };
