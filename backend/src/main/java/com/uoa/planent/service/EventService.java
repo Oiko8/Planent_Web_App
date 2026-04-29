@@ -12,18 +12,21 @@ import com.uoa.planent.specification.EventSpecifications;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -46,6 +49,13 @@ public class EventService {
         return event.getOrganizer().getId().equals(user.getId());
     }
 
+    // scheduled every 15 mins
+    @Scheduled(fixedRate = 900000)
+    @Transactional
+    public void completePastEvents() {
+        int updatedCount = eventRepository.markPastEventsAsCompleted(Instant.now());
+        log.info("Successfully marked {} events as COMPLETED.", updatedCount);
+    }
 
 
     // returns all non-draft events

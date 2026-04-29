@@ -8,11 +8,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 
 @SpringBootApplication
+@EnableScheduling
 public class PlanentApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(PlanentApplication.class);
@@ -26,7 +28,7 @@ public class PlanentApplication {
     @Bean
     public CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.count() == 0) {
+            if (!userRepository.existsByUsername("admin")) {
                 User admin = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
@@ -47,7 +49,9 @@ public class PlanentApplication {
 
 
                 userRepository.save(admin);
-                logger.info("First (admin) user created!");
+                logger.info("First admin user created with username 'admin'.");
+            }else{
+                logger.info("Admin user already exists with username 'admin'.");
             }
         };
     }

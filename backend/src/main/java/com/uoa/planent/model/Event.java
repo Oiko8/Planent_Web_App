@@ -127,7 +127,6 @@ public class Event {
 
         // can remove
         this.ticketTypes.remove(ticketType);
-        ticketType.setEvent(null);
     }
 
 
@@ -168,6 +167,7 @@ public class Event {
         }
     }
 
+    // publish, cancel and draft only handle checking and changing the status
     public void publish() throws IllegalStateException {
         if (this.status == EventStatus.CANCELLED) {
             throw new IllegalStateException("Cannot publish a cancelled event.");
@@ -206,7 +206,7 @@ public class Event {
 
 
 
-    // always call after building/updating event fields
+    // always call after creating/updating event
     public void validate() throws IllegalArgumentException, IllegalStateException{
         validateDates();
         validateTicketCapacity();
@@ -216,9 +216,16 @@ public class Event {
         if (startDatetime.isAfter(endDatetime)) {
             throw new IllegalArgumentException("Start date must be before end date.");
         }
+        // updates on draft/published events may end up having past dates that were left from creation
+        if (startDatetime.isBefore(Instant.now())){
+            throw new IllegalArgumentException("Start date cannot be in the past.");
+        }
+        if (endDatetime.isBefore(Instant.now())){
+            throw new IllegalArgumentException("End date cannot be in the past.");
+        }
     }
     private void validateTicketCapacity() throws IllegalStateException {
-        if (ticketTypes == null || this.ticketTypes.isEmpty()) return; // may not have tickets yet if draft (check in status valdiation)
+        if (ticketTypes == null || this.ticketTypes.isEmpty()) return; // may not have tickets yet if draft
 
         int totalTickets = ticketTypes.stream().mapToInt(EventTicketType::getQuantity).sum();
 
