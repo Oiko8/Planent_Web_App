@@ -34,6 +34,8 @@ public class UserService {
     // checks if the given userId matches the one of the signed user (user)
     // or if signed in user is an admin
     public boolean isUserOwnerOrAdmin(Integer userId, UserDetailsImpl user) {
+        if (user == null) return false; // access denied exception by default if false
+
         boolean isAdmin = user.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
         boolean isSelf = user.getId().equals(userId);
 
@@ -103,16 +105,23 @@ public class UserService {
     public UserResponse updateUser(Integer userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
 
+        // check email first
+        if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new IllegalArgumentException("Email already exists.");
+            }
+            user.setEmail(request.getEmail());
+        }
+
         // update only the non-null (given) fields
-        Optional.ofNullable(request.getFirstName()).ifPresent(user::setFirstName);
-        Optional.ofNullable(request.getLastName()).ifPresent(user::setLastName);
-        Optional.ofNullable(request.getEmail()).ifPresent(user::setEmail);
-        Optional.ofNullable(request.getPhone()).ifPresent(user::setPhone);
-        Optional.ofNullable(request.getCountry()).ifPresent(user::setCountry);
-        Optional.ofNullable(request.getCity()).ifPresent(user::setCity);
-        Optional.ofNullable(request.getAddress()).ifPresent(user::setAddress);
-        Optional.ofNullable(request.getZipcode()).ifPresent(user::setZipcode);
-        Optional.ofNullable(request.getAfm()).ifPresent(user::setAfm);
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getCountry() != null) user.setCountry(request.getCountry());
+        if (request.getCity() != null) user.setCity(request.getCity());
+        if (request.getAddress() != null) user.setAddress(request.getAddress());
+        if (request.getZipcode() != null) user.setZipcode(request.getZipcode());
+        if (request.getAfm() != null) user.setAfm(request.getAfm());
 
         User savedUser = userRepository.save(user);
         return UserMapper.toDataResponse(savedUser);

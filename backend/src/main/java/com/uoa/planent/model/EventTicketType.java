@@ -1,10 +1,12 @@
 package com.uoa.planent.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -17,7 +19,7 @@ public class EventTicketType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticket_type_id", nullable = false)
-    private Integer id; // TicketTypeId , better
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "event_id", nullable = false)
@@ -35,4 +37,30 @@ public class EventTicketType {
     @Column(name = "available", nullable = false)
     private Integer available;
 
+
+    public boolean hasBookings() {
+        return !Objects.equals(quantity, available);
+    }
+    public boolean canDelete() {
+        return !hasBookings();
+    }
+
+    public void updateInfo(@NotNull Integer newQuantity, @NotNull BigDecimal newPrice) throws IllegalArgumentException {
+        updateQuantity(newQuantity);
+        updatePrice(newPrice);
+    }
+
+    public void updateQuantity(@NotNull Integer newQuantity) throws IllegalArgumentException {
+        int soldTickets = this.quantity - this.available;
+        if (newQuantity < soldTickets) {
+            throw new IllegalArgumentException("Cannot reduce quantity below the number of already sold tickets (" + soldTickets + ").");
+        }
+
+        this.quantity = newQuantity;
+        this.available = newQuantity - soldTickets;
+    }
+
+    public void updatePrice(@NotNull BigDecimal newPrice) {
+        this.price = newPrice;
+    }
 }

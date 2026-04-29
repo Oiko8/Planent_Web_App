@@ -1,9 +1,6 @@
 package com.uoa.planent.controller;
 
-import com.uoa.planent.dto.event.CategoryResponse;
-import com.uoa.planent.dto.event.EventCreateRequest;
-import com.uoa.planent.dto.event.EventResponse;
-import com.uoa.planent.dto.event.EventSearchRequest;
+import com.uoa.planent.dto.event.*;
 import com.uoa.planent.security.UserDetailsImpl;
 import com.uoa.planent.service.EventService;
 import jakarta.validation.Valid;
@@ -30,9 +27,10 @@ public class EventController {
 
     // ---- public endpoints ----
 
+    // returns all non-draft events
     @GetMapping
-    public ResponseEntity<Page<EventResponse>> getAllPublishedEvents(Pageable pageable) {
-        return ResponseEntity.ok(eventService.getAllPublishedEvents(pageable));
+    public ResponseEntity<Page<EventResponse>> getAllVisibleEvents(Pageable pageable) {
+        return ResponseEntity.ok(eventService.getAllVisibleEvents(pageable));
     }
 
     // returns draft events only to the organizer of that event (if authenticated)
@@ -43,9 +41,10 @@ public class EventController {
     }
 
 
+    // searches from all non-draft events
     @GetMapping("/search")
-    public ResponseEntity<Page<EventResponse>> searchPublishedEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
-        return ResponseEntity.ok(eventService.searchPublishedEvents(request, pageable));
+    public ResponseEntity<Page<EventResponse>> searchVisibleEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
+        return ResponseEntity.ok(eventService.searchVisibleEvents(request, pageable));
     }
 
 
@@ -69,7 +68,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}")
-    @PreAuthorize("@eventService.isOrganizer(#eventId, principal)") // organizer can delete only
+    @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
     public ResponseEntity<Void> deleteEvent(@PathVariable Integer eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.noContent().build();
@@ -82,4 +81,9 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, currentUser.getId()));
     }
 
+    @PatchMapping("/{eventId}")
+    @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @RequestBody @Valid EventUpdateRequest request){
+        return ResponseEntity.ok().body(eventService.updateEvent(eventId, request));
+    }
 }

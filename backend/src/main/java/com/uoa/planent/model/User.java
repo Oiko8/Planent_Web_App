@@ -86,5 +86,4 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy = "receiver")
     private Set<Message> receivedMessages = new LinkedHashSet<>();
-
 }

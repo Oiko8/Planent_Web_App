@@ -2,10 +2,7 @@ package com.uoa.planent.mapper;
 
 import java.util.List;
 
-import com.uoa.planent.dto.event.CategoryResponse;
-import com.uoa.planent.dto.event.EventResponse;
-import com.uoa.planent.dto.event.MediaResponse;
-import com.uoa.planent.dto.event.TicketTypeResponse;
+import com.uoa.planent.dto.event.*;
 import com.uoa.planent.model.*;
 
 public class EventMapper {
@@ -79,6 +76,15 @@ public class EventMapper {
         response.setQuantity(tt.getQuantity());
         response.setAvailable(tt.getAvailable());
         return response;
+    }
+
+    public static EventTicketType toTicketTypeModel(TicketTypeRequest request) {
+        EventTicketType ticketType = new EventTicketType();
+        ticketType.setName(request.getName().trim());
+        ticketType.setPrice(request.getPrice());
+        ticketType.setQuantity(request.getQuantity());
+        ticketType.setAvailable(request.getQuantity());
+        return ticketType;
     }
 
 

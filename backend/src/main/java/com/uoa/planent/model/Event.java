@@ -1,6 +1,7 @@
 package com.uoa.planent.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 // import org.hibernate.annotations.ColumnDefault;
 
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -78,38 +80,21 @@ public class Event {
     private String description;
 
 
-    // indirect mapping to bookings
-    // Event -> Event Ticket Types -> Booking
-    public boolean canBeDeleted() {
-        if (this.status == EventStatus.DRAFT) {
-            return true;
-        } else if (this.status == EventStatus.PUBLISHED) {
-            return this.ticketTypes == null || 
-                this.ticketTypes.stream().allMatch(tt -> tt.getAvailable().equals(tt.getQuantity()));
-        }
-        return false;
-    }
-
-
     // map event to its categories, media and ticket types to avoid querying those tables separately
     // cascade will automatically save any new categories, media or ticket type objects to the corresponding tables (EventMedia, EventCategory, EventTicketType)
     // orphan removal will remove them when the event gets deleted or when they are removed from the set
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventMedia> media = new LinkedHashSet<>();
-    public void addMedia(EventMedia media){
+    public void addMedia(@NotNull EventMedia media){
         media.setEvent(this);
         this.media.add(media);
-    }
-    public void removeMedia(EventMedia media){
-        this.media.remove(media);
-        media.setEvent(null); // ensure link breaks + help gc
     }
 
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventCategory> categories = new LinkedHashSet<>();
-    public void addCategory(Category category){
+    public void addCategory(@NotNull Category category){
         // add the composite id (key) of the join table
         EventCategoryId eventCategoryId = new EventCategoryId();
         eventCategoryId.setCategoryId(category.getId()); // eventId will be set by Hibernate
@@ -122,34 +107,133 @@ public class Event {
         eventCategory.setEvent(this);
         this.categories.add(eventCategory);
     }
-    public void removeCategory(Category category){
-        for (Iterator<EventCategory> iterator = this.categories.iterator(); iterator.hasNext(); ){
-            EventCategory eventCategory = iterator.next();
-
-            if (eventCategory.getCategory().getId().equals(category.getId())){
-                iterator.remove();
-                eventCategory.setEvent(null);
-                break;
-            }
-        }
-    }
 
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventTicketType> ticketTypes = new LinkedHashSet<>();
-    public void addTicketType(EventTicketType ticketType){
+    public void addTicketType(@NotNull EventTicketType ticketType){
         ticketType.setEvent(this);
         this.ticketTypes.add(ticketType);
     }
-    public void removeTicketType(EventTicketType ticketType){
+    public void removeTicketType(@NotNull EventTicketType ticketType) throws IllegalStateException {
+        if (!this.ticketTypes.contains(ticketType)) {
+            return;
+        }
+
+        // exists -> allowed to remove?
+        if (ticketType.canDelete()) {
+            throw new IllegalStateException("Cannot remove ticket '" + ticketType.getName() + "' because it has bookings.");
+        }
+
+        // can remove
         this.ticketTypes.remove(ticketType);
         ticketType.setEvent(null);
     }
 
 
-    // It didn't worl because booking has not field "event"
-    // also have a live link only to the bookings
-    // @Builder.Default
-    // @OneToMany(mappedBy = "event")
-    // private Set<Booking> bookings = new LinkedHashSet<>();
+
+
+
+    // ------------- helper and validation methods -------------
+    public boolean hasBookings() {
+        return this.ticketTypes != null && this.ticketTypes.stream().anyMatch(EventTicketType::hasBookings);
+    }
+    public boolean canBeDeleted() {
+        if (this.status == EventStatus.DRAFT) {
+            return true;
+        } else if (this.status == EventStatus.PUBLISHED) {
+            return !hasBookings();
+        }
+        return false;
+    }
+
+    public void checkIfDeletable() throws IllegalStateException { // gives detailed exceptions on the above false return values
+        if (this.status == EventStatus.PUBLISHED) {
+            if (hasBookings()){
+                throw new IllegalStateException("Cannot delete a published event with active bookings.");
+            }
+        }else if (this.status == EventStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot delete a cancelled event.");
+        }else if (this.status == EventStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot delete a completed event.");
+        }
+    }
+
+
+    public void checkIfEditable() throws IllegalStateException {
+        if (this.status == EventStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot edit a cancelled event.");
+        }else if (this.status == EventStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot edit a completed event.");
+        }
+    }
+
+    public void publish() throws IllegalStateException {
+        if (this.status == EventStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot publish a cancelled event.");
+        }
+        if (this.status == EventStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot publish a completed event.");
+        }
+
+        this.status = EventStatus.PUBLISHED;
+    }
+
+    public void cancel() throws IllegalStateException {
+        if (this.status == EventStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot cancel a completed event.");
+        }
+        if (this.status == EventStatus.DRAFT) {
+            throw new IllegalStateException("Cannot cancel a draft event. Request a deletion instead.");
+        }
+
+        this.status = EventStatus.CANCELLED;
+    }
+
+    public void draft() throws IllegalStateException {
+        if (this.status == EventStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot draft a cancelled event.");
+        }
+        if (this.status == EventStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot draft a completed event.");
+        }
+        if (this.status == EventStatus.PUBLISHED) {
+            throw new IllegalStateException("Cannot draft a published event.");
+        }
+
+        this.status = EventStatus.DRAFT;
+    }
+
+
+
+    // always call after building/updating event fields
+    public void validate() throws IllegalArgumentException, IllegalStateException{
+        validateDates();
+        validateTicketCapacity();
+        validateStatus(); // check last
+    }
+    private void validateDates() throws IllegalArgumentException {
+        if (startDatetime.isAfter(endDatetime)) {
+            throw new IllegalArgumentException("Start date must be before end date.");
+        }
+    }
+    private void validateTicketCapacity() throws IllegalStateException {
+        if (ticketTypes == null || this.ticketTypes.isEmpty()) return; // may not have tickets yet if draft (check in status valdiation)
+
+        int totalTickets = ticketTypes.stream().mapToInt(EventTicketType::getQuantity).sum();
+
+        if (totalTickets > this.capacity) {
+            throw new IllegalStateException("Total tickets (" + totalTickets + ") exceed event capacity (" + this.capacity + ").");
+        }
+    }
+    private void validateStatus() throws IllegalStateException {
+        if (this.status == EventStatus.PUBLISHED) {
+            if (this.ticketTypes == null || this.ticketTypes.isEmpty()) {
+                throw new IllegalStateException("A published event must have at least one ticket type.");
+            }
+            if (this.categories == null || this.categories.isEmpty()) {
+                throw new IllegalStateException("A published event must have at least one category.");
+            }
+        }
+    }
 }

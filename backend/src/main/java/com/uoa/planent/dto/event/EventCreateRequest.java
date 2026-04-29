@@ -38,14 +38,12 @@ public class EventCreateRequest {
     @Size(max = 255, message = "Event address too long")
     private String address;
 
-    // @NotNull(message = "Missing event latitude")
-    @Nullable
+    @NotNull(message = "Missing event latitude")
     @Digits(integer = 2, fraction = 8, message = "Event latitude must contain up to 2 integer and 8 decimal digits")
     @DecimalMin(value = "-90.0", message = "Event latitude must be between -90 and 90") @DecimalMax(value = "90.0", message = "Event latitude must be between -90 and 90")
     private BigDecimal latitude;
 
-    // @NotNull(message = "Missing event longitude")
-    @Nullable
+    @NotNull(message = "Missing event longitude")
     @Digits(integer = 3, fraction = 8, message = "Event longitude must contain up to 3 integer and 8 decimal digits")
     @DecimalMin(value = "-180.0", message = "Event longitude must be between -180 and 180") @DecimalMax(value = "180.0", message = "Event longitude must be between -180 and 180")
     private BigDecimal longitude;
@@ -65,13 +63,15 @@ public class EventCreateRequest {
     @NotBlank(message = "Missing event description")
     private String description;
 
+    private boolean publish = false; // false -> DRAFT | true -> PUBLISHED (default DRAFT)
+
     @Nullable // optional
-    private List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls;
+    private List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls; // if given the list then it cannot be blank
 
     @NotEmpty(message = "Missing event category IDs")
-    private List<Integer> categoryIds;
+    private List<@NotNull Integer> categoryIds;
 
     @Valid
     @NotEmpty(message = "Missing event ticket types")
-    private List<TicketTypeRequest> ticketTypes;
+    private List<@NotNull @Valid TicketTypeRequest> ticketTypes;
 }
