@@ -41,7 +41,7 @@ public class EventTicketType {
     public boolean hasBookings() {
         return !Objects.equals(quantity, available);
     }
-    public boolean canDelete() {
+    public boolean canBeDeleted() {
         return !hasBookings();
     }
 

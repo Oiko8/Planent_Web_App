@@ -1,5 +1,6 @@
 package com.uoa.planent.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -7,9 +8,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -112,6 +111,11 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventTicketType> ticketTypes = new LinkedHashSet<>();
     public void addTicketType(@NotNull EventTicketType ticketType){
+        boolean nameAlreadyExists = this.ticketTypes.stream().anyMatch(existingTicket -> existingTicket.getName().equalsIgnoreCase(ticketType.getName()));
+        if (nameAlreadyExists) {
+            throw new IllegalArgumentException("A ticket type with the name '" + ticketType.getName() + "' already exists for this event.");
+        }
+
         ticketType.setEvent(this);
         this.ticketTypes.add(ticketType);
     }
@@ -121,7 +125,7 @@ public class Event {
         }
 
         // exists -> allowed to remove?
-        if (ticketType.canDelete()) {
+        if (!ticketType.canBeDeleted()) {
             throw new IllegalStateException("Cannot remove ticket '" + ticketType.getName() + "' because it has bookings.");
         }
 
@@ -167,13 +171,40 @@ public class Event {
         }
     }
 
+    // only for updating (rescheduling) date times, not for creating/setting
+    public void reschedule(@Nullable Instant newStart, @Nullable Instant newEnd) {
+        newStart = newStart != null ? newStart : this.startDatetime;
+        newEnd = newEnd != null ? newEnd : this.endDatetime;
+
+        if (newStart.isAfter(newEnd)) {
+            throw new IllegalArgumentException("Start date must be before end date.");
+        }
+
+        // if start date changed then it cannot move in the past
+        if (!newStart.equals(this.startDatetime)) {
+            if (newStart.isBefore(Instant.now())) {
+                throw new IllegalArgumentException("The new start time cannot be in the past.");
+            }
+        }
+
+        // if end date changed then it cannot move in the past
+        if (!newEnd.equals(this.endDatetime)) {
+            if (newEnd.isBefore(Instant.now())) {
+                throw new IllegalArgumentException("The new end time cannot be in the past.");
+            }
+        }
+
+        this.startDatetime = newStart;
+        this.endDatetime = newEnd;
+    }
+
     // publish, cancel and draft only handle checking and changing the status
     public void publish() throws IllegalStateException {
         if (this.status == EventStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot publish a cancelled event.");
+            throw new IllegalStateException("Cannot republish a cancelled event.");
         }
         if (this.status == EventStatus.COMPLETED) {
-            throw new IllegalStateException("Cannot publish a completed event.");
+            throw new IllegalStateException("Cannot republish a completed event.");
         }
 
         this.status = EventStatus.PUBLISHED;
@@ -206,23 +237,18 @@ public class Event {
 
 
 
+    // state validations to validate entity as a whole after all field updates
     // always call after creating/updating event
     public void validate() throws IllegalArgumentException, IllegalStateException{
         validateDates();
         validateTicketCapacity();
         validateStatus(); // check last
     }
-    private void validateDates() throws IllegalArgumentException {
-        if (startDatetime.isAfter(endDatetime)) {
+    private void validateDates() {
+        if (this.startDatetime.isAfter(this.endDatetime)) {
             throw new IllegalArgumentException("Start date must be before end date.");
         }
-        // updates on draft/published events may end up having past dates that were left from creation
-        if (startDatetime.isBefore(Instant.now())){
-            throw new IllegalArgumentException("Start date cannot be in the past.");
-        }
-        if (endDatetime.isBefore(Instant.now())){
-            throw new IllegalArgumentException("End date cannot be in the past.");
-        }
+        // past dates check in reschedule for updating or creation dto for creating
     }
     private void validateTicketCapacity() throws IllegalStateException {
         if (ticketTypes == null || this.ticketTypes.isEmpty()) return; // may not have tickets yet if draft

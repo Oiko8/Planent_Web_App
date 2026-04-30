@@ -21,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Objects;
 @Slf4j
 @AllArgsConstructor
 @Service
+@Validated // null checks
 @Transactional(readOnly = true)
 public class EventService {
 
@@ -128,7 +130,7 @@ public class EventService {
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "status")
+                Sort.by(Sort.Direction.DESC, "status") // sorts by alphabetic order of enum, only works with these names
                         .and(pageable.getSort())
         );
 
@@ -143,7 +145,7 @@ public class EventService {
         // get organizer user
         User organizer = userRepository.findById(organizerId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + organizerId + "' not found."));
 
-        // create the event basic info and without status and media/categories/ticket types
+        // create the event's basic info and without status and media/categories/ticket types
         Event event = Event.builder()
                 .title(request.getTitle())
                 .eventType(request.getEventType())
@@ -220,8 +222,11 @@ public class EventService {
         if (request.getLongitude() != null) event.setLongitude(request.getLongitude());
         if (request.getDescription() != null) event.setDescription(request.getDescription());
         if (request.getCapacity() != null) event.setCapacity(request.getCapacity());
-        if (request.getStartDatetime() != null) event.setStartDatetime(request.getStartDatetime());
-        if (request.getEndDatetime() != null) event.setEndDatetime(request.getEndDatetime());
+
+        // date
+        if (request.getStartDatetime() != null || request.getEndDatetime() != null) {
+            event.reschedule(request.getStartDatetime(), request.getEndDatetime()); // handles null
+        }
 
         // categories (replace)
         if (request.getCategoryIds() != null) {

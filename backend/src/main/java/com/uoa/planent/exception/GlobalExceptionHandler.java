@@ -1,8 +1,10 @@
 package com.uoa.planent.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 // import org.springframework.http.ResponseEntity;
@@ -23,6 +25,9 @@ import java.util.Map;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
+
+    // -------------- security & authorization --------------
+
     @ExceptionHandler(BadCredentialsException.class)
     public ProblemDetail handleBadCredentials(BadCredentialsException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Incorrect username or password.");
@@ -37,13 +42,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ProblemDetail handleValidationException(ValidationException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-
-        return problemDetail;
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(AccessDeniedException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "You do not have permission to perform this action.");
@@ -52,27 +50,22 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+
+
+
+    // -------------- validation & bad requests --------------
+
+    @ExceptionHandler(ValidationException.class)
+    public ProblemDetail handleValidationException(ValidationException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
 
         return problemDetail;
     }
 
-
-    @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalState(IllegalStateException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ProblemDetail handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED, "Method " + e.getMethod() + " not supported for this endpoint. Supported methods: " + e.getSupportedHttpMethods());
-
-        return problemDetail;
-    }
-
 
     // invalid post (dto) arguments
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -88,4 +81,50 @@ public class GlobalExceptionHandler {
 
         return problemDetail;
     }
+
+    // from @NotNull annotations (in services)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ProblemDetail handleConstraintViolation(ConstraintViolationException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    // from database null fields that are non-nullable or uniques
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request conflicts with database constraints.");
+    }
+
+
+
+
+
+
+    // -------------- domain & service --------------
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+
+        return problemDetail;
+    }
+
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ProblemDetail handleIllegalState(IllegalStateException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+
+
+
+
+    // -------------- web & http layer --------------
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ProblemDetail handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED, "Method " + e.getMethod() + " not supported for this endpoint. Supported methods: " + e.getSupportedHttpMethods());
+
+        return problemDetail;
+    }
+
 }
