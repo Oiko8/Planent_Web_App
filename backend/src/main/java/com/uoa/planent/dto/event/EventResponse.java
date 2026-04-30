@@ -1,32 +1,35 @@
 package com.uoa.planent.dto.event;
 
 import jakarta.annotation.Nullable;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-@Getter
-@Setter
+@Value
+@Builder
+@Jacksonized
 public class EventResponse {
-    private Integer eventId;
-    private String title;
-    private String eventType;
-    private String venue;
-    private String country;
-    private String city;
-    private String address;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
-    private Instant startDatetime;
-    private Instant endDatetime;
-    private Integer capacity;
-    private String status;
-    private String description;
-    private Integer organizerId;
-    private Boolean canDelete;
-    @Nullable private List<MediaResponse> media = null;
-    private List<CategoryResponse> categories;
-    private List<TicketTypeResponse> ticketTypes;
+    Integer eventId;
+    String title;
+    String eventType;
+    String venue;
+    String country;
+    String city;
+    String address;
+    BigDecimal latitude;
+    BigDecimal longitude;
+    Instant startDatetime;
+    Instant endDatetime;
+    Integer capacity;
+    String status;
+    String description;
+    Integer organizerId;
+    Boolean canDelete;
+    @Nullable List<MediaResponse> media;
+    List<CategoryResponse> categories;
+    List<TicketTypeResponse> ticketTypes;
 }

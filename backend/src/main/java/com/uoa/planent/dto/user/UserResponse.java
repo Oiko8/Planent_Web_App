@@ -1,26 +1,28 @@
 package com.uoa.planent.dto.user;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Value
+@Builder
+@Jacksonized
 public class UserResponse {
-    private Integer userId;
-    private String username;
-    private Boolean isAdmin;
-    private Boolean isApproved;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phone;
-    private String country;
-    private String city;
-    private String address;
-    private String zipcode;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
-    private String afm;
+    Integer userId;
+    String username;
+    Boolean isAdmin;
+    Boolean isApproved;
+    String firstName;
+    String lastName;
+    String email;
+    String phone;
+    String country;
+    String city;
+    String address;
+    String zipcode;
+    BigDecimal latitude;
+    BigDecimal longitude;
+    String afm;
 }

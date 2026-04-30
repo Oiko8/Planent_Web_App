@@ -59,26 +59,26 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword())); // encrypt password
         User savedUser = userRepository.save(user);
 
-        return UserMapper.toDataResponse(savedUser);
+        return UserMapper.toResponse(savedUser);
 
     }
 
     public UserResponse getUserById(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
         
-        return UserMapper.toDataResponse(user);
+        return UserMapper.toResponse(user);
     }
 
     public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User with username '" + username + "' not found."));
 
-        return UserMapper.toDataResponse(user);
+        return UserMapper.toResponse(user);
     }
 
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
             .stream()
-            .map(UserMapper::toDataResponse)
+            .map(UserMapper::toResponse)
             .collect(Collectors.toList());
     } 
 
@@ -87,7 +87,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
         user.setIsApproved(true);
         User savedUser = userRepository.save(user);
-        return UserMapper.toDataResponse(savedUser);
+        return UserMapper.toResponse(savedUser);
     }
 
     @Transactional
@@ -124,7 +124,7 @@ public class UserService {
         if (request.getAfm() != null) user.setAfm(request.getAfm());
 
         User savedUser = userRepository.save(user);
-        return UserMapper.toDataResponse(savedUser);
+        return UserMapper.toResponse(savedUser);
     }
 
 }

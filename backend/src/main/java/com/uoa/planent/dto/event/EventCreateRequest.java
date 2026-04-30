@@ -1,88 +1,90 @@
 package com.uoa.planent.dto.event;
 
 
-import com.uoa.planent.annotation.Trim;
 import com.uoa.planent.annotation.TrimDeserializer;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-@Getter
-@Setter
+@Value
+@Builder
+@Jacksonized
 public class EventCreateRequest {
 
+    @JsonDeserialize(using = TrimDeserializer.class)
     @NotBlank(message = "Missing event title")
     @Size(max = 100, message = "Event title too long")
-    @Trim
-    private String title;
+    String title;
 
+    @JsonDeserialize(using = TrimDeserializer.class)
     @NotBlank(message = "Missing event type")
     @Size(max = 100, message = "Event type too long")
-    @Trim
-    private String eventType;
+    String eventType;
 
+    @JsonDeserialize(using = TrimDeserializer.class)
     @NotBlank(message = "Missing event venue")
     @Size(max = 100, message = "Event venue too long")
-    @Trim
-    private String venue;
+    String venue;
 
+    @JsonDeserialize(using = TrimDeserializer.class)
     @NotBlank(message = "Missing event country")
     @Size(max = 50, message = "Event country too long")
-    @Trim
-    private String country;
+    String country;
 
+    @JsonDeserialize(using = TrimDeserializer.class)
     @NotBlank(message = "Missing event city")
     @Size(max = 50, message = "Event city too long")
-    @Trim
-    private String city;
+    String city;
 
+    @JsonDeserialize(using = TrimDeserializer.class)
     @NotBlank(message = "Missing event address")
     @Size(max = 255, message = "Event address too long")
-    @Trim
-    private String address;
+    String address;
 
     @NotNull(message = "Missing event latitude")
     @Digits(integer = 2, fraction = 8, message = "Event latitude must contain up to 2 integer and 8 decimal digits")
     @DecimalMin(value = "-90.0", message = "Event latitude must be between -90 and 90") @DecimalMax(value = "90.0", message = "Event latitude must be between -90 and 90")
-    private BigDecimal latitude;
+    BigDecimal latitude;
 
     @NotNull(message = "Missing event longitude")
     @Digits(integer = 3, fraction = 8, message = "Event longitude must contain up to 3 integer and 8 decimal digits")
     @DecimalMin(value = "-180.0", message = "Event longitude must be between -180 and 180") @DecimalMax(value = "180.0", message = "Event longitude must be between -180 and 180")
-    private BigDecimal longitude;
+    BigDecimal longitude;
 
     @NotNull(message = "Missing event start date time")
     @Future(message = "Event must start in the future")
-    private Instant startDatetime;
+    Instant startDatetime;
 
     @NotNull(message = "Missing event end date time")
     @Future(message = "Event must end in the future")
-    private Instant endDatetime;
+    Instant endDatetime;
 
     @NotNull(message = "Missing event capacity")
     @Min(value = 1, message = "Capacity must be at least 1")
-    private Integer capacity;
+    Integer capacity;
 
     @NotBlank(message = "Missing event description")
-    private String description;
+    String description;
 
-    private boolean publish = false; // false -> DRAFT | true -> PUBLISHED (default DRAFT)
+    @Builder.Default
+    boolean publish = false; // false -> DRAFT | true -> PUBLISHED (default DRAFT)
 
     @Nullable // optional
     @JsonDeserialize(contentUsing = TrimDeserializer.class)
-    private List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls; // if given the list then it cannot be blank
+    List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls; // if given the list then it cannot be blank
 
     @NotEmpty(message = "Missing event category IDs")
-    private List<@NotNull Integer> categoryIds;
+    List<@NotNull Integer> categoryIds;
 
     @Valid
     @NotEmpty(message = "Missing event ticket types")
-    private List<@NotNull @Valid TicketTypeRequest> ticketTypes;
+    List<@NotNull @Valid TicketTypeRequest> ticketTypes;
 }

@@ -1,12 +1,14 @@
 package com.uoa.planent.dto.event;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
-@Getter
-@Setter
+@Value
+@Builder
+@Jacksonized
 public class CategoryResponse {
-    private Integer categoryId;
-    private String categoryName;
+    Integer categoryId;
+    String categoryName;
 }

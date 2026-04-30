@@ -1,14 +1,15 @@
 package com.uoa.planent.dto.user;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.Date;
 
-@AllArgsConstructor
-@Getter
+@Value
+@Builder
+@Jacksonized
 public class UserLoginResponse {
-    private final String jwtToken;
-    private final Date createdAt;
-    private final Date expirationDate;
+    String jwtToken;
+    Date createdAt;
+    Date expirationDate;
 }

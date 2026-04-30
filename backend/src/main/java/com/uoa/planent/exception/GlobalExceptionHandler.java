@@ -8,6 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 // import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -94,8 +96,16 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request conflicts with database constraints.");
     }
 
+    // database triggers
+    @ExceptionHandler(JpaSystemException.class)
+    public ProblemDetail handleJpaSystemException(org.springframework.orm.jpa.JpaSystemException e) {
+        String detail = "A database constraint prevented this action.";
 
-
+        if (e.getRootCause() != null) {
+            detail = e.getRootCause().getMessage();
+        }
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+    }
 
 
 
@@ -127,4 +137,13 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        String detail = "Malformed JSON request.";
+        if (e.getMostSpecificCause() != null) {
+            detail = e.getMostSpecificCause().getMessage();
+        }
+
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+    }
 }

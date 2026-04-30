@@ -1,5 +1,6 @@
 package com.uoa.planent.mapper;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.uoa.planent.dto.event.*;
@@ -8,77 +9,66 @@ import com.uoa.planent.model.*;
 public class EventMapper {
 
     public static EventResponse toResponse(Event event){
-        EventResponse response = new EventResponse();
-        response.setEventId(event.getId());
-        response.setTitle(event.getTitle());
-        response.setEventType(event.getEventType());
-        response.setVenue(event.getVenue());
-        response.setCountry(event.getCountry());
-        response.setCity(event.getCity());
-        response.setAddress(event.getAddress());
-        response.setLatitude(event.getLatitude());
-        response.setLongitude(event.getLongitude());
-        response.setCapacity(event.getCapacity());
-        response.setStatus(event.getStatus().name());
-        response.setDescription(event.getDescription());
-        response.setStartDatetime(event.getStartDatetime());
-        response.setEndDatetime(event.getEndDatetime());
-        response.setOrganizerId(event.getOrganizer().getId());
-        response.setCanDelete(event.canBeDeleted());
+        if (event == null) return null;
 
-
-        // map media
-        if (event.getMedia() != null){
-            List<MediaResponse> media = event.getMedia().stream()
-                    .map(EventMapper::toMediaResponse)
-                    .toList();
-            response.setMedia(media);
-        }
-
-        // map categories
-        List<CategoryResponse> categories = event.getCategories().stream()
-            .map(ec -> EventMapper.toCategoryResponse(ec.getCategory()))
-            .toList();
-        response.setCategories(categories);
-
-        // map ticket types
-        List<TicketTypeResponse> ticketTypes = event.getTicketTypes().stream()
-            .map(EventMapper::toTicketTypeResponse)
-            .toList();
-        response.setTicketTypes(ticketTypes);
-
-
-        return response;
+        return EventResponse.builder()
+                .eventId(event.getId())
+                .title(event.getTitle())
+                .eventType(event.getEventType())
+                .venue(event.getVenue())
+                .country(event.getCountry())
+                .city(event.getCity())
+                .address(event.getAddress())
+                .latitude(event.getLatitude())
+                .longitude(event.getLongitude())
+                .capacity(event.getCapacity())
+                .status(event.getStatus() != null ? event.getStatus().name() : null)
+                .description(event.getDescription())
+                .startDatetime(event.getStartDatetime())
+                .endDatetime(event.getEndDatetime())
+                .organizerId(event.getOrganizer() != null ? event.getOrganizer().getId() : null)
+                .canDelete(event.canBeDeleted())
+                // mapping nested lists
+                .media(event.getMedia() != null ?
+                        event.getMedia().stream().map(EventMapper::toMediaResponse).toList() : null)
+                .categories(event.getCategories() != null ?
+                        event.getCategories().stream().map(ec -> toCategoryResponse(ec.getCategory())).toList() : Collections.emptyList())
+                .ticketTypes(event.getTicketTypes() != null ?
+                        event.getTicketTypes().stream().map(EventMapper::toTicketTypeResponse).toList() : Collections.emptyList())
+                .build();
     }
 
     public static MediaResponse toMediaResponse(EventMedia media) {
-        MediaResponse response = new MediaResponse();
-        response.setMediaId(media.getId());
-        response.setPhotoUrl(media.getPhotoUrl());
-
-        return response;
+        if (media == null) return null;
+        return MediaResponse.builder()
+                .mediaId(media.getId())
+                .photoUrl(media.getPhotoUrl())
+                .build();
     }
 
     public static CategoryResponse toCategoryResponse(Category category) {
-        CategoryResponse response = new CategoryResponse();
-        response.setCategoryId(category.getId());
-        response.setCategoryName(category.getCategoryName());
-
-        return response;
+        if (category == null) return null;
+        return CategoryResponse.builder()
+                .categoryId(category.getId())
+                .categoryName(category.getCategoryName())
+                .build();
     }
 
 
     public static TicketTypeResponse toTicketTypeResponse(EventTicketType tt) {
-        TicketTypeResponse response = new TicketTypeResponse();
-        response.setTicketTypeId(tt.getId());
-        response.setName(tt.getName());
-        response.setPrice(tt.getPrice());
-        response.setQuantity(tt.getQuantity());
-        response.setAvailable(tt.getAvailable());
-        return response;
+        if (tt == null) return null;
+        return TicketTypeResponse.builder()
+                .ticketTypeId(tt.getId())
+                .name(tt.getName())
+                .price(tt.getPrice())
+                .quantity(tt.getQuantity())
+                .available(tt.getAvailable())
+                .build();
     }
 
     public static EventTicketType toTicketTypeModel(TicketTypeRequest request) {
+        if (request == null) return null;
+
         EventTicketType ticketType = new EventTicketType();
         ticketType.setName(request.getName());
         ticketType.setPrice(request.getPrice());

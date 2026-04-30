@@ -27,6 +27,10 @@ public class AuthService {
         String token = jwtUtil.generate(request.getUsername(), jwtTtl);
 
         // respond with jwt
-        return new UserLoginResponse(token, jwtUtil.extractCreatedAt(token), jwtUtil.extractExpirationDate(token));
+        return UserLoginResponse.builder()
+                .jwtToken(token)
+                .createdAt(jwtUtil.extractCreatedAt(token))
+                .expirationDate(jwtUtil.extractExpirationDate(token))
+                .build();
     }
 }

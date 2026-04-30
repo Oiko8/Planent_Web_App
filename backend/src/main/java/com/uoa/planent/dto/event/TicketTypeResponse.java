@@ -1,16 +1,18 @@
 package com.uoa.planent.dto.event;
 
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
-import lombok.Getter;
-import lombok.Setter;
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Value
+@Builder
+@Jacksonized
 public class TicketTypeResponse {
-    private Integer ticketTypeId;
-    private String name;
-    private BigDecimal price;
-    private Integer quantity;
-    private Integer available;
+    Integer ticketTypeId;
+    String name;
+    BigDecimal price;
+    Integer quantity;
+    Integer available;
 }
