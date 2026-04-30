@@ -111,7 +111,7 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventTicketType> ticketTypes = new LinkedHashSet<>();
     public void addTicketType(@NotNull EventTicketType ticketType){
-        boolean nameAlreadyExists = this.ticketTypes.stream().anyMatch(existingTicket -> existingTicket.getName().equalsIgnoreCase(ticketType.getName()));
+        boolean nameAlreadyExists = this.ticketTypes.stream().anyMatch(existingTicket -> existingTicket.getName().equals(ticketType.getName()));
         if (nameAlreadyExists) {
             throw new IllegalArgumentException("A ticket type with the name '" + ticketType.getName() + "' already exists for this event.");
         }

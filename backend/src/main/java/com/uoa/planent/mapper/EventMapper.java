@@ -80,7 +80,7 @@ public class EventMapper {
 
     public static EventTicketType toTicketTypeModel(TicketTypeRequest request) {
         EventTicketType ticketType = new EventTicketType();
-        ticketType.setName(request.getName().trim());
+        ticketType.setName(request.getName());
         ticketType.setPrice(request.getPrice());
         ticketType.setQuantity(request.getQuantity());
         ticketType.setAvailable(request.getQuantity());

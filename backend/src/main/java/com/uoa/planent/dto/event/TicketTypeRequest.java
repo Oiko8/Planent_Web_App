@@ -22,4 +22,8 @@ public class TicketTypeRequest {
     @NotNull(message = "Missing ticket type quantity")
     @Min(value = 0, message = "Ticket type quantity cannot be negative")
     private Integer quantity;
+
+    public void setName(String name) {
+        this.name = name != null ? name.trim() : null; // ensure name is trimmed when coming from the dto
+    }
 }
