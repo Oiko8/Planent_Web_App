@@ -1,9 +1,13 @@
 package com.uoa.planent.dto.event;
 
+import com.uoa.planent.annotation.Trim;
+import com.uoa.planent.annotation.TrimDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.annotation.JsonDeserialize;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -16,21 +20,27 @@ public class EventUpdateRequest {
     // will update only given fields
 
     @Size(max = 100, message = "Event title too long")
+    @Trim
     private String title;
 
     @Size(max = 100, message = "Event type too long")
+    @Trim
     private String eventType;
 
     @Size(max = 100, message = "Event venue too long")
+    @Trim
     private String venue;
 
     @Size(max = 50, message = "Event country too long")
+    @Trim
     private String country;
 
     @Size(max = 50, message = "Event city too long")
+    @Trim
     private String city;
 
     @Size(max = 255, message = "Event address too long")
+    @Trim
     private String address;
 
     @Digits(integer = 2, fraction = 8, message = "Event latitude must contain up to 2 integer and 8 decimal digits")
@@ -59,6 +69,7 @@ public class EventUpdateRequest {
 
     // replaces existing media/categories/ticket types if sent as [] (but doesnt allow [null] or [""] lists)
 
+    @JsonDeserialize(contentUsing = TrimDeserializer.class)
     private List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls;
 
     private List<@NotNull Integer> categoryIds;

@@ -1,6 +1,7 @@
 package com.uoa.planent.dto.event;
 
 
+import com.uoa.planent.annotation.Trim;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ public class TicketTypeRequest {
 
     @NotBlank(message = "Missing ticket type name")
     @Size(max = 60, message = "Ticket type name too long")
+    @Trim
     private String name;
 
     @NotNull(message = "Missing ticket type price")
@@ -23,7 +25,4 @@ public class TicketTypeRequest {
     @Min(value = 0, message = "Ticket type quantity cannot be negative")
     private Integer quantity;
 
-    public void setName(String name) {
-        this.name = name != null ? name.trim() : null; // ensure name is trimmed when coming from the dto
-    }
 }

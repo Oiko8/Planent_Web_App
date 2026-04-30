@@ -1,11 +1,15 @@
 package com.uoa.planent.dto.event;
 
 
+import com.uoa.planent.annotation.Trim;
+import com.uoa.planent.annotation.TrimDeserializer;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.annotation.JsonDeserialize;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -16,26 +20,32 @@ public class EventCreateRequest {
 
     @NotBlank(message = "Missing event title")
     @Size(max = 100, message = "Event title too long")
+    @Trim
     private String title;
 
     @NotBlank(message = "Missing event type")
     @Size(max = 100, message = "Event type too long")
+    @Trim
     private String eventType;
 
     @NotBlank(message = "Missing event venue")
     @Size(max = 100, message = "Event venue too long")
+    @Trim
     private String venue;
 
     @NotBlank(message = "Missing event country")
     @Size(max = 50, message = "Event country too long")
+    @Trim
     private String country;
 
     @NotBlank(message = "Missing event city")
     @Size(max = 50, message = "Event city too long")
+    @Trim
     private String city;
 
     @NotBlank(message = "Missing event address")
     @Size(max = 255, message = "Event address too long")
+    @Trim
     private String address;
 
     @NotNull(message = "Missing event latitude")
@@ -66,6 +76,7 @@ public class EventCreateRequest {
     private boolean publish = false; // false -> DRAFT | true -> PUBLISHED (default DRAFT)
 
     @Nullable // optional
+    @JsonDeserialize(contentUsing = TrimDeserializer.class)
     private List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls; // if given the list then it cannot be blank
 
     @NotEmpty(message = "Missing event category IDs")
