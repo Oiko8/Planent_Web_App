@@ -171,14 +171,24 @@ public class Event {
         }
     }
 
+    public void checkCanBook() throws IllegalStateException {
+        if (status == EventStatus.DRAFT){
+            throw new IllegalStateException("Event with ID '" + id + "' is draft.");
+        }
+        if (status == EventStatus.CANCELLED){
+            throw new IllegalStateException("Event with ID '" + id + "' is cancelled.");
+        }
+        if (status == EventStatus.COMPLETED || endDatetime.isBefore(Instant.now())){
+            throw new IllegalStateException("Event with ID '" + id + "' is completed.");
+        }
+    }
+
     // only for updating (rescheduling) date times, not for creating/setting
-    public void reschedule(@Nullable Instant newStart, @Nullable Instant newEnd) {
+    public void reschedule(@Nullable Instant newStart, @Nullable Instant newEnd) throws IllegalArgumentException {
         newStart = newStart != null ? newStart : this.startDatetime;
         newEnd = newEnd != null ? newEnd : this.endDatetime;
 
-        if (newStart.isAfter(newEnd)) {
-            throw new IllegalArgumentException("Start date must be before end date.");
-        }
+        // start before end date checked in validation
 
         // if start date changed then it cannot move in the past
         if (!newStart.equals(this.startDatetime)) {

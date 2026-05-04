@@ -59,6 +59,7 @@ public class EventMapper {
         if (tt == null) return null;
         return TicketTypeResponse.builder()
                 .ticketTypeId(tt.getId())
+                .eventId(tt.getEvent().getId())
                 .name(tt.getName())
                 .price(tt.getPrice())
                 .quantity(tt.getQuantity())

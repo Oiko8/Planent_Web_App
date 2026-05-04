@@ -39,7 +39,7 @@ public class EventService {
     private final UserRepository userRepository;
 
 
-    public boolean isOrganizerOrAdmin(Integer eventId, UserDetailsImpl user) throws ResourceNotFoundException {
+    public boolean isOrganizerOrAdmin(@NotNull Integer eventId, UserDetailsImpl user) throws ResourceNotFoundException {
         if (user == null) return false; // access denied exception by default if false
 
         // check if admin
@@ -47,7 +47,7 @@ public class EventService {
         if (isAdmin) return true;
 
         // check if organizer
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
         return event.getOrganizer().getId().equals(user.getId());
     }
 

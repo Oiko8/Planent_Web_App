@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Objects;
 
 @Getter
@@ -44,6 +45,33 @@ public class EventTicketType {
     public boolean canBeDeleted() {
         return !hasBookings();
     }
+
+    // checks if theres enough available tickets and then proceeds to book them by reducing available count
+    // returns total cost
+    public BigDecimal tryBook(@NotNull Integer numberOfTickets) throws IllegalArgumentException {
+        checkCanBook(numberOfTickets);
+
+        // book
+        this.available -= numberOfTickets;
+        return this.price.multiply(BigDecimal.valueOf(numberOfTickets));
+    }
+
+    private void checkCanBook(@NotNull Integer numberOfTickets) throws IllegalArgumentException, IllegalStateException {
+        // event's side
+        this.event.checkCanBook();
+
+        // ticket type's side
+        if (this.available < numberOfTickets) {
+            throw new IllegalArgumentException("Not enough tickets available. Available: " + available + ", Requested: " + numberOfTickets);
+        }
+    }
+
+
+    public void cancelBooking(@NotNull Integer numberOfTickets) {
+        this.available += numberOfTickets;
+        if (this.available > this.quantity) this.available = this.quantity; // make sure
+    }
+
 
     public void updateInfo(@NotNull Integer newQuantity, @NotNull BigDecimal newPrice) throws IllegalArgumentException {
         updateQuantity(newQuantity);

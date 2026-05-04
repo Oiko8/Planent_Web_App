@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Jacksonized
 public class TicketTypeResponse {
     Integer ticketTypeId;
+    Integer eventId;
     String name;
     BigDecimal price;
     Integer quantity;
