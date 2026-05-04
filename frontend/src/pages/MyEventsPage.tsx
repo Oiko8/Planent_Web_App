@@ -43,6 +43,18 @@ export default function MyEventsPage() {
         }
     }
 
+    async function handlePublish(eventId: number) {
+        try {
+            await api.patch(`/events/${eventId}`, { publish: true });
+            setEvents((prev) => prev.map(e =>
+                e.eventId === eventId ? { ...e, status: "PUBLISHED" } : e
+            ));
+            setSuccessMessage("Event published successfully!");
+        } catch (err: any) {
+            setDeleteError(err.response?.data?.detail ?? "Failed to publish event.");
+        }
+    }
+
     if (loading) return <p>Loading your events...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -85,6 +97,8 @@ export default function MyEventsPage() {
                             </div>
 
                             <div className="my-event-actions">
+
+                                {/* Edit — always visible */}
                                 <button
                                     className="borderless-button"
                                     onClick={() => navigate(`/edit-event/${event.eventId}`)}
@@ -92,6 +106,17 @@ export default function MyEventsPage() {
                                     Edit
                                 </button>
 
+                                {/* Publish — only for DRAFT */}
+                                {event.status === "DRAFT" && (
+                                    <button
+                                        className="admin-btn-approve"
+                                        onClick={() => handlePublish(event.eventId)}
+                                    >
+                                        Publish
+                                    </button>
+                                )}
+
+                                {/* Delete — only for DRAFT */}
                                 {event.status === "DRAFT" && confirmDeleteId !== event.eventId && (
                                     <button
                                         className="borderless-button"
@@ -105,7 +130,7 @@ export default function MyEventsPage() {
                                     </button>
                                 )}
 
-                                {/* Confirmation banner inline inside the card */}
+                                {/* Inline confirmation */}
                                 {confirmDeleteId === event.eventId && (
                                     <div className="confirm-banner-inline">
                                         <p>Delete this event?</p>
@@ -115,6 +140,7 @@ export default function MyEventsPage() {
                                 )}
                             </div>
                         </div>
+   
                     ))}
                 </div>
             )}
