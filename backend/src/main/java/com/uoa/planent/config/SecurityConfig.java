@@ -66,7 +66,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(frontendUrl)); // allow frontend only
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // for these methods
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // for these methods
         config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // with these headers
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
