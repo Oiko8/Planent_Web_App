@@ -52,7 +52,7 @@ public class Booking {
     }
 
 
-    // for a user cancelling a booking
+    // cancelling a booking with checks
     public void tryCancel() throws IllegalStateException {
         checkCanCancel();
         cancel();
@@ -72,7 +72,7 @@ public class Booking {
         }
     }
 
-    // force cancelling a booking (system)
+    // use for force cancelling a booking (system)
     public void cancel() {
         if (this.bookingStatus != BookingStatus.CANCELLED){
             this.bookingStatus = BookingStatus.CANCELLED;

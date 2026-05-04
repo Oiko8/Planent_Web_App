@@ -44,6 +44,8 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(request, currentUser.getId()));
     }
 
+
+    // attendee or admin can cancel only
     @PostMapping("/{bookingId}/cancel")
     @PreAuthorize("@bookingService.isAttendeeOrAdmin(#bookingId, principal)")
     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Integer bookingId) {

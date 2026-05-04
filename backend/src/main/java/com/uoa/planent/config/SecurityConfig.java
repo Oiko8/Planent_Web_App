@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll() // authentication by anyone
                         .requestMatchers(HttpMethod.GET, "/events/my-events").authenticated() // authenticated to get my events
                         .requestMatchers(HttpMethod.GET, "/events/**").permitAll() // other gets are public on events
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()) // all others need authentication
 
                 // authorization
                 .authenticationProvider(authenticationProvider) // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match

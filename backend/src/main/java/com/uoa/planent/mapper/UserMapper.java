@@ -1,5 +1,6 @@
 package com.uoa.planent.mapper;
 
+import com.uoa.planent.dto.user.UserPublicInfo;
 import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserRegisterRequest;
 import com.uoa.planent.model.User;
@@ -51,6 +52,20 @@ public class UserMapper {
                 .longitude(user.getLongitude())
                 .latitude(user.getLatitude())
                 .afm(user.getAfm())
+                .build();
+    }
+
+    public static UserPublicInfo toPublicInfo(User user) {
+        if (user == null) return null;
+
+        return UserPublicInfo.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .country(user.getCountry())
+                .city(user.getCity())
                 .build();
     }
 }
