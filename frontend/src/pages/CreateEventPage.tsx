@@ -1,5 +1,6 @@
 import { use, useEffect, useState } from "react";
 import { CreateEventForm } from "../types/createEventData";
+import LocationAutocomplete from "../components/LocationAutocomplete";
 
 import api from "../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
@@ -155,24 +156,36 @@ export default function CreateEventPage() {
                 <input name="venue" value={eventForm.venue} onChange={handleChange} placeholder="Venue name" />
             </div>
 
-            {/* Country */}
+            {/* Location */}
             <div>
-                <label>Country</label>
-                <input name="country" value={eventForm.country} onChange={handleChange} placeholder="Country" />
+                <label>Location *</label>
+                <LocationAutocomplete
+                    placeholder="Search for venue address..."
+                    onSelect={(location) => {
+                        setEventForm((prev) => ({
+                            ...prev,
+                            address: location.address,
+                            city: location.city,
+                            country: location.country,
+                            zipcode: location.zipcode,
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                        }));
+                    }}
+                />
             </div>
 
-            {/* City */}
-            <div>
-                <label>City</label>
-                <input name="city" value={eventForm.city} onChange={handleChange} placeholder="City" />
-            </div>
-
-            {/* Address */}
-            <div>
-                <label>Address</label>
-                <input name="address" value={eventForm.address} onChange={handleChange} placeholder="Full address" />
-            </div>
-
+            {/* Show selected location details as read-only */}
+            {eventForm.city && (
+                <div className="location-selected">
+                    <span>📍 {eventForm.address}, {eventForm.city}, {eventForm.country}</span>
+                    {eventForm.latitude && (
+                        <span className="location-coords">
+                            {eventForm.latitude.toFixed(4)}, {eventForm.longitude?.toFixed(4)}
+                        </span>
+                    )}
+                </div>
+            )}
 
             {/* Start DateTime */}
             <div>
