@@ -220,7 +220,9 @@ public class Event {
         this.status = EventStatus.PUBLISHED;
     }
 
-    public void cancel() throws IllegalStateException {
+    // returns true if the event was just cancelled
+    // false if it was already cancelled
+    public boolean cancel() throws IllegalStateException {
         if (this.status == EventStatus.COMPLETED) {
             throw new IllegalStateException("Cannot cancel a completed event.");
         }
@@ -228,7 +230,11 @@ public class Event {
             throw new IllegalStateException("Cannot cancel a draft event. Request a deletion instead.");
         }
 
-        this.status = EventStatus.CANCELLED;
+        if (this.status != EventStatus.CANCELLED) {
+            this.status = EventStatus.CANCELLED;
+            return true;
+        }
+        return false;
     }
 
     public void draft() throws IllegalStateException {

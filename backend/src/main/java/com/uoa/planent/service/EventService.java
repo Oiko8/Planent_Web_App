@@ -1,6 +1,7 @@
 package com.uoa.planent.service;
 
 import com.uoa.planent.dto.event.*;
+import com.uoa.planent.event.EventCancelledEvent;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.EventMapper;
 import com.uoa.planent.model.*;
@@ -13,6 +14,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,8 @@ public class EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
 
     public boolean isOrganizerOrAdmin(@NotNull Integer eventId, UserDetailsImpl user) throws ResourceNotFoundException {
@@ -246,7 +250,15 @@ public class EventService {
         }
 
         // status (if both cancel and published are given then an exception will be thrown from publish() or draft())
-        if (request.getCancel() != null && request.getCancel()) event.cancel();
+        if (request.getCancel() != null && request.getCancel()) {
+            boolean justCancelled = event.cancel();
+
+            // if event got canceled (first time) then send messages to attendees
+            // publishes an async event that runs after a successful commit (save) of this transaction
+            if (justCancelled) {
+                eventPublisher.publishEvent(new EventCancelledEvent(event.getId()));
+            }
+        }
         if (request.getPublish() != null){
             if (request.getPublish()){
                 event.publish();
@@ -257,6 +269,7 @@ public class EventService {
 
         event.validate();
         Event savedEvent = eventRepository.save(event);
+
         return EventMapper.toResponse(savedEvent);
     }
 

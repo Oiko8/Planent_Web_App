@@ -58,4 +58,15 @@ public class MessageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(messageService.sendMessage(request, currentUser.getId()));
     }
 
+
+    // soft deleting
+    // only sender/receiver can soft delete
+    @DeleteMapping("/{messageId}")
+    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)")
+    public ResponseEntity<Void> deleteMessage(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
+        messageService.deleteMessage(messageId, currentUser.getId());
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

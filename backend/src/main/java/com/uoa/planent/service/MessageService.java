@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @AllArgsConstructor
 @Service
@@ -41,7 +43,7 @@ public class MessageService {
     }
 
     public boolean isReceiver(@NotNull Message message, @NotNull Integer currentUserId) {
-        return Objects.equals(message.getSender().getId(), currentUserId);
+        return Objects.equals(message.getReceiver().getId(), currentUserId);
     }
 
     public boolean isSenderOrReceiver(@NotNull Integer messageId, UserDetailsImpl user) {
@@ -153,5 +155,46 @@ public class MessageService {
 
         Message savedMessage = messageRepository.save(message);
         return MessageMapper.toResponse(savedMessage, receiver);
+    }
+
+
+    @Transactional
+    public void sendBulkMessages(@NotNull Event event, @NotNull User sender, Set<User> receivers, @NotNull String body) {
+        if (receivers == null || receivers.isEmpty()) {
+            return; // no receivers -> dont send anything
+        }
+
+        List<Message> messages = receivers.stream().map(receiver ->
+                Message.builder()
+                        .event(event)
+                        .sender(sender)
+                        .receiver(receiver)
+                        .body(body)
+                        .isRead(false)
+                        .deletedBySender(false)
+                        .deletedByReceiver(false)
+                        .build()
+        ).toList();
+
+        messageRepository.saveAll(messages);
+    }
+
+
+    @Transactional
+    public void deleteMessage(@NotNull Integer messageId, @NotNull Integer currentUserId) {
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
+
+        if (isSender(message, currentUserId) && !message.getDeletedBySender()) {
+            message.setDeletedBySender(true);
+            messageRepository.save(message);
+        }else if (isReceiver(message, currentUserId) && !message.getDeletedByReceiver()) {
+            message.setDeletedByReceiver(true);
+            messageRepository.save(message);
+        }
+
+        // if both deleted then delete it permanently from the database
+        if (message.getDeletedBySender() && message.getDeletedByReceiver()) {
+            messageRepository.delete(message);
+        }
     }
 }

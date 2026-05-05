@@ -72,7 +72,7 @@ public class Booking {
         }
     }
 
-    // use for force cancelling a booking (system)
+    // use for force cancelling a booking (from cancelled event event)
     public void cancel() {
         if (this.bookingStatus != BookingStatus.CANCELLED){
             this.bookingStatus = BookingStatus.CANCELLED;
