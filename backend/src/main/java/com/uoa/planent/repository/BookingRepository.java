@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Page<Booking> findAllByAttendeeId(Integer attendeeId, Pageable pageable);
+
+    boolean existsByTicketType_Event_IdAndAttendee_Id(Integer eventId, Integer userId);
 }

@@ -1,17 +1,19 @@
 package com.uoa.planent.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "Message", indexes = {
         @Index(name = "fk_Message_User1_idx", columnList = "sender_id"),
         @Index(name = "fk_Message_User2_idx", columnList = "receiver_id"),
         @Index(name = "fk_Message_Event1_idx", columnList = "event_id")
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,12 +37,15 @@ public class Message {
     private String body;
 
     @Column(name = "is_read", columnDefinition = "TINYINT(1)", nullable = false)
+    @Builder.Default
     private Boolean isRead = false;
 
     @Column(name = "deleted_by_sender", columnDefinition = "TINYINT(1)", nullable = false)
+    @Builder.Default
     private Boolean deletedBySender = false;
 
     @Column(name = "deleted_by_receiver", columnDefinition = "TINYINT(1)", nullable = false)
+    @Builder.Default
     private Boolean deletedByReceiver = false;
 
 }
