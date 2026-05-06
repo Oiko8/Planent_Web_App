@@ -11,4 +11,6 @@ export type RegisterFormData = {
     address: string;
     zipcode: string;
     afm: string;
+    latitude: number | null;
+    longitude: number | null; 
 };

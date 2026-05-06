@@ -636,9 +636,13 @@ html {
     background: #14532d;
     border: 1px solid #166534;
     color: #86efac;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    display: inline-block;
+    border-radius: 999px;
+    font-size: 0.75rem;
     font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -984,4 +988,170 @@ html {
 .booking-event-link:hover {
     color: #93c5fd;
     text-decoration: underline;
+}
+
+/* ===== Auth & Form Pages (Login, Register, CreateEvent) ===== */
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem 4rem;
+    min-height: 80vh;
+}
+
+.auth-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-card-wide {
+    max-width: 700px;
+}
+
+.auth-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 0.3rem;
+}
+
+.auth-subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0 0 2rem;
+}
+
+.auth-section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 1.5rem 0 0.8rem;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 0.4rem;
+}
+
+.auth-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.auth-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.auth-input {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    color: #e5e7eb;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.auth-input:focus {
+    border-color: #3b82f6;
+}
+
+.auth-input::placeholder {
+    color: #334155;
+}
+
+.auth-textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #1d4ed8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 1.5rem;
+}
+
+.auth-button:hover {
+    background: #2563eb;
+}
+
+.auth-error {
+    color: #f87171;
+    font-size: 0.85rem;
+    margin: 0.8rem 0 0;
+}
+
+.auth-footer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 1.2rem;
+}
+
+.auth-link {
+    color: #3b82f6;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Checkboxes */
+.auth-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    cursor: pointer;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    padding: 0.35rem 0.7rem;
+    transition: border-color 0.2s;
+}
+
+.auth-checkbox-label:hover {
+    border-color: #334155;
+}
+
+/* Ticket form row */
+.ticket-form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 0.8rem;
+    align-items: center;
+    margin-bottom: 0.8rem;
 }

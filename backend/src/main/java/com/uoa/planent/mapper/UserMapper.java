@@ -24,6 +24,9 @@ public class UserMapper {
         user.setZipcode(request.getZipcode());
         user.setAfm(request.getAfm());
 
+        user.setLatitude(request.getLatitude());
+        user.setLongitude(request.getLongitude());
+
         // default for a new user
         user.setIsAdmin(false);
         user.setIsApproved(false);
