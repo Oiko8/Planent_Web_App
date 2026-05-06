@@ -49,7 +49,7 @@ export default function AdminPage() {
 
     async function fetchEvents() {
         try {
-            const response = await api.get<PageResponse<EventItem>>("/events/my-events?size=100");
+            const response = await api.get("/events?size=100");
             setEvents(response.data.content);
         } catch (err) {
             setEventsError("Failed to load events.");
@@ -77,6 +77,28 @@ export default function AdminPage() {
             setUserMessage("User rejected and removed.");
         } catch {
             setUserMessage("Failed to reject user.");
+        }
+    }
+
+    async function handlePublishEvent(eventId: number) {
+        try {
+            await api.patch(`/events/${eventId}`, { publish: true });
+            setEvents(prev => prev.map(e =>
+                e.eventId === eventId ? { ...e, status: "PUBLISHED" as const } : e
+            ));
+        } catch (err: any) {
+            setEventsError(err.response?.data?.detail ?? "Failed to publish event.");
+        }
+    }
+
+    async function handleCancelEvent(eventId: number) {
+        try {
+            await api.patch(`/events/${eventId}`, { cancel: true });
+            setEvents(prev => prev.map(e =>
+                e.eventId === eventId ? { ...e, status: "CANCELLED" as const } : e
+            ));
+        } catch (err: any) {
+            setEventsError(err.response?.data?.detail ?? "Failed to cancel event.");
         }
     }
 
@@ -168,24 +190,44 @@ export default function AdminPage() {
                     {eventsLoading && <p>Loading events...</p>}
                     {eventsError && <p className="message-error">{eventsError}</p>}
 
+                    {events.length === 0 && !eventsLoading && (
+                        <p className="admin-empty">No events found.</p>
+                    )}
+
                     {events.map(event => (
                         <div key={event.eventId} className="admin-user-card">
                             <div className="admin-user-info">
                                 <strong>{event.title}</strong>
-                                <span className="admin-user-meta">{event.eventType} · {event.city}, {event.country}</span>
+                                <span className="admin-user-meta">
+                                    {event.eventType} · {event.city}, {event.country}
+                                </span>
                                 <span className="admin-user-meta">
                                     {new Date(event.startDatetime).toLocaleDateString("el-GR")}
                                 </span>
                             </div>
-                            <span className={`status-badge status-${event.status.toLowerCase()}`}>
-                                {event.status}
-                            </span>
+                            <div className="admin-user-actions">
+                                <span className={`status-badge status-${event.status.toLowerCase()}`}>
+                                    {event.status}
+                                </span>
+                                {event.status === "DRAFT" && (
+                                    <button
+                                        className="admin-btn-approve"
+                                        onClick={() => handlePublishEvent(event.eventId)}
+                                    >
+                                        Publish
+                                    </button>
+                                )}
+                                {event.status === "PUBLISHED" && (
+                                    <button
+                                        className="admin-btn-reject"
+                                        onClick={() => handleCancelEvent(event.eventId)}
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))}
-
-                    {events.length === 0 && !eventsLoading && (
-                        <p className="admin-empty">No events found.</p>
-                    )}
                 </div>
             )}
         </div>
