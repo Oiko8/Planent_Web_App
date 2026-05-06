@@ -235,6 +235,7 @@ public class EventService {
         // categories (replace)
         if (request.getCategoryIds() != null) {
             event.getCategories().clear();
+            eventRepository.flush();
             addCategories(event, request.getCategoryIds());
         }
 

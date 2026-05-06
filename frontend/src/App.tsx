@@ -1,23 +1,36 @@
 import './styles/index.css'
+import { Routes, Route, useLocation } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
-import EventsPage from "./pages/EventsPage"
-import WelcomePage from "./pages/WelcomePage"
+import AdminNavbar from "./components/AdminNavbar";
+import WelcomePage from "./pages/WelcomePage";
+import EventsPage from "./pages/EventsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import CreateEventPage from "./pages/CreateEventPage";
 import MyEventsPage from "./pages/MyEventsPage";
 import AdminPage from "./pages/AdminPage";
-import { AuthProvider } from "./context/AuthContext";
-import { Routes, Route, useLocation } from "react-router-dom";
-import AdminNavbar from "./components/AdminNavbar";
+import EditEventPage from './pages/EditEventPage';
 
 export default function App() {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
+    );
+}
+
+function AppContent() {
+    const { authLoading } = useAuth();
     const location = useLocation();
     const isAdminRoute = location.pathname.startsWith("/admin");
 
+    // wait for auth to restore before rendering anything
+    if (authLoading) return null;
+
     return (
-        <AuthProvider>
+        <>
             {isAdminRoute ? <AdminNavbar /> : <Navbar />}
             <Routes>
                 <Route path="/" element={<WelcomePage />} />
@@ -30,8 +43,9 @@ export default function App() {
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/create-event" element={<CreateEventPage />} />
                 <Route path="/my-events" element={<MyEventsPage />} />
-            
+                <Route path="/edit-event/:eventId" element={<EditEventPage />} />
+
             </Routes>
-        </AuthProvider>
+        </>
     );
 }

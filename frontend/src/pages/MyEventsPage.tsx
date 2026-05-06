@@ -99,12 +99,14 @@ export default function MyEventsPage() {
                             <div className="my-event-actions">
 
                                 {/* Edit — always visible */}
-                                <button
-                                    className="borderless-button"
-                                    onClick={() => navigate(`/edit-event/${event.eventId}`)}
-                                >
-                                    Edit
-                                </button>
+                                {event.status !== "COMPLETED" && (
+                                    <button
+                                        className="borderless-button"
+                                        onClick={() => navigate(`/edit-event/${event.eventId}`)}
+                                    >
+                                        Edit
+                                    </button>
+                                )}
 
                                 {/* Publish — only for DRAFT */}
                                 {event.status === "DRAFT" && (
@@ -145,7 +147,6 @@ export default function MyEventsPage() {
                 </div>
             )}
 
-            <button onClick={() => navigate("/create-event")}>+ Create New Event</button>
         </div>
     );
 }

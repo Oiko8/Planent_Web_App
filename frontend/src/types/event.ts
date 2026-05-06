@@ -1,4 +1,4 @@
-export type EventStatus = "PUBLISHED" | "DRAFT" | "CANCELLED";
+export type EventStatus = "PUBLISHED" | "DRAFT" | "CANCELLED" | "COMPLETED";
 
 export type CategoryResponse = {
     categoryId: number;

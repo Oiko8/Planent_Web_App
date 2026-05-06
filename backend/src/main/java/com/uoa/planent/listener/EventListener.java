@@ -10,6 +10,7 @@ import com.uoa.planent.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -28,7 +29,7 @@ public class EventListener {
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleEventCancellation(EventCancelledEvent payload) {
         // get event and organizer
         Event event = eventRepository.findById(payload.getEventId()).orElseThrow();
