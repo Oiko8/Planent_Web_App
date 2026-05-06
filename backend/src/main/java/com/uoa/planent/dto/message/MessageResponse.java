@@ -11,6 +11,8 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class MessageResponse {
     Integer messageId;
+    Integer eventId;
+    String eventTitle;
     UserPublicInfo otherUser;
     String body;
 }

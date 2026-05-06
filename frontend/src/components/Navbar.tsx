@@ -1,5 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import api from "../api/axiosConfig";
 
 
 export default function Navbar() {
@@ -10,6 +12,20 @@ export default function Navbar() {
         logout();
         navigate("/");
     }
+
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (!user) return;
+        api.get("/messages/inbox")
+            .then(res => {
+                const unread = res.data.content.filter((m: any) => !m.isRead).length;
+                setUnreadCount(unread);
+            })
+            .catch(() => {});
+    }, [user, location.pathname]);
     
     return (
         <nav className="navbar">
@@ -26,6 +42,10 @@ export default function Navbar() {
                     <>
                         <button className="borderless-button" onClick={() => navigate("/my-events")}>My Events</button>
                         <button className="borderless-button" onClick={() => navigate("/my-bookings")}>My Bookings</button>
+                        <button className="borderless-button" onClick={() => navigate("/messages")}>
+                            Messages
+                            {unreadCount > 0 && <span className="admin-badge" style={{ marginLeft: "0.4rem" }}>{unreadCount}</span>}
+                        </button>
                         <button className="borderless-button" onClick={handleLogout}>Logout</button>
                     </>
                 ) : (

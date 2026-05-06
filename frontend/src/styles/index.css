@@ -1,5 +1,4 @@
 /* ============================================================
-   PLANENT — index.css
    Sections:
    1.  Base & Reset
    2.  Navbar
@@ -13,6 +12,7 @@
    10. My Events Page
    11. Admin Page
    12. Location Autocomplete
+   13. Message
    ============================================================ */
 
 
@@ -1005,4 +1005,89 @@ body {
 .location-coords {
   font-size: 0.75rem;
   color: #475569;
+}
+
+
+/* ============================================================
+   13. MESSAGES PAGE
+   ============================================================ */
+.message-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    background: #0f172a;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.message-card:hover {
+    border-color: #334155;
+}
+
+.message-unread {
+    border-color: #1d4ed8;
+    background: #0f1f3d;
+}
+
+.message-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.message-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.3rem;
+}
+
+.message-card-user {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.message-card-username {
+    font-weight: 400;
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.message-card-preview {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 500px;
+}
+
+.message-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+    flex-shrink: 0;
+}
+
+.message-body-expanded {
+    margin: -0.5rem 0 0.5rem;
+    padding: 1.2rem 1.5rem;
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.message-body-expanded p {
+    margin: 0;
+    color: #cbd5e1;
+    line-height: 1.7;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
 }

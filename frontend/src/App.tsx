@@ -15,6 +15,8 @@ import EditEventPage from './pages/EditEventPage';
 import EventDetailPage from './pages/EventDetailPage';
 import MyBookingsPage from './pages/MyBookingPage';
 import BookingPage from './pages/BookingPage';
+import MessagePage from './pages/MessagePage';
+import ComposeMessagePage from './pages/ComposeMessagePage';
 
 export default function App() {
     return (
@@ -51,6 +53,9 @@ function AppContent() {
 
                 <Route path="/my-bookings" element={<MyBookingsPage />} />
                 <Route path="/book/:eventId" element={<BookingPage />} />
+
+                <Route path="/messages" element={<MessagePage />} />
+                <Route path="/messages/compose" element={<ComposeMessagePage />} />
 
             </Routes>
         </>

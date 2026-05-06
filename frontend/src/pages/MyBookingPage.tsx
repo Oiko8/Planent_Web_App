@@ -90,6 +90,15 @@ export default function MyBookingsPage() {
                             {booking.bookingStatus}
                         </span>
 
+                        {booking.bookingStatus === "CONFIRMED" && (
+                            <button
+                                className="borderless-button"
+                                onClick={() => navigate(`/messages/compose?eventId=${booking.eventId}`)}
+                            >
+                                ✉ Message
+                            </button>
+                        )}
+
                         {booking.bookingStatus === "CONFIRMED" && confirmCancelId !== booking.bookingId && (
                             <button
                                 className="admin-btn-reject"

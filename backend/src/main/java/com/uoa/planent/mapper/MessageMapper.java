@@ -12,6 +12,8 @@ public class MessageMapper {
 
         return MessagePreviewResponse.builder()
                 .messageId(message.getId())
+                .eventId(message.getEvent() != null ? message.getEvent().getId() : null)
+                .eventTitle(message.getEvent() != null ? message.getEvent().getTitle() : null)
                 .otherUser(UserMapper.toPublicInfo(otherUser))
                 .bodyPreview(message.getBody().length() > 50 ? message.getBody().substring(0, 50) + "..." : message.getBody())
                 .isRead(message.getIsRead())
@@ -23,6 +25,8 @@ public class MessageMapper {
 
         return MessageResponse.builder()
                 .messageId(message.getId())
+                .eventId(message.getEvent() != null ? message.getEvent().getId() : null)
+                .eventTitle(message.getEvent() != null ? message.getEvent().getTitle() : null)
                 .otherUser(UserMapper.toPublicInfo(otherUser))
                 .body(message.getBody())
                 .build();

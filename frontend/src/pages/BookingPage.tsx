@@ -86,6 +86,12 @@ export default function BookingPage() {
                         <button className="create-event-button" onClick={() => navigate("/my-bookings")}>
                             View My Bookings
                         </button>
+                        <button
+                            className="event-card-button-secondary"
+                            onClick={() => navigate(`/messages/compose?eventId=${eventId}`)}
+                        >
+                            Message Organizer
+                        </button>
                         <button className="borderless-button" onClick={() => navigate("/events")}>
                             Browse More Events
                         </button>
