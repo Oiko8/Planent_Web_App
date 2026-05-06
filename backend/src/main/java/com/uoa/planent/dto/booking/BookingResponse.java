@@ -15,6 +15,8 @@ import java.time.Instant;
 @Jacksonized
 public class BookingResponse {
     Integer bookingId;
+    Integer eventId;
+    String eventTitle;
     String attendeeUsername;
     TicketTypeResponse ticketType;
     Integer numberOfTickets;

@@ -12,6 +12,9 @@ import CreateEventPage from "./pages/CreateEventPage";
 import MyEventsPage from "./pages/MyEventsPage";
 import AdminPage from "./pages/AdminPage";
 import EditEventPage from './pages/EditEventPage';
+import EventDetailPage from './pages/EventDetailPage';
+import MyBookingsPage from './pages/MyBookingPage';
+import BookingPage from './pages/BookingPage';
 
 export default function App() {
     return (
@@ -44,6 +47,10 @@ function AppContent() {
                 <Route path="/create-event" element={<CreateEventPage />} />
                 <Route path="/my-events" element={<MyEventsPage />} />
                 <Route path="/edit-event/:eventId" element={<EditEventPage />} />
+                <Route path="/events/:eventId" element={<EventDetailPage />} />
+
+                <Route path="/my-bookings" element={<MyBookingsPage />} />
+                <Route path="/book/:eventId" element={<BookingPage />} />
 
             </Routes>
         </>

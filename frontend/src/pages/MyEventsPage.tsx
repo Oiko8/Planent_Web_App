@@ -79,9 +79,8 @@ export default function MyEventsPage() {
 
 
             {events.length === 0 ? (
-                <div>
-                    <p>You have no events yet.</p>
-                    <button onClick={() => navigate("/create-event")}>Create your first event</button>
+                <div style={{ textAlign: "center", color: "#64748b", marginTop: "1rem" }}>
+                    <p>You have no events yet.</p>              
                 </div>
             ) : (
                 <div>

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import type { EventItem } from "../types/event";
 
 type EventCardProps = {
@@ -6,6 +7,9 @@ type EventCardProps = {
 };
 
 export default function EventCard({ event, onOpen }: EventCardProps) {
+
+    const navigate = useNavigate()
+
     const formattedDate = new Date(event.startDatetime).toLocaleDateString("el-GR", {
         day: "2-digit",
         month: "long",
@@ -33,10 +37,10 @@ export default function EventCard({ event, onOpen }: EventCardProps) {
                     <span className="event-card-price">From €{lowestPrice.toFixed(2)}</span>
                 )}
                 <div className="event-card-actions">
-                    <button className="event-card-button-secondary" onClick={onOpen}>
+                    <button className="event-card-button-secondary" onClick={() => navigate(`/events/${event.eventId}`)}>
                         More
                     </button>
-                    <button className="event-card-button-primary" onClick={() => {}}>
+                    <button className="event-card-button-primary" onClick={() => navigate(`/book/${event.eventId}`)}>
                         Book Your Place
                     </button>
                 </div>

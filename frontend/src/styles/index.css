@@ -91,13 +91,17 @@ html {
   color: #ffffff;
 }
 
-/* header όπως είπαμε */
+/* header */
 .header {
   text-align: center;
   padding-top: 3rem;
   padding-bottom: 2.5rem;
 }
 
+/* simple center text */
+.text-center {
+    text-align: center;
+}
 
 
 /* Login */
@@ -499,7 +503,7 @@ html {
 /* My Events top bar */
 .my-events-top-bar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     max-width: 800px;
     margin: 0 auto 1.5rem;
 }
@@ -644,13 +648,17 @@ html {
 }
 
 .admin-btn-reject {
-    padding: 0.35rem 0.9rem;
+    padding: 0.2rem 0.6rem;
     background: #450a0a;
     border: 1px solid #7f1d1d;
     color: #fca5a5;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    display: inline-block;
+    border-radius: 999px;
+    font-size: 0.75rem;
     font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -722,4 +730,258 @@ html {
 .location-coords {
     font-size: 0.75rem;
     color: #475569;
+}
+
+/* Event Detail Page */
+.event-detail-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+}
+
+.event-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-top: 1.5rem;
+}
+
+.event-detail-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 1.2rem;
+}
+
+.event-detail-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 1.2rem;
+}
+
+.event-detail-categories {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.event-category-tag {
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.event-detail-description {
+    margin-bottom: 2rem;
+}
+
+.event-detail-description h3,
+.event-detail-map h3,
+.event-detail-tickets h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+}
+
+.event-detail-description p {
+    color: #cbd5e1;
+    line-height: 1.7;
+}
+
+.event-detail-map {
+    margin-bottom: 2rem;
+}
+
+.event-detail-tickets {
+    margin-top: 2rem;
+}
+
+/* Ticket type cards */
+.ticket-type-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    background: #0f172a;
+    /* cursor: pointer; */
+    transition: border-color 0.2s;
+}
+
+/* .ticket-type-card:hover {
+    border-color: #334155;
+} */
+
+.ticket-selected {
+    border-color: #1d4ed8 !important;
+    background: #0f1f3d;
+}
+
+.ticket-available {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+
+.ticket-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #86efac;
+}
+
+/* Booking section */
+.booking-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #1e293b;
+}
+
+.booking-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.booking-controls input {
+    width: 80px;
+    padding: 0.4rem 0.6rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #e5e7eb;
+    font-size: 0.9rem;
+}
+
+.booking-total {
+    font-weight: 700;
+    color: #86efac;
+}
+
+.booking-guest-msg {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+
+/* Booking Page */
+.booking-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+}
+
+.booking-event-summary {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.booking-event-summary h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    color: #f1f5f9;
+}
+
+.booking-event-summary p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.booking-tickets {
+    margin-bottom: 1.5rem;
+}
+
+.booking-tickets h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+}
+
+.ticket-soldout {
+    opacity: 0.4;
+    cursor: not-allowed !important;
+}
+
+.booking-login-prompt {
+    text-align: center;
+    padding: 3rem 0;
+    color: #64748b;
+}
+
+.booking-login-prompt p {
+    margin-bottom: 1.5rem;
+}
+
+.booking-success-screen {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #0f172a;
+    border: 1px solid #166534;
+    border-radius: 10px;
+    margin-top: 2rem;
+}
+
+.booking-success-screen h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #86efac;
+}
+
+.booking-success-screen p {
+    color: #cbd5e1;
+    margin: 0.4rem 0;
+}
+
+.booking-ticket-type-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    background: #0f172a;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.booking-ticket-type-card:hover {
+    border-color: #334155;
+}
+
+.booking-event-link {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.booking-event-link:hover {
+    color: #93c5fd;
+    text-decoration: underline;
 }

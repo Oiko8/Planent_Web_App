@@ -9,6 +9,8 @@ public class BookingMapper {
 
         return BookingResponse.builder()
                 .bookingId(booking.getId())
+                .eventId(booking.getTicketType().getEvent().getId())
+                .eventTitle(booking.getTicketType().getEvent().getTitle())
                 .attendeeUsername(booking.getAttendee().getUsername())
                 .ticketType(EventMapper.toTicketTypeResponse(booking.getTicketType()))
                 .numberOfTickets(booking.getNumberOfTickets())
