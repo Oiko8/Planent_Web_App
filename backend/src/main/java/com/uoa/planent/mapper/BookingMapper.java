@@ -11,7 +11,7 @@ public class BookingMapper {
                 .bookingId(booking.getId())
                 .eventId(booking.getTicketType().getEvent().getId())
                 .eventTitle(booking.getTicketType().getEvent().getTitle())
-                .attendeeUsername(booking.getAttendee().getUsername())
+                .attendee(UserMapper.toPublicInfo(booking.getAttendee()))
                 .ticketType(EventMapper.toTicketTypeResponse(booking.getTicketType()))
                 .numberOfTickets(booking.getNumberOfTickets())
                 .totalCost(booking.getTotalCost())

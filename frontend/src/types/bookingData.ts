@@ -1,10 +1,12 @@
+import { UserPublicInfo } from "./message";
+
 export type BookingStatus = "CONFIRMED" | "CANCELLED";
 
 export type BookingItem = {
     bookingId: number;
     eventId: number;    
     eventTitle: string;     
-    attendeeUsername: string;
+    attendee: UserPublicInfo;
     ticketType: {
         ticketTypeId: number;
         name: string;

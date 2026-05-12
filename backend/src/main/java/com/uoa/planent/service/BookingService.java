@@ -52,6 +52,11 @@ public class BookingService {
         return bookingRepository.findAllByAttendeeId(attendeeId, pageable).map(BookingMapper::toResponse);
     }
 
+    // Bookings for a specific event — for organizer/admin only (enforced in the controller)
+    public Page<BookingResponse> getBookingsByEvent(@NotNull Integer eventId, Pageable pageable) {
+        return bookingRepository.findAllByTicketType_Event_Id(eventId, pageable).map(BookingMapper::toResponse);
+    }
+
     public BookingResponse getBookingById(Integer bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
         return BookingMapper.toResponse(booking);

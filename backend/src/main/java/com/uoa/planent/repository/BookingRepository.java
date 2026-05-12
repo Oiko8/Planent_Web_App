@@ -16,6 +16,8 @@ import java.util.Set;
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Page<Booking> findAllByAttendeeId(Integer attendeeId, Pageable pageable);
 
+    Page<Booking> findAllByTicketType_Event_Id(Integer eventId, Pageable pageable);
+
     @Query("SELECT b FROM Booking b WHERE b.ticketType.event.id = :eventId AND b.bookingStatus != 'CANCELLED'")
     List<Booking> findActiveBookingsByEventId(@Param("eventId") Integer eventId);
 

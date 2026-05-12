@@ -29,6 +29,13 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getMyBookings(currentUser.getId(), pageable)); // authenticated == non-null user id
     }
 
+    // Bookings of a given event --- only the admin and the organizer can see them
+    @GetMapping("/event/{eventId}")
+    @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)")
+    public ResponseEntity<Page<BookingResponse>> getBookingsByEvent(@PathVariable Integer eventId, Pageable pageable) {
+        return ResponseEntity.ok(bookingService.getBookingsByEvent(eventId, pageable));
+    }
+
     // only gets the bookings for the attendee
     // or if admin
     @GetMapping("/{bookingId}")

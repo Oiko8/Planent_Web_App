@@ -17,6 +17,7 @@ import MyBookingsPage from './pages/MyBookingPage';
 import BookingPage from './pages/BookingPage';
 import MessagePage from './pages/MessagePage';
 import ComposeMessagePage from './pages/ComposeMessagePage';
+import EventBookingsPage from './pages/EventsBookingsPage';
 
 export default function App() {
     return (
@@ -44,10 +45,11 @@ function AppContent() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/pending-approval" element={<PendingApprovalPage />} />
-                
+
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/create-event" element={<CreateEventPage />} />
                 <Route path="/my-events" element={<MyEventsPage />} />
+                <Route path="/my-events/:eventId/bookings" element={<EventBookingsPage />} />
                 <Route path="/edit-event/:eventId" element={<EditEventPage />} />
                 <Route path="/events/:eventId" element={<EventDetailPage />} />
 

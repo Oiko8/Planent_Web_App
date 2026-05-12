@@ -2,6 +2,7 @@ package com.uoa.planent.dto.booking;
 
 
 import com.uoa.planent.dto.event.TicketTypeResponse;
+import com.uoa.planent.dto.user.UserPublicInfo;
 import com.uoa.planent.model.Booking;
 import lombok.Builder;
 import lombok.Value;
@@ -17,7 +18,7 @@ public class BookingResponse {
     Integer bookingId;
     Integer eventId;
     String eventTitle;
-    String attendeeUsername;
+    UserPublicInfo attendee;
     TicketTypeResponse ticketType;
     Integer numberOfTickets;
     BigDecimal totalCost;
