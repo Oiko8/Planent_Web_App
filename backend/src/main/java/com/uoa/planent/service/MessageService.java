@@ -5,6 +5,7 @@ import com.uoa.planent.dto.message.MessageResponse;
 import com.uoa.planent.dto.message.MessageSendRequest;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.MessageMapper;
+import com.uoa.planent.model.Booking;
 import com.uoa.planent.model.Event;
 import com.uoa.planent.model.Message;
 import com.uoa.planent.model.User;
@@ -24,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -47,7 +49,7 @@ public class MessageService {
     }
 
     public boolean isSenderOrReceiver(@NotNull Integer messageId, UserDetailsImpl user) {
-        if (user == null) return false; // access denied exception by default if false
+        if (user == null) return false;
 
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
 
@@ -58,37 +60,28 @@ public class MessageService {
     public boolean canSendMessage(Integer eventId, Integer senderId, Integer receiverId){
         if (eventId == null || senderId == null || receiverId == null) return false;
 
-        // cant send message to self
         if (senderId.equals(receiverId)) {
             return false;
         }
 
-
-        // check if the receiver is the organizer to the event that the sender is an attendee
-        // or vice versa
         Event event = eventRepository.findById(eventId).orElse(null);
         if (event == null) {
-            return false; // event doesnt exist -> 403 forbidden
+            return false;
         }
         Integer organizerId = event.getOrganizer().getId();
 
-
-        // sender is organizer
         if (senderId.equals(organizerId)) {
-            return hasBooking(eventId, receiverId); // receiver must have a booking on this event
+            return hasBooking(eventId, receiverId);
         }
 
-        // receiver is organizer
         if (receiverId.equals(organizerId)) {
-            return hasBooking(eventId, senderId); // sender must have a booking on this event
+            return hasBooking(eventId, senderId);
         }
 
-        // everything else forbidden
         return false;
     }
 
     private boolean hasBooking(Integer eventId, Integer userId) {
-        // user has a booking on a ticket type for the given event
         return bookingRepository.existsByTicketType_Event_IdAndAttendee_Id(eventId, userId);
     }
 
@@ -101,7 +94,7 @@ public class MessageService {
     public Page<MessagePreviewResponse> getInboxMessages(@NotNull Integer currentUserId, Pageable pageable) {
         return messageRepository.findByReceiverIdAndDeletedByReceiverFalse(currentUserId, pageable).map(
                 message -> {
-                    User otherUser = message.getSender(); // inbox (sender -> current user)
+                    User otherUser = message.getSender();
                     return MessageMapper.toPreviewResponse(message, otherUser);
                 });
     }
@@ -109,27 +102,28 @@ public class MessageService {
     public Page<MessagePreviewResponse> getSentMessages(@NotNull Integer currentUserId, Pageable pageable) {
         return messageRepository.findBySenderIdAndDeletedBySenderFalse(currentUserId, pageable)
                 .map(message -> {
-                    User otherUser = message.getReceiver(); // sent (current user -> receiver)
+                    User otherUser = message.getReceiver();
                     return MessageMapper.toPreviewResponse(message, otherUser);
                 });
+    }
+
+    public long getUnreadCount(@NotNull Integer currentUserId) {
+        return messageRepository.countByReceiverIdAndIsReadFalseAndDeletedByReceiverFalse(currentUserId);
     }
 
     @Transactional
     public MessageResponse getMessageById(@NotNull Integer messageId, @NotNull Integer currentUserId) {
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
 
-        // mark read only if the receiver is reading it
         if (!message.getIsRead() && isReceiver(message, currentUserId)) {
             message.setIsRead(true);
             message = messageRepository.save(message);
         }
 
-        // get other user
-        // this method is called only by preauthorizing that the current user is either the sender or receiver
         User otherUser;
         if (isSender(message, currentUserId)) {
             otherUser = message.getReceiver();
-        } else { // current user is the receiver
+        } else {
             otherUser = message.getSender();
         }
 
@@ -161,7 +155,7 @@ public class MessageService {
     @Transactional
     public void sendBulkMessages(@NotNull Event event, @NotNull User sender, Set<User> receivers, @NotNull String body) {
         if (receivers == null || receivers.isEmpty()) {
-            return; // no receivers -> dont send anything
+            return;
         }
 
         List<Message> messages = receivers.stream().map(receiver ->
@@ -180,6 +174,31 @@ public class MessageService {
     }
 
 
+    // Organizer (or admin) broadcasts a message to all active attendees of an event.
+    // The sender is excluded from the recipient set (you don't message yourself).
+    // Reuses the existing sendBulkMessages — no new persistence code.
+    // Returns the number of recipients so the caller can confirm "Sent to N attendees".
+    @Transactional
+    public int broadcastToEventAttendees(@NotNull Integer eventId, @NotNull Integer senderId, @NotNull String body) {
+        User sender = userRepository.findById(senderId).orElseThrow(
+                () -> new ResourceNotFoundException("User with ID '" + senderId + "' not found."));
+        Event event = eventRepository.findById(eventId).orElseThrow(
+                () -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
+
+        // Only active (non-cancelled) bookings — cancelled attendees shouldn't get more updates
+        List<Booking> activeBookings = bookingRepository.findActiveBookingsByEventId(eventId);
+
+        // Distinct attendees, excluding the sender themselves
+        Set<User> recipients = activeBookings.stream()
+                .map(Booking::getAttendee)
+                .filter(a -> !a.getId().equals(senderId))
+                .collect(Collectors.toSet());
+
+        sendBulkMessages(event, sender, recipients, body);
+        return recipients.size();
+    }
+
+
     @Transactional
     public void deleteMessage(@NotNull Integer messageId, @NotNull Integer currentUserId) {
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
@@ -192,7 +211,6 @@ public class MessageService {
             messageRepository.save(message);
         }
 
-        // if both deleted then delete it permanently from the database
         if (message.getDeletedBySender() && message.getDeletedByReceiver()) {
             messageRepository.delete(message);
         }

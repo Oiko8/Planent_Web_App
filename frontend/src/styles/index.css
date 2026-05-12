@@ -451,7 +451,6 @@ body {
 
 /* ============================================================
    6b. EVENTS BROWSE FILTERS
-   (append to existing "6. EVENTS BROWSE PAGE" section)
    ============================================================ */
 
 .events-filters {
@@ -1145,7 +1144,6 @@ body {
 
 /* ============================================================
    14. PAGINATION
-   (append at the end of index.css)
    ============================================================ */
 
 .pagination {
@@ -1190,7 +1188,6 @@ body {
 
 /* ============================================================
    15. EVENT BOOKINGS PAGE
-   (append to index.css)
    ============================================================ */
 
 .bookings-list {
@@ -1236,4 +1233,54 @@ body {
 .booking-card-meta {
   font-size: 0.85rem;
   color: #94a3b8;
+}
+
+
+/* ============================================================
+   16. COMPOSE MESSAGE PICKER (NewMessagePage)
+   ============================================================ */
+
+.compose-section-title {
+  max-width: 800px;
+  margin: 1.5rem auto 0.3rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 1rem;
+}
+
+.compose-section-hint {
+  max-width: 800px;
+  margin: 0 auto 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  padding: 0 1rem;
+}
+
+.compose-list {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.compose-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  background: #0f172a;
+}
+
+.compose-item-label {
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }

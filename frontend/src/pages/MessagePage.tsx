@@ -18,12 +18,22 @@ export default function MessagePage() {
     const [inboxPage, setInboxPage] = useState(0);
     const [sentPage, setSentPage] = useState(0);
 
+    // Total unread count across all inbox pages — fetched from a dedicated endpoint
+    const [unreadCount, setUnreadCount] = useState(0);
+
     const [loading, setLoading] = useState(true);
     const [expandedMessage, setExpandedMessage] = useState<MessageFull | null>(null);
     const [expandedId, setExpandedId] = useState<number | null>(null);
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
+
+    // Fetch unread count on mount
+    useEffect(() => {
+        api.get<{ count: number }>("/messages/unread-count")
+            .then(res => setUnreadCount(res.data.count))
+            .catch(() => { /* non-critical */ });
+    }, []);
 
     // Fetch inbox whenever inboxPage changes
     useEffect(() => {
@@ -70,7 +80,15 @@ export default function MessagePage() {
             setExpandedMessage(response.data);
             setExpandedId(messageId);
 
-            // Mark as read locally in inbox (server already marked it on GET)
+            // If this was an unread inbox message, the server just marked it read.
+            // Reflect that locally: decrement the global count + flip isRead in the list.
+            const wasUnread = inboxData?.content.some(
+                m => m.messageId === messageId && !m.isRead
+            );
+            if (wasUnread) {
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
+
             setInboxData(prev => prev ? {
                 ...prev,
                 content: prev.content.map(m =>
@@ -85,8 +103,17 @@ export default function MessagePage() {
     async function handleDelete(messageId: number) {
         try {
             await api.delete(`/messages/${messageId}`);
-            // The same messageId can only appear in one of the two lists for
-            // the current user, but it's safe to try filtering both.
+
+            // If we just deleted an unread inbox message, drop the count too
+            const deletingUnreadInbox = inboxData?.content.some(
+                m => m.messageId === messageId && !m.isRead
+            );
+            if (deletingUnreadInbox) {
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
+
+            // The same messageId can only appear in one of the two lists for the
+            // current user, but filtering both is safe and saves a branch.
             setInboxData(prev => prev ? {
                 ...prev,
                 content: prev.content.filter(m => m.messageId !== messageId),
@@ -97,6 +124,7 @@ export default function MessagePage() {
                 content: prev.content.filter(m => m.messageId !== messageId),
                 totalElements: prev.totalElements - 1,
             } : prev);
+
             if (expandedId === messageId) {
                 setExpandedId(null);
                 setExpandedMessage(null);
@@ -111,15 +139,24 @@ export default function MessagePage() {
     const onPageChange = activeTab === "inbox" ? setInboxPage : setSentPage;
     const currentMessages = currentData?.content ?? [];
 
-    // Unread count only reflects the current inbox page — step 5 will replace
-    // this with a dedicated /messages/unread-count endpoint
-    const unreadCount = inboxData?.content.filter(m => !m.isRead).length ?? 0;
+    // Cap large counts to "9+" for visual balance
+    const badgeLabel = unreadCount > 9 ? "9+" : unreadCount;
 
     if (loading && !inboxData) return <p className="header">Loading...</p>;
 
     return (
         <div className="admin-page">
             <h1 className="header">Messages</h1>
+
+            {/* Compose entry point */}
+            <div className="my-events-top-bar">
+                <button
+                    className="create-event-button"
+                    onClick={() => navigate("/messages/new")}
+                >
+                    + New Message
+                </button>
+            </div>
 
             {error && <div className="message-error">{error}</div>}
 
@@ -132,7 +169,7 @@ export default function MessagePage() {
                     Inbox
                     {unreadCount > 0 && (
                         <span className="admin-badge" style={{ marginLeft: "0.5rem" }}>
-                            {unreadCount}
+                            {badgeLabel}
                         </span>
                     )}
                 </button>

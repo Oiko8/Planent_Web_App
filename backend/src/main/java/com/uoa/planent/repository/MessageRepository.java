@@ -14,4 +14,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     // sent
     Page<Message> findBySenderIdAndDeletedBySenderFalse(Integer senderId, Pageable pageable);
+
+    // number of unread messages in the receiver's inbox
+    long countByReceiverIdAndIsReadFalseAndDeletedByReceiverFalse(Integer receiverId);
 }

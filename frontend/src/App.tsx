@@ -17,7 +17,9 @@ import MyBookingsPage from './pages/MyBookingPage';
 import BookingPage from './pages/BookingPage';
 import MessagePage from './pages/MessagePage';
 import ComposeMessagePage from './pages/ComposeMessagePage';
-import EventBookingsPage from './pages/EventsBookingsPage';
+import EventBookingsPage from './pages/EventBookingsPage';
+import NewMessagePage from './pages/NewMessagePage';
+import BroadcastMessagePage from './pages/BroadcastMessagePage';
 
 export default function App() {
     return (
@@ -32,7 +34,6 @@ function AppContent() {
     const location = useLocation();
     const isAdminRoute = location.pathname.startsWith("/admin");
 
-    // wait for auth to restore before rendering anything
     if (authLoading) return null;
 
     return (
@@ -47,18 +48,20 @@ function AppContent() {
                 <Route path="/pending-approval" element={<PendingApprovalPage />} />
 
                 <Route path="/events" element={<EventsPage />} />
+                <Route path="/events/:eventId" element={<EventDetailPage />} />
                 <Route path="/create-event" element={<CreateEventPage />} />
+                <Route path="/edit-event/:eventId" element={<EditEventPage />} />
+
                 <Route path="/my-events" element={<MyEventsPage />} />
                 <Route path="/my-events/:eventId/bookings" element={<EventBookingsPage />} />
-                <Route path="/edit-event/:eventId" element={<EditEventPage />} />
-                <Route path="/events/:eventId" element={<EventDetailPage />} />
+                <Route path="/my-events/:eventId/broadcast" element={<BroadcastMessagePage />} />
 
                 <Route path="/my-bookings" element={<MyBookingsPage />} />
                 <Route path="/book/:eventId" element={<BookingPage />} />
 
                 <Route path="/messages" element={<MessagePage />} />
+                <Route path="/messages/new" element={<NewMessagePage />} />
                 <Route path="/messages/compose" element={<ComposeMessagePage />} />
-
             </Routes>
         </>
     );

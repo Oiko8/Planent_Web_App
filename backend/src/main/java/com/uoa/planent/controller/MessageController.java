@@ -1,5 +1,6 @@
 package com.uoa.planent.controller;
 
+import com.uoa.planent.dto.message.BroadcastMessageRequest;
 import com.uoa.planent.dto.message.MessagePreviewResponse;
 import com.uoa.planent.dto.message.MessageResponse;
 import com.uoa.planent.dto.message.MessageSendRequest;
@@ -15,6 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/messages")
@@ -26,7 +29,6 @@ public class MessageController {
     // ---- authenticated only endpoints ----
 
 
-    // inbox/sent messages will only show a preview of the message and not mark it as read
     @GetMapping("/inbox")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<MessagePreviewResponse>> getInboxMessages(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser, Pageable pageable) {
@@ -40,8 +42,28 @@ public class MessageController {
     }
 
 
-    // only sender/receiver can view the full message
-    // calling this endpoint as the receiver will mark the message as read
+    @GetMapping("/unread-count")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Long>> getUnreadCount(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
+        return ResponseEntity.ok(Map.of("count", messageService.getUnreadCount(currentUser.getId())));
+    }
+
+
+    // Broadcast a message to all active attendees of an event.
+    // Authorized like the bookings endpoint: only the event's organizer or an admin.
+    // Returns the number of recipients so the frontend can show "Sent to N attendees".
+    @PostMapping("/broadcast/{eventId}")
+    @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)")
+    public ResponseEntity<Map<String, Integer>> broadcastToEvent(
+            @PathVariable Integer eventId,
+            @RequestBody @Valid BroadcastMessageRequest request,
+            @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser
+    ) {
+        int recipientCount = messageService.broadcastToEventAttendees(eventId, currentUser.getId(), request.getBody());
+        return ResponseEntity.ok(Map.of("recipientCount", recipientCount));
+    }
+
+
     @GetMapping("/{messageId}")
     @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)")
     public ResponseEntity<MessageResponse> getMessageById(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
@@ -49,9 +71,6 @@ public class MessageController {
     }
 
 
-
-    // current user is sender
-    // messages can only be sent between attendees - organizers
     @PostMapping
     @PreAuthorize("@messageService.canSendMessage(#request.eventId, #currentUser.id, #request.receiverId)")
     public ResponseEntity<MessageResponse> sendMessage(@RequestBody @Valid MessageSendRequest request, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
@@ -59,8 +78,6 @@ public class MessageController {
     }
 
 
-    // soft deleting
-    // only sender/receiver can soft delete
     @DeleteMapping("/{messageId}")
     @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)")
     public ResponseEntity<Void> deleteMessage(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
