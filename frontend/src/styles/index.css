@@ -449,6 +449,56 @@ body {
 .search-input::placeholder { color: #475569; }
 .search-input:focus         { border-color: #334155; }
 
+/* ============================================================
+   6b. EVENTS BROWSE FILTERS
+   (append to existing "6. EVENTS BROWSE PAGE" section)
+   ============================================================ */
+
+.events-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  max-width: 1000px;
+  margin: 0 auto 1.5rem;
+  padding: 0 1rem;
+}
+
+.events-filter-input {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  color: #e5e7eb;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.events-filter-input:focus       { border-color: #334155; }
+.events-filter-input::placeholder { color: #475569; }
+
+.events-filter-text {
+  flex: 1 1 280px;
+  min-width: 200px;
+}
+
+.events-result-count {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin: 0 0 1.5rem;
+}
+
+.events-status-message {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  padding: 2rem 1rem;
+}
+
 
 /* ============================================================
    7. EVENT CARD
@@ -1090,4 +1140,50 @@ body {
     line-height: 1.7;
     font-size: 0.9rem;
     white-space: pre-wrap;
+}
+
+
+/* ============================================================
+   14. PAGINATION
+   (append at the end of index.css)
+   ============================================================ */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2.5rem auto 2rem;
+  max-width: 1000px;
+  padding: 0 1rem;
+}
+
+.pagination-button {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  color: #cbd5e1;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.pagination-button:hover:not(:disabled) {
+  border-color: #334155;
+  color: #ffffff;
+}
+
+.pagination-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
 }

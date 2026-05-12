@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
+import Pagination from "../components/Pagination";
 import type { PageResponse } from "../types/event";
-import type { BookingItem, BookingStatus } from "../types/bookingData";
+import type { BookingItem } from "../types/bookingData";
 
+const PAGE_SIZE = 10;
 
 export default function MyBookingsPage() {
     const navigate = useNavigate();
-    const [bookings, setBookings] = useState<BookingItem[]>([]);
+    const [pageData, setPageData] = useState<PageResponse<BookingItem> | null>(null);
+    const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [confirmCancelId, setConfirmCancelId] = useState<number | null>(null);
@@ -15,9 +18,12 @@ export default function MyBookingsPage() {
 
     useEffect(() => {
         async function fetchBookings() {
+            setLoading(true);
             try {
-                const response = await api.get<PageResponse<BookingItem>>("/bookings/my-bookings");
-                setBookings(response.data.content);
+                const response = await api.get<PageResponse<BookingItem>>("/bookings/my-bookings", {
+                    params: { page, size: PAGE_SIZE },
+                });
+                setPageData(response.data);
             } catch (err) {
                 setError("Failed to load your bookings.");
             } finally {
@@ -25,16 +31,21 @@ export default function MyBookingsPage() {
             }
         }
         fetchBookings();
-    }, []);
+    }, [page]);
 
     async function handleCancel(bookingId: number) {
         try {
             await api.post(`/bookings/${bookingId}/cancel`);
-            setBookings(prev => prev.map(b =>
-                b.bookingId === bookingId
-                    ? { ...b, bookingStatus: "CANCELLED" }
-                    : b
-            ));
+            // Local update: flip the booking's status in current page's content.
+            // No item is removed, so totals stay valid.
+            setPageData(prev => prev ? {
+                ...prev,
+                content: prev.content.map(b =>
+                    b.bookingId === bookingId
+                        ? { ...b, bookingStatus: "CANCELLED" as const }
+                        : b
+                ),
+            } : prev);
             setSuccessMessage("Booking cancelled successfully.");
             setConfirmCancelId(null);
         } catch (err: any) {
@@ -43,7 +54,9 @@ export default function MyBookingsPage() {
         }
     }
 
-    if (loading) return <p className="header">Loading...</p>;
+    if (loading && !pageData) return <p className="header">Loading...</p>;
+
+    const bookings = pageData?.content ?? [];
 
     return (
         <div className="admin-page">
@@ -90,23 +103,10 @@ export default function MyBookingsPage() {
                             {booking.bookingStatus}
                         </span>
 
-                        {booking.bookingStatus === "CONFIRMED" && (
-                            <button
-                                className="borderless-button"
-                                onClick={() => navigate(`/messages/compose?eventId=${booking.eventId}`)}
-                            >
-                                ✉ Message
-                            </button>
-                        )}
-
                         {booking.bookingStatus === "CONFIRMED" && confirmCancelId !== booking.bookingId && (
                             <button
                                 className="admin-btn-reject"
-                                onClick={() => {
-                                    setSuccessMessage("");
-                                    setError("");
-                                    setConfirmCancelId(booking.bookingId);
-                                }}
+                                onClick={() => setConfirmCancelId(booking.bookingId)}
                             >
                                 Cancel
                             </button>
@@ -115,13 +115,15 @@ export default function MyBookingsPage() {
                         {confirmCancelId === booking.bookingId && (
                             <div className="confirm-banner-inline">
                                 <p>Cancel this booking?</p>
-                                <button onClick={() => handleCancel(booking.bookingId)}>Yes</button>
-                                <button onClick={() => setConfirmCancelId(null)}>No</button>
+                                <button onClick={() => handleCancel(booking.bookingId)}>Yes, cancel</button>
+                                <button onClick={() => setConfirmCancelId(null)}>Keep</button>
                             </div>
                         )}
                     </div>
                 </div>
             ))}
+
+            <Pagination pageData={pageData} onPageChange={setPage} />
         </div>
     );
 }

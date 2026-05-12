@@ -3,13 +3,21 @@ import api from "../api/axiosConfig";
 import type { MessagePreview, MessageFull } from "../types/message";
 import type { PageResponse } from "../types/event";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 type Tab = "inbox" | "sent";
 
+const PAGE_SIZE = 10;
+
 export default function MessagePage() {
     const [activeTab, setActiveTab] = useState<Tab>("inbox");
-    const [inbox, setInbox] = useState<MessagePreview[]>([]);
-    const [sent, setSent] = useState<MessagePreview[]>([]);
+
+    // Each tab keeps its own pageData + page state — they're independent lists
+    const [inboxData, setInboxData] = useState<PageResponse<MessagePreview> | null>(null);
+    const [sentData, setSentData] = useState<PageResponse<MessagePreview> | null>(null);
+    const [inboxPage, setInboxPage] = useState(0);
+    const [sentPage, setSentPage] = useState(0);
+
     const [loading, setLoading] = useState(true);
     const [expandedMessage, setExpandedMessage] = useState<MessageFull | null>(null);
     const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -17,28 +25,40 @@ export default function MessagePage() {
 
     const navigate = useNavigate();
 
+    // Fetch inbox whenever inboxPage changes
     useEffect(() => {
-        fetchMessages();
-    }, []);
-
-    async function fetchMessages() {
-        setLoading(true);
-        try {
-            const [inboxRes, sentRes] = await Promise.all([
-                api.get<PageResponse<MessagePreview>>("/messages/inbox"),
-                api.get<PageResponse<MessagePreview>>("/messages/sent"),
-            ]);
-            setInbox(inboxRes.data.content);
-            setSent(sentRes.data.content);
-        } catch {
-            setError("Failed to load messages.");
-        } finally {
-            setLoading(false);
+        async function fetchInbox() {
+            try {
+                const response = await api.get<PageResponse<MessagePreview>>("/messages/inbox", {
+                    params: { page: inboxPage, size: PAGE_SIZE },
+                });
+                setInboxData(response.data);
+            } catch {
+                setError("Failed to load inbox.");
+            } finally {
+                setLoading(false);
+            }
         }
-    }
+        fetchInbox();
+    }, [inboxPage]);
+
+    // Fetch sent whenever sentPage changes
+    useEffect(() => {
+        async function fetchSent() {
+            try {
+                const response = await api.get<PageResponse<MessagePreview>>("/messages/sent", {
+                    params: { page: sentPage, size: PAGE_SIZE },
+                });
+                setSentData(response.data);
+            } catch {
+                setError("Failed to load sent messages.");
+            }
+        }
+        fetchSent();
+    }, [sentPage]);
 
     async function handleOpenMessage(messageId: number) {
-        // toggle — close if already open
+        // Toggle — close if already open
         if (expandedId === messageId) {
             setExpandedId(null);
             setExpandedMessage(null);
@@ -50,10 +70,13 @@ export default function MessagePage() {
             setExpandedMessage(response.data);
             setExpandedId(messageId);
 
-            // mark as read locally in inbox
-            setInbox(prev => prev.map(m =>
-                m.messageId === messageId ? { ...m, isRead: true } : m
-            ));
+            // Mark as read locally in inbox (server already marked it on GET)
+            setInboxData(prev => prev ? {
+                ...prev,
+                content: prev.content.map(m =>
+                    m.messageId === messageId ? { ...m, isRead: true } : m
+                ),
+            } : prev);
         } catch {
             setError("Failed to load message.");
         }
@@ -62,8 +85,18 @@ export default function MessagePage() {
     async function handleDelete(messageId: number) {
         try {
             await api.delete(`/messages/${messageId}`);
-            setInbox(prev => prev.filter(m => m.messageId !== messageId));
-            setSent(prev => prev.filter(m => m.messageId !== messageId));
+            // The same messageId can only appear in one of the two lists for
+            // the current user, but it's safe to try filtering both.
+            setInboxData(prev => prev ? {
+                ...prev,
+                content: prev.content.filter(m => m.messageId !== messageId),
+                totalElements: prev.totalElements - 1,
+            } : prev);
+            setSentData(prev => prev ? {
+                ...prev,
+                content: prev.content.filter(m => m.messageId !== messageId),
+                totalElements: prev.totalElements - 1,
+            } : prev);
             if (expandedId === messageId) {
                 setExpandedId(null);
                 setExpandedMessage(null);
@@ -73,10 +106,16 @@ export default function MessagePage() {
         }
     }
 
-    const unreadCount = inbox.filter(m => !m.isRead).length;
-    const currentMessages = activeTab === "inbox" ? inbox : sent;
+    // Pick the right data and setter based on the active tab
+    const currentData = activeTab === "inbox" ? inboxData : sentData;
+    const onPageChange = activeTab === "inbox" ? setInboxPage : setSentPage;
+    const currentMessages = currentData?.content ?? [];
 
-    if (loading) return <p className="header">Loading...</p>;
+    // Unread count only reflects the current inbox page — step 5 will replace
+    // this with a dedicated /messages/unread-count endpoint
+    const unreadCount = inboxData?.content.filter(m => !m.isRead).length ?? 0;
+
+    if (loading && !inboxData) return <p className="header">Loading...</p>;
 
     return (
         <div className="admin-page">
@@ -134,7 +173,7 @@ export default function MessagePage() {
                         <button
                             className="admin-btn-reject"
                             onClick={e => {
-                                e.stopPropagation(); // prevent opening message
+                                e.stopPropagation();
                                 handleDelete(message.messageId);
                             }}
                         >
@@ -161,6 +200,9 @@ export default function MessagePage() {
                     )}
                 </div>
             ))}
+
+            {/* Pagination follows the active tab */}
+            <Pagination pageData={currentData} onPageChange={onPageChange} />
         </div>
     );
 }

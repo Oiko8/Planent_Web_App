@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
+import Pagination from "../components/Pagination";
 import type { EventItem, PageResponse } from "../types/event";
 
+const PAGE_SIZE = 10;
+
 export default function MyEventsPage() {
-    const [events, setEvents] = useState<EventItem[]>([]);
+    const [pageData, setPageData] = useState<PageResponse<EventItem> | null>(null);
+    const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
@@ -12,11 +16,15 @@ export default function MyEventsPage() {
     const [deleteError, setDeleteError] = useState("");
     const navigate = useNavigate();
 
+    // Refetches whenever `page` changes
     useEffect(() => {
         async function fetchMyEvents() {
+            setLoading(true);
             try {
-                const response = await api.get<PageResponse<EventItem>>("/events/my-events");
-                setEvents(response.data.content);
+                const response = await api.get<PageResponse<EventItem>>("/events/my-events", {
+                    params: { page, size: PAGE_SIZE },
+                });
+                setPageData(response.data);
             } catch (err) {
                 setError("Failed to load your events.");
             } finally {
@@ -24,7 +32,7 @@ export default function MyEventsPage() {
             }
         }
         fetchMyEvents();
-    }, []);
+    }, [page]);
 
     async function handleDelete(eventId: number) {
         setSuccessMessage("");
@@ -32,7 +40,14 @@ export default function MyEventsPage() {
 
         try {
             await api.delete(`/events/${eventId}`);
-            setEvents((prev) => prev.filter((e) => e.eventId !== eventId));
+            // Local update: drop the event from current page's content.
+            // totalElements/totalPages stay slightly stale until next page navigation;
+            // for perfect accuracy you would refetch the page here instead.
+            setPageData(prev => prev ? {
+                ...prev,
+                content: prev.content.filter(e => e.eventId !== eventId),
+                totalElements: prev.totalElements - 1,
+            } : prev);
             setSuccessMessage("Event deleted successfully!");
         } catch (err: any) {
             const message = err.response?.data?.detail
@@ -46,17 +61,22 @@ export default function MyEventsPage() {
     async function handlePublish(eventId: number) {
         try {
             await api.patch(`/events/${eventId}`, { publish: true });
-            setEvents((prev) => prev.map(e =>
-                e.eventId === eventId ? { ...e, status: "PUBLISHED" } : e
-            ));
+            setPageData(prev => prev ? {
+                ...prev,
+                content: prev.content.map(e =>
+                    e.eventId === eventId ? { ...e, status: "PUBLISHED" as const } : e
+                ),
+            } : prev);
             setSuccessMessage("Event published successfully!");
         } catch (err: any) {
             setDeleteError(err.response?.data?.detail ?? "Failed to publish event.");
         }
     }
 
-    if (loading) return <p>Loading your events...</p>;
+    if (loading && !pageData) return <p>Loading your events...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
+
+    const events = pageData?.content ?? [];
 
     return (
         <div>
@@ -70,17 +90,16 @@ export default function MyEventsPage() {
                 <div className="message-error">{deleteError}</div>
             )}
 
-            {/* Create button — above everything */}
+            {/* Create button */}
             <div className="my-events-top-bar">
                 <button className="create-event-button" onClick={() => navigate("/create-event")}>
                     + Create New Event
                 </button>
             </div>
 
-
             {events.length === 0 ? (
                 <div style={{ textAlign: "center", color: "#64748b", marginTop: "1rem" }}>
-                    <p>You have no events yet.</p>              
+                    <p>You have no events yet.</p>
                 </div>
             ) : (
                 <div>
@@ -96,8 +115,7 @@ export default function MyEventsPage() {
                             </div>
 
                             <div className="my-event-actions">
-
-                                {/* Edit — always visible */}
+                                {/* Edit — always visible except for completed */}
                                 {event.status !== "COMPLETED" && (
                                     <button
                                         className="borderless-button"
@@ -141,11 +159,11 @@ export default function MyEventsPage() {
                                 )}
                             </div>
                         </div>
-   
                     ))}
                 </div>
             )}
 
+            <Pagination pageData={pageData} onPageChange={setPage} />
         </div>
     );
 }
