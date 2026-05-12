@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function WelcomePage() {
     const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchFeaturedEvents() {
@@ -35,11 +35,7 @@ export default function WelcomePage() {
                 <div className="featured-events-grid">
                     {featuredEvents.length > 0 ? (
                         featuredEvents.map((event) => (
-                            <EventCard
-                                key={event.eventId}
-                                event={event}
-                                onOpen={() => navigate("/events")}
-                            />
+                            <EventCard key={event.eventId} event={event} />
                         ))
                     ) : (
                         <p>No featured events at the moment.</p>

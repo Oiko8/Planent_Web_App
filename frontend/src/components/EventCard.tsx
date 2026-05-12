@@ -3,10 +3,9 @@ import type { EventItem } from "../types/event";
 
 type EventCardProps = {
     event: EventItem;
-    onOpen: () => void;
 };
 
-export default function EventCard({ event, onOpen }: EventCardProps) {
+export default function EventCard({ event }: EventCardProps) {
 
     const navigate = useNavigate()
 

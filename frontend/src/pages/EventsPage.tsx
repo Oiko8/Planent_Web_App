@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import EventCard from "../components/EventCard";
 import Pagination from "../components/Pagination";
 import type { EventItem, CategoryResponse, PageResponse } from "../types/event";
@@ -24,27 +23,18 @@ const EMPTY_FILTERS: Filters = {
 };
 
 const DEBOUNCE_MS = 400;
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 export default function EventsPage() {
-    const navigate = useNavigate();
-
-    // Filter inputs (immediate)
     const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-    // Only free-text gets debounced
     const [debouncedText, setDebouncedText] = useState("");
-    // Current page (0-based, like Spring Data)
     const [page, setPage] = useState(0);
 
-    // Data / status
     const [pageData, setPageData] = useState<PageResponse<EventItem> | null>(null);
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Debounce the free-text input. Also resets to page 0 when the
-    // debounced text actually changes (typing on a later page should
-    // bring the user back to page 1 of the new results).
     useEffect(() => {
         const t = setTimeout(() => {
             setDebouncedText(filters.text);
@@ -53,14 +43,12 @@ export default function EventsPage() {
         return () => clearTimeout(t);
     }, [filters.text]);
 
-    // Load categories once for the dropdown
     useEffect(() => {
         api.get<CategoryResponse[]>("/events/categories")
             .then(res => setCategories(res.data))
-            .catch(() => { /* non-critical: dropdown will just be empty */ });
+            .catch(() => { /* non-critical */ });
     }, []);
 
-    // Fetch events whenever filters or page change
     useEffect(() => {
         const controller = new AbortController();
 
@@ -104,11 +92,9 @@ export default function EventsPage() {
         return () => controller.abort();
     }, [debouncedText, filters.category, filters.city, filters.maxPrice, filters.startDate, filters.endDate, page]);
 
-    // Every non-text filter change resets to page 0 *in the same render*,
-    // so the fetch effect fires exactly once with the new filter + page 0.
     function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
         setFilters(prev => ({ ...prev, [key]: value }));
-        if (key !== "text") setPage(0); // text resets page via the debounce effect
+        if (key !== "text") setPage(0);
     }
 
     function resetFilters() {
@@ -124,7 +110,6 @@ export default function EventsPage() {
         <div>
             <h1 className="header">Browse events</h1>
 
-            {/* Filter bar */}
             <div className="events-filters">
                 <input
                     className="events-filter-input events-filter-text"
@@ -188,14 +173,12 @@ export default function EventsPage() {
                 )}
             </div>
 
-            {/* Result count */}
             {!loading && !error && (
                 <p className="events-result-count">
                     {totalElements} event{totalElements !== 1 ? "s" : ""} found
                 </p>
             )}
 
-            {/* Status messages */}
             {loading && <p className="events-status-message">Loading events...</p>}
             {error && <p className="events-status-message message-error">{error}</p>}
 
@@ -203,20 +186,14 @@ export default function EventsPage() {
                 <p className="events-status-message">No events match your filters.</p>
             )}
 
-            {/* Event grid */}
             {events.length > 0 && (
                 <div className="event-body-grid">
                     {events.map(event => (
-                        <EventCard
-                            key={event.eventId}
-                            event={event}
-                            onOpen={() => navigate(`/events/${event.eventId}`)}
-                        />
+                        <EventCard key={event.eventId} event={event} />
                     ))}
                 </div>
             )}
 
-            {/* Pagination controls — render nothing if totalPages <= 1 */}
             <Pagination pageData={pageData} onPageChange={setPage} />
         </div>
     );
