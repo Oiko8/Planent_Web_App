@@ -10,11 +10,12 @@ import org.springframework.stereotype.Repository;
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     // inbox
-    Page<Message> findByReceiverIdAndDeletedByReceiverFalse(Integer receiverId, Pageable pageable);
+    Page<Message> findByReceiverIdAndDeletedByReceiverFalseOrderByIdDesc(Integer receiverId, Pageable pageable);
 
-    // sent
-    Page<Message> findBySenderIdAndDeletedBySenderFalse(Integer senderId, Pageable pageable);
+    // sent — same newest-first ordering
+    Page<Message> findBySenderIdAndDeletedBySenderFalseOrderByIdDesc(Integer senderId, Pageable pageable);
 
-    // number of unread messages in the receiver's inbox
+    // Number of unread messages in the receiver's inbox.
+    // Spring Data's `countBy...` runs SELECT COUNT(*) instead of SELECT *.
     long countByReceiverIdAndIsReadFalseAndDeletedByReceiverFalse(Integer receiverId);
 }

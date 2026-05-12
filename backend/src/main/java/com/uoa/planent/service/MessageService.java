@@ -92,7 +92,8 @@ public class MessageService {
     // ----- main methods -----
 
     public Page<MessagePreviewResponse> getInboxMessages(@NotNull Integer currentUserId, Pageable pageable) {
-        return messageRepository.findByReceiverIdAndDeletedByReceiverFalse(currentUserId, pageable).map(
+        // Repository method's OrderByIdDesc gives us newest-first by default
+        return messageRepository.findByReceiverIdAndDeletedByReceiverFalseOrderByIdDesc(currentUserId, pageable).map(
                 message -> {
                     User otherUser = message.getSender();
                     return MessageMapper.toPreviewResponse(message, otherUser);
@@ -100,7 +101,7 @@ public class MessageService {
     }
 
     public Page<MessagePreviewResponse> getSentMessages(@NotNull Integer currentUserId, Pageable pageable) {
-        return messageRepository.findBySenderIdAndDeletedBySenderFalse(currentUserId, pageable)
+        return messageRepository.findBySenderIdAndDeletedBySenderFalseOrderByIdDesc(currentUserId, pageable)
                 .map(message -> {
                     User otherUser = message.getReceiver();
                     return MessageMapper.toPreviewResponse(message, otherUser);
@@ -177,7 +178,6 @@ public class MessageService {
     // Organizer (or admin) broadcasts a message to all active attendees of an event.
     // The sender is excluded from the recipient set (you don't message yourself).
     // Reuses the existing sendBulkMessages — no new persistence code.
-    // Returns the number of recipients so the caller can confirm "Sent to N attendees".
     @Transactional
     public int broadcastToEventAttendees(@NotNull Integer eventId, @NotNull Integer senderId, @NotNull String body) {
         User sender = userRepository.findById(senderId).orElseThrow(
