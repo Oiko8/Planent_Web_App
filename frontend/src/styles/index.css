@@ -1,5 +1,6 @@
 /* ============================================================
    Sections:
+   0.  Theme Tokens (CSS variables)
    1.  Base & Reset
    2.  Navbar
    3.  Shared Utilities (buttons, messages, banners, badges)
@@ -12,8 +13,122 @@
    10. My Events Page
    11. Admin Page
    12. Location Autocomplete
-   13. Message
+   13. Messages Page
+   14. Pagination
+   15. Event Bookings Page
+   16. Compose Message Picker
    ============================================================ */
+
+
+/* ============================================================
+   0. THEME TOKENS
+   ============================================================ */
+
+/* Dark is the default — applies whenever no [data-theme="light"] is set */
+:root,
+[data-theme="dark"] {
+  /* surfaces */
+  --bg-page: #020617;
+  --bg-surface: #0f172a;
+  --bg-input: #020617;
+
+  /* borders */
+  --border-weak: #1e293b;
+  --border-medium: #334155;
+  --border-strong: #475569;
+
+  /* text */
+  --text-strong: #f1f5f9;
+  --text-primary: #e5e7eb;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-faint: #475569;
+  --text-placeholder: #334155;
+  --text-on-primary: #ffffff;
+
+  /* brand */
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #2563eb;
+  --color-primary-accent: #3b82f6;
+  --color-primary-soft: #0f1f3d;
+
+  /* success / danger / warning / info */
+  --color-success-bg: #14532d;
+  --color-success-border: #166534;
+  --color-success-text: #86efac;
+
+  --color-danger-bg: #450a0a;
+  --color-danger-border: #7f1d1d;
+  --color-danger-text: #fca5a5;
+  --color-danger-text-strong: #f87171;
+  --color-danger-solid: #dc2626;
+
+  --color-warning-bg: #1c1917;
+  --color-warning-border: #78350f;
+  --color-warning-text: #fcd34d;
+
+  --color-info-bg: #1e3a5f;
+  --color-info-text: #93c5fd;
+
+  /* misc */
+  --color-price: #86efac;
+  --shadow-card: none;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* surfaces */
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
+
+  /* borders */
+  --border-weak: #e2e8f0;
+  --border-medium: #cbd5e1;
+  --border-strong: #94a3b8;
+
+  /* text */
+  --text-strong: #0f172a;
+  --text-primary: #1e293b;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+  --text-faint: #94a3b8;
+  --text-placeholder: #cbd5e1;
+  --text-on-primary: #ffffff;
+
+  /* brand */
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #2563eb;
+  --color-primary-accent: #3b82f6;
+  --color-primary-soft: #dbeafe;
+
+  /* success / danger / warning / info */
+  --color-success-bg: #dcfce7;
+  --color-success-border: #86efac;
+  --color-success-text: #166534;
+
+  --color-danger-bg: #fee2e2;
+  --color-danger-border: #fca5a5;
+  --color-danger-text: #991b1b;
+  --color-danger-text-strong: #b91c1c;
+  --color-danger-solid: #dc2626;
+
+  --color-warning-bg: #fef3c7;
+  --color-warning-border: #fcd34d;
+  --color-warning-text: #92400e;
+
+  --color-info-bg: #dbeafe;
+  --color-info-text: #1e40af;
+
+  /* misc */
+  --color-price: #15803d;
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06);
+
+  color-scheme: light;
+}
 
 
 /* ============================================================
@@ -21,7 +136,6 @@
    ============================================================ */
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -34,8 +148,9 @@ html {
 
 body {
   margin: 0;
-  background: #020617;
-  color: #e5e7eb;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 
@@ -50,7 +165,7 @@ body {
   gap: 2rem;
   padding: 0.9rem 1.5rem;
   justify-content: left;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--border-weak);
   backdrop-filter: blur(10px);
   background: transparent;
 }
@@ -63,12 +178,15 @@ body {
 .navbar-search {
   margin-left: auto;
   justify-content: right;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .borderless-button {
   background: none;
   border: none;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 400;
   letter-spacing: 0.03em;
@@ -77,7 +195,28 @@ body {
 }
 
 .borderless-button:hover {
-  color: #ffffff;
+  color: var(--text-strong);
+}
+
+/* Theme toggle button (icon-only, sits in navbar) */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border-weak);
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--border-medium);
+  color: var(--text-strong);
 }
 
 
@@ -97,10 +236,10 @@ body {
   max-width: 800px;
   margin: 0 auto 1rem;
   padding: 0.8rem 1.2rem;
-  background: #14532d;
-  border: 1px solid #166534;
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
   border-radius: 8px;
-  color: #86efac;
+  color: var(--color-success-text);
   text-align: center;
 }
 
@@ -108,10 +247,10 @@ body {
   max-width: 800px;
   margin: 0 auto 1rem;
   padding: 0.8rem 1.2rem;
-  background: #450a0a;
-  border: 1px solid #7f1d1d;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
   border-radius: 8px;
-  color: #fca5a5;
+  color: var(--color-danger-text);
   text-align: center;
 }
 
@@ -123,10 +262,10 @@ body {
   max-width: 800px;
   margin: 0 auto 1.5rem;
   padding: 1rem 1.5rem;
-  background: #1c1917;
-  border: 1px solid #78350f;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
   border-radius: 8px;
-  color: #fcd34d;
+  color: var(--color-warning-text);
 }
 
 .confirm-banner p {
@@ -145,13 +284,13 @@ body {
 }
 
 .confirm-banner button:first-of-type {
-  background: #dc2626;
-  color: white;
+  background: var(--color-danger-solid);
+  color: var(--text-on-primary);
 }
 
 .confirm-banner button:last-of-type {
-  background: #1e293b;
-  color: #cbd5e1;
+  background: var(--border-weak);
+  color: var(--text-secondary);
 }
 
 /* Inline confirmation (inside event cards) */
@@ -160,10 +299,10 @@ body {
   align-items: center;
   gap: 0.6rem;
   padding: 0.5rem 0.8rem;
-  background: #1c1917;
-  border: 1px solid #78350f;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
   border-radius: 8px;
-  color: #fcd34d;
+  color: var(--color-warning-text);
 }
 
 .confirm-banner-inline p {
@@ -182,8 +321,8 @@ body {
   white-space: nowrap;
 }
 
-.confirm-banner-inline button:first-of-type { background: #dc2626; color: white; }
-.confirm-banner-inline button:last-of-type  { background: #1e293b; color: #cbd5e1; }
+.confirm-banner-inline button:first-of-type { background: var(--color-danger-solid); color: var(--text-on-primary); }
+.confirm-banner-inline button:last-of-type  { background: var(--border-weak); color: var(--text-secondary); }
 
 /* Status badges */
 .status-badge {
@@ -194,19 +333,18 @@ body {
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  /* margin-top: 0.4rem; */
 }
 
-.status-draft     { background: #1e293b; color: #94a3b8; }
-.status-published { background: #14532d; color: #86efac; }
-.status-cancelled { background: #450a0a; color: #fca5a5; }
-.status-completed { background: #1e3a5f; color: #93c5fd; }
+.status-draft     { background: var(--border-weak);       color: var(--text-muted); }
+.status-published { background: var(--color-success-bg);  color: var(--color-success-text); }
+.status-cancelled { background: var(--color-danger-bg);   color: var(--color-danger-text); }
+.status-completed { background: var(--color-info-bg);     color: var(--color-info-text); }
 
 /* Primary CTA button */
 .create-event-button {
   padding: 0.6rem 1.4rem;
-  background: #1d4ed8;
-  color: white;
+  background: var(--color-primary);
+  color: var(--text-on-primary);
   border: none;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -216,7 +354,7 @@ body {
   transition: background 0.2s;
 }
 
-.create-event-button:hover { background: #2563eb; }
+.create-event-button:hover { background: var(--color-primary-hover); }
 
 
 /* ============================================================
@@ -231,12 +369,13 @@ body {
 }
 
 .auth-card {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
   border-radius: 12px;
   padding: 2.5rem;
   width: 100%;
   max-width: 440px;
+  box-shadow: var(--shadow-card);
 }
 
 .auth-card-wide { max-width: 700px; }
@@ -244,24 +383,24 @@ body {
 .auth-title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-strong);
   margin: 0 0 0.3rem;
 }
 
 .auth-subtitle {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-dim);
   margin: 0 0 2rem;
 }
 
 .auth-section-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin: 1.5rem 0 0.8rem;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--border-weak);
   padding-bottom: 0.4rem;
 }
 
@@ -279,15 +418,15 @@ body {
 
 .auth-label {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .auth-input {
-  background: #020617;
-  border: 1px solid #1e293b;
+  background: var(--bg-input);
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  color: #e5e7eb;
+  color: var(--text-primary);
   padding: 0.65rem 1rem;
   font-size: 0.9rem;
   outline: none;
@@ -295,8 +434,8 @@ body {
   width: 100%;
 }
 
-.auth-input:focus        { border-color: #3b82f6; }
-.auth-input::placeholder { color: #334155; }
+.auth-input:focus        { border-color: var(--color-primary-accent); }
+.auth-input::placeholder { color: var(--text-placeholder); }
 
 .auth-textarea {
   min-height: 100px;
@@ -307,8 +446,8 @@ body {
 .auth-button {
   width: 100%;
   padding: 0.75rem;
-  background: #1d4ed8;
-  color: white;
+  background: var(--color-primary);
+  color: var(--text-on-primary);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -318,10 +457,10 @@ body {
   margin-top: 1.5rem;
 }
 
-.auth-button:hover { background: #2563eb; }
+.auth-button:hover { background: var(--color-primary-hover); }
 
 .auth-error {
-  color: #f87171;
+  color: var(--color-danger-text-strong);
   font-size: 0.85rem;
   margin: 0.8rem 0 0;
 }
@@ -329,12 +468,12 @@ body {
 .auth-footer {
   text-align: center;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-dim);
   margin-top: 1.2rem;
 }
 
 .auth-link {
-  color: #3b82f6;
+  color: var(--color-primary-accent);
   cursor: pointer;
   font-weight: 500;
 }
@@ -354,16 +493,16 @@ body {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
   border-radius: 6px;
   padding: 0.35rem 0.7rem;
   transition: border-color 0.2s;
 }
 
-.auth-checkbox-label:hover { border-color: #334155; }
+.auth-checkbox-label:hover { border-color: var(--border-medium); }
 
 /* Ticket form row (CreateEvent / EditEvent) */
 .ticket-form-row {
@@ -397,8 +536,8 @@ body {
   display: inline-block;
   margin-top: 1.5rem;
   padding: 0.7rem 2rem;
-  background: #1d4ed8;
-  color: white;
+  background: var(--color-primary);
+  color: var(--text-on-primary);
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -408,7 +547,7 @@ body {
   transition: background 0.2s;
 }
 
-.welcome-button:hover { background: #2563eb; }
+.welcome-button:hover { background: var(--color-primary-hover); }
 
 
 /* ============================================================
@@ -437,22 +576,22 @@ body {
   width: 100%;
   max-width: 500px;
   padding: 0.65rem 1.2rem;
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  color: #e5e7eb;
+  color: var(--text-primary);
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s;
 }
 
-.search-input::placeholder { color: #475569; }
-.search-input:focus         { border-color: #334155; }
+.search-input::placeholder { color: var(--text-placeholder); }
+.search-input:focus         { border-color: var(--border-medium); }
+
 
 /* ============================================================
    6b. EVENTS BROWSE FILTERS
    ============================================================ */
-
 .events-filters {
   display: flex;
   flex-wrap: wrap;
@@ -465,10 +604,10 @@ body {
 }
 
 .events-filter-input {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  color: #e5e7eb;
+  color: var(--text-primary);
   padding: 0.55rem 0.9rem;
   font-size: 0.85rem;
   outline: none;
@@ -476,8 +615,8 @@ body {
   min-width: 0;
 }
 
-.events-filter-input:focus       { border-color: #334155; }
-.events-filter-input::placeholder { color: #475569; }
+.events-filter-input:focus       { border-color: var(--border-medium); }
+.events-filter-input::placeholder { color: var(--text-placeholder); }
 
 .events-filter-text {
   flex: 1 1 280px;
@@ -486,14 +625,14 @@ body {
 
 .events-result-count {
   text-align: center;
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 0.85rem;
   margin: 0 0 1.5rem;
 }
 
 .events-status-message {
   text-align: center;
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 0.9rem;
   padding: 2rem 1rem;
 }
@@ -507,14 +646,15 @@ body {
   flex-direction: column;
   justify-content: space-between;
   padding: 1.4rem 1.5rem;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-weak);
   border-radius: 10px;
-  background: #0f172a;
+  background: var(--bg-surface);
   text-align: left;
   transition: border-color 0.2s;
+  box-shadow: var(--shadow-card);
 }
 
-.event-card:hover { border-color: #334155; }
+.event-card:hover { border-color: var(--border-medium); }
 
 .event-card-top { flex: 1; }
 
@@ -524,7 +664,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--text-dim);
   margin-bottom: 0.5rem;
 }
 
@@ -532,19 +672,19 @@ body {
   margin: 0 0 0.6rem;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-strong);
 }
 
 .event-card-meta {
   margin: 0.2rem 0;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .event-card-description {
   margin-top: 0.8rem;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-dim);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-box-line-clamp: 2;
@@ -558,13 +698,13 @@ body {
   align-items: center;
   margin-top: 1.2rem;
   padding-top: 1rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--border-weak);
 }
 
 .event-card-price {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #86efac;
+  color: var(--color-price);
 }
 
 .event-card-actions {
@@ -574,8 +714,8 @@ body {
 
 .event-card-button-secondary {
   background: none;
-  border: 1px solid #334155;
-  color: #94a3b8;
+  border: 1px solid var(--border-medium);
+  color: var(--text-muted);
   padding: 0.35rem 0.8rem;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -584,14 +724,14 @@ body {
 }
 
 .event-card-button-secondary:hover {
-  border-color: #64748b;
-  color: #e2e8f0;
+  border-color: var(--text-dim);
+  color: var(--text-strong);
 }
 
 .event-card-button-primary {
-  background: #1d4ed8;
+  background: var(--color-primary);
   border: none;
-  color: white;
+  color: var(--text-on-primary);
   padding: 0.35rem 0.9rem;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -600,7 +740,7 @@ body {
   transition: background 0.2s;
 }
 
-.event-card-button-primary:hover { background: #2563eb; }
+.event-card-button-primary:hover { background: var(--color-primary-hover); }
 
 
 /* ============================================================
@@ -623,7 +763,7 @@ body {
 .event-detail-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-strong);
   margin-bottom: 1.2rem;
 }
 
@@ -632,7 +772,7 @@ body {
   flex-direction: column;
   gap: 0.4rem;
   font-size: 0.9rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 1.2rem;
 }
 
@@ -644,8 +784,8 @@ body {
 }
 
 .event-category-tag {
-  background: #1e293b;
-  color: #94a3b8;
+  background: var(--border-weak);
+  color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.25rem 0.7rem;
@@ -663,14 +803,14 @@ body {
 .event-detail-tickets h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.8rem;
 }
 
 .event-detail-description p {
-  color: #cbd5e1;
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 
@@ -681,18 +821,18 @@ body {
   align-items: center;
   padding: 1rem 1.2rem;
   margin-bottom: 0.8rem;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  background: #0f172a;
+  background: var(--bg-surface);
   cursor: pointer;
   transition: border-color 0.2s;
 }
 
-.ticket-type-card:hover { border-color: #334155; }
+.ticket-type-card:hover { border-color: var(--border-medium); }
 
 .ticket-selected {
-  border-color: #1d4ed8 !important;
-  background: #0f1f3d;
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary-soft);
 }
 
 .ticket-soldout {
@@ -703,21 +843,21 @@ body {
 .ticket-available {
   display: block;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-dim);
   margin-top: 0.2rem;
 }
 
 .ticket-price {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #86efac;
+  color: var(--color-price);
 }
 
 /* Booking controls (inside EventDetail) */
 .booking-section {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--border-weak);
 }
 
 .booking-controls {
@@ -726,26 +866,26 @@ body {
   gap: 1rem;
   margin-bottom: 1rem;
   font-size: 0.9rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .booking-controls input {
   width: 80px;
   padding: 0.4rem 0.6rem;
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
   border-radius: 6px;
-  color: #e5e7eb;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .booking-total {
   font-weight: 700;
-  color: #86efac;
+  color: var(--color-price);
 }
 
 .booking-guest-msg {
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 0.85rem;
   margin-top: 1rem;
   text-align: center;
@@ -762,23 +902,24 @@ body {
 }
 
 .booking-event-summary {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
   border-radius: 10px;
   padding: 1.2rem 1.5rem;
   margin-bottom: 2rem;
+  box-shadow: var(--shadow-card);
 }
 
 .booking-event-summary h2 {
   margin: 0 0 0.5rem;
   font-size: 1.2rem;
-  color: #f1f5f9;
+  color: var(--text-strong);
 }
 
 .booking-event-summary p {
   margin: 0.2rem 0;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .booking-tickets { margin-bottom: 1.5rem; }
@@ -786,16 +927,32 @@ body {
 .booking-tickets h3 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.8rem;
 }
 
+/* Selectable ticket cards on the dedicated booking page */
+.booking-ticket-type-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.8rem;
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.booking-ticket-type-card:hover { border-color: var(--border-medium); }
+
 .booking-login-prompt {
   text-align: center;
   padding: 3rem 0;
-  color: #64748b;
+  color: var(--text-dim);
 }
 
 .booking-login-prompt p { margin-bottom: 1.5rem; }
@@ -803,20 +960,21 @@ body {
 .booking-success-screen {
   text-align: center;
   padding: 3rem 1rem;
-  background: #0f172a;
-  border: 1px solid #166534;
+  background: var(--bg-surface);
+  border: 1px solid var(--color-success-border);
   border-radius: 10px;
   margin-top: 2rem;
+  box-shadow: var(--shadow-card);
 }
 
 .booking-success-screen h2 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
-  color: #86efac;
+  color: var(--color-success-text);
 }
 
 .booking-success-screen p {
-  color: #cbd5e1;
+  color: var(--text-secondary);
   margin: 0.4rem 0;
 }
 
@@ -827,7 +985,7 @@ body {
 }
 
 .booking-event-link:hover {
-  color: #93c5fd;
+  color: var(--color-primary-accent);
   text-decoration: underline;
 }
 
@@ -849,9 +1007,10 @@ body {
   padding: 1.2rem 1.5rem;
   margin: 0 auto 1rem;
   max-width: 800px;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  background: #0f172a;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .my-event-actions {
@@ -875,13 +1034,13 @@ body {
   gap: 0.5rem;
   max-width: 900px;
   margin: 0 auto 2rem;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--border-weak);
 }
 
 .admin-tab {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -892,8 +1051,8 @@ body {
   transition: color 0.2s, border-color 0.2s;
 }
 
-.admin-tab:hover    { color: #cbd5e1; }
-.admin-tab-active   { color: #ffffff; border-bottom: 2px solid #1d4ed8; }
+.admin-tab:hover    { color: var(--text-secondary); }
+.admin-tab-active   { color: var(--text-strong); border-bottom: 2px solid var(--color-primary); }
 
 .admin-section {
   max-width: 900px;
@@ -906,7 +1065,7 @@ body {
   gap: 0.6rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -916,8 +1075,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #1d4ed8;
-  color: white;
+  background: var(--color-primary);
+  color: var(--text-on-primary);
   font-size: 0.75rem;
   font-weight: 700;
   border-radius: 999px;
@@ -930,14 +1089,15 @@ body {
   align-items: center;
   padding: 1rem 1.5rem;
   margin-bottom: 0.8rem;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  background: #0f172a;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .admin-user-pending {
-  border-color: #78350f;
-  background: #1c1917;
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
 }
 
 .admin-user-info {
@@ -946,8 +1106,8 @@ body {
   gap: 0.2rem;
 }
 
-.admin-user-username { font-size: 0.85rem; color: #64748b; }
-.admin-user-meta     { font-size: 0.8rem;  color: #475569; }
+.admin-user-username { font-size: 0.85rem; color: var(--text-dim); }
+.admin-user-meta     { font-size: 0.8rem;  color: var(--text-faint); }
 
 .admin-user-actions {
   display: flex;
@@ -958,9 +1118,9 @@ body {
 
 .admin-btn-approve {
   padding: 0.2rem 0.6rem;
-  background: #14532d;
-  border: 1px solid #166534;
-  color: #86efac;
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-text);
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -970,13 +1130,13 @@ body {
   transition: background 0.2s;
 }
 
-.admin-btn-approve:hover { background: #166534; }
+.admin-btn-approve:hover { background: var(--color-success-border); }
 
 .admin-btn-reject {
   padding: 0.2rem 0.6rem;
-  background: #450a0a;
-  border: 1px solid #7f1d1d;
-  color: #fca5a5;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -986,12 +1146,22 @@ body {
   transition: background 0.2s;
 }
 
-.admin-btn-reject:hover { background: #7f1d1d; }
+.admin-btn-reject:hover { background: var(--color-danger-border); }
 
 .admin-empty {
-  color: #475569;
+  color: var(--text-faint);
   text-align: center;
   padding: 2rem 0;
+}
+
+/* Export bar (admin events tab) */
+.admin-export-bar {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  max-width: 800px;
+  margin: 0 auto 1.5rem;
+  flex-wrap: wrap;
 }
 
 
@@ -1008,8 +1178,8 @@ body {
   top: 100%;
   left: 0;
   right: 0;
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
   border-radius: 8px;
   margin-top: 0.3rem;
   list-style: none;
@@ -1017,24 +1187,25 @@ body {
   z-index: 100;
   max-height: 250px;
   overflow-y: auto;
+  box-shadow: var(--shadow-card);
 }
 
 .location-dropdown-item {
   padding: 0.7rem 1rem;
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .location-dropdown-item:hover {
-  background: #1e293b;
-  color: #ffffff;
+  background: var(--border-weak);
+  color: var(--text-strong);
 }
 
 .location-loading {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-dim);
   margin: 0.3rem 0 0;
 }
 
@@ -1043,17 +1214,17 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0.6rem 1rem;
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-top: 0.3rem;
 }
 
 .location-coords {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--text-faint);
 }
 
 
@@ -1061,91 +1232,90 @@ body {
    13. MESSAGES PAGE
    ============================================================ */
 .message-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    background: #0f172a;
-    cursor: pointer;
-    transition: border-color 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
 .message-card:hover {
-    border-color: #334155;
+  border-color: var(--border-medium);
 }
 
 .message-unread {
-    border-color: #1d4ed8;
-    background: #0f1f3d;
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 
 .message-card-info {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .message-card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
 }
 
 .message-card-user {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .message-card-username {
-    font-weight: 400;
-    color: #64748b;
-    font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 0.8rem;
 }
 
 .message-card-preview {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #64748b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 500px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 500px;
 }
 
 .message-unread-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #3b82f6;
-    flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary-accent);
+  flex-shrink: 0;
 }
 
 .message-body-expanded {
-    margin: -0.5rem 0 0.5rem;
-    padding: 1.2rem 1.5rem;
-    background: #020617;
-    border: 1px solid #1e293b;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
+  margin: -0.5rem 0 0.5rem;
+  padding: 1.2rem 1.5rem;
+  background: var(--bg-page);
+  border: 1px solid var(--border-weak);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
 }
 
 .message-body-expanded p {
-    margin: 0;
-    color: #cbd5e1;
-    line-height: 1.7;
-    font-size: 0.9rem;
-    white-space: pre-wrap;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
 }
 
 
 /* ============================================================
    14. PAGINATION
    ============================================================ */
-
 .pagination {
   display: flex;
   align-items: center;
@@ -1157,9 +1327,9 @@ body {
 }
 
 .pagination-button {
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  color: #cbd5e1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
+  color: var(--text-secondary);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -1169,8 +1339,8 @@ body {
 }
 
 .pagination-button:hover:not(:disabled) {
-  border-color: #334155;
-  color: #ffffff;
+  border-color: var(--border-medium);
+  color: var(--text-strong);
 }
 
 .pagination-button:disabled {
@@ -1179,17 +1349,17 @@ body {
 }
 
 .pagination-info {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.9rem;
   font-weight: 500;
   min-width: 100px;
   text-align: center;
 }
 
+
 /* ============================================================
    15. EVENT BOOKINGS PAGE
    ============================================================ */
-
 .bookings-list {
   max-width: 800px;
   margin: 0 auto;
@@ -1202,9 +1372,10 @@ body {
   align-items: center;
   padding: 1rem 1.5rem;
   margin-bottom: 0.8rem;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  background: #0f172a;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .booking-card-attendee {
@@ -1214,13 +1385,13 @@ body {
 }
 
 .booking-card-attendee strong {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .booking-card-username {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-dim);
   font-weight: 400;
 }
 
@@ -1232,20 +1403,19 @@ body {
 
 .booking-card-meta {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 
 /* ============================================================
    16. COMPOSE MESSAGE PICKER (NewMessagePage)
    ============================================================ */
-
 .compose-section-title {
   max-width: 800px;
   margin: 1.5rem auto 0.3rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 0 1rem;
@@ -1255,7 +1425,7 @@ body {
   max-width: 800px;
   margin: 0 auto 1rem;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-dim);
   padding: 0 1rem;
 }
 
@@ -1272,13 +1442,13 @@ body {
   gap: 1rem;
   padding: 0.9rem 1.2rem;
   margin-bottom: 0.5rem;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-weak);
   border-radius: 8px;
-  background: #0f172a;
+  background: var(--bg-surface);
 }
 
 .compose-item-label {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 0.95rem;
   display: flex;
   align-items: center;

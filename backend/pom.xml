@@ -117,6 +117,12 @@
             <version>3.1.2</version>
             <scope>compile</scope>
         </dependency>
+
+		<dependency>
+			<groupId>tools.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>3.1.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>

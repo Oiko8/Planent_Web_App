@@ -31,6 +31,10 @@ export default function AdminPage() {
     const [eventsLoading, setEventsLoading] = useState(true);
     const [eventsError, setEventsError] = useState("");
 
+    // Export state
+    const [exporting, setExporting] = useState<"xml" | "json" | null>(null);
+    const [exportError, setExportError] = useState("");
+
     useEffect(() => {
         fetchUsers();
         fetchEvents();
@@ -99,6 +103,52 @@ export default function AdminPage() {
             ));
         } catch (err: any) {
             setEventsError(err.response?.data?.detail ?? "Failed to cancel event.");
+        }
+    }
+
+    async function handleExport(format: "xml" | "json") {
+        setExporting(format);
+        setExportError("");
+        try {
+            const response = await api.get("/admin/export/events", {
+                params: { format },
+                responseType: "blob",
+            });
+
+            // Pull filename from Content-Disposition; fall back to a sensible default.
+            const disposition = (response.headers["content-disposition"] ?? "") as string;
+            const match = /filename="?([^"]+)"?/.exec(disposition);
+            const filename = match?.[1] ?? `events-export.${format}`;
+
+            // Build a download link and click it. The browser handles the rest.
+            const blob = new Blob([response.data], {
+                type: format === "xml" ? "application/xml" : "application/json",
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err: any) {
+            // With responseType:"blob", error bodies come back as Blob too
+            let detail = `Failed to export events as ${format.toUpperCase()}.`;
+            if (err.response?.data instanceof Blob) {
+                try {
+                    const text = await err.response.data.text();
+                    const parsed = JSON.parse(text);
+                    detail = parsed.detail ?? parsed.error ?? detail;
+                } catch {
+                    // not json - generic message
+                }
+            } else if (err.response?.data?.detail) {
+                detail = err.response.data.detail;
+            }
+            setExportError(detail);
+        } finally {
+            setExporting(null);
         }
     }
 
@@ -187,6 +237,26 @@ export default function AdminPage() {
             {/* Events Tab */}
             {activeTab === "events" && (
                 <div className="admin-section">
+                    {/* Export bar */}
+                    <div className="admin-export-bar">
+                        <button
+                            className="create-event-button"
+                            onClick={() => handleExport("xml")}
+                            disabled={exporting !== null}
+                        >
+                            {exporting === "xml" ? "Exporting..." : "📥 Export XML"}
+                        </button>
+                        <button
+                            className="create-event-button"
+                            onClick={() => handleExport("json")}
+                            disabled={exporting !== null}
+                        >
+                            {exporting === "json" ? "Exporting..." : "📥 Export JSON"}
+                        </button>
+                    </div>
+
+                    {exportError && <div className="message-error">{exportError}</div>}
+
                     {eventsLoading && <p>Loading events...</p>}
                     {eventsError && <p className="message-error">{eventsError}</p>}
 

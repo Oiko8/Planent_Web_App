@@ -1,11 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 
 
 export default function Navbar() {
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     function handleLogout() {
@@ -28,7 +30,7 @@ export default function Navbar() {
             .catch(() => { /* silent: badge just stays at previous value */ });
     }, [user, location.pathname]);
 
-    // Cap large counts to "9+" for visual balance (Gmail/Slack pattern)
+    // Cap large counts to "9+" for visual balance (Gmail's pattern)
     const badgeLabel = unreadCount > 9 ? "9+" : unreadCount;
 
     return (
@@ -60,6 +62,15 @@ export default function Navbar() {
                         <button className="borderless-button" onClick={() => navigate("/register")}>Sign up</button>
                     </>
                 )}
+
+                <button
+                    className="theme-toggle"
+                    onClick={toggleTheme}
+                    title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                    aria-label="Toggle color theme"
+                >
+                    {theme === "dark" ? "☀️" : "🌙"}
+                </button>
             </a>
         </nav>
     );
