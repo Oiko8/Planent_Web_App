@@ -20,6 +20,7 @@ import ComposeMessagePage from './pages/ComposeMessagePage';
 import EventBookingsPage from './pages/EventBookingsPage';
 import NewMessagePage from './pages/NewMessagePage';
 import BroadcastMessagePage from './pages/BroadcastMessagePage';
+import ProfilePage from './pages/ProfilePage';
 
 export default function App() {
     return (
@@ -47,6 +48,8 @@ function AppContent() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/pending-approval" element={<PendingApprovalPage />} />
 
+                <Route path="/profile" element={<ProfilePage />} />
+                
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/events/:eventId" element={<EventDetailPage />} />
                 <Route path="/create-event" element={<CreateEventPage />} />

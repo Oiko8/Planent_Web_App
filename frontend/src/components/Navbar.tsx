@@ -3,23 +3,17 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
+import UserMenu from "./UserMenu";
 
 
 export default function Navbar() {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
-
-    function handleLogout() {
-        logout();
-        navigate("/");
-    }
 
     const [unreadCount, setUnreadCount] = useState(0);
     const location = useLocation();
 
-    // Refetch on login + every route change.
-    // The count is a single integer from the DB — no pagination needed.
     useEffect(() => {
         if (!user) {
             setUnreadCount(0);
@@ -27,11 +21,8 @@ export default function Navbar() {
         }
         api.get<{ count: number }>("/messages/unread-count")
             .then(res => setUnreadCount(res.data.count))
-            .catch(() => { /* silent: badge just stays at previous value */ });
+            .catch(() => { /* silent: badge keeps previous value */ });
     }, [user, location.pathname]);
-
-    // Cap large counts to "9+" for visual balance (Gmail's pattern)
-    const badgeLabel = unreadCount > 9 ? "9+" : unreadCount;
 
     return (
         <nav className="navbar">
@@ -39,23 +30,11 @@ export default function Navbar() {
                 <button className="borderless-button" onClick={() => navigate("/")}>Home</button>
             </a>
 
-            <a className="navbar-search">
+            <div className="navbar-search">
                 <button className="borderless-button" onClick={() => navigate("/events")}>&#128269;</button>
 
-                { user ? (
-                    <>
-                        <button className="borderless-button" onClick={() => navigate("/my-events")}>My Events</button>
-                        <button className="borderless-button" onClick={() => navigate("/my-bookings")}>My Bookings</button>
-                        <button className="borderless-button" onClick={() => navigate("/messages")}>
-                            Messages
-                            {unreadCount > 0 && (
-                                <span className="admin-badge" style={{ marginLeft: "0.4rem" }}>
-                                    {badgeLabel}
-                                </span>
-                            )}
-                        </button>
-                        <button className="borderless-button" onClick={handleLogout}>Logout</button>
-                    </>
+                {user ? (
+                    <UserMenu unreadCount={unreadCount} />
                 ) : (
                     <>
                         <button className="borderless-button" onClick={() => navigate("/login")}>Login</button>
@@ -71,7 +50,7 @@ export default function Navbar() {
                 >
                     {theme === "dark" ? "☀️" : "🌙"}
                 </button>
-            </a>
+            </div>
         </nav>
     );
 }

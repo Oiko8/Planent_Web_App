@@ -9,7 +9,7 @@ export default function AdminNavbar() {
 
     function handleLogout() {
         logout();
-        navigate("/login");
+        navigate("/");
     }
 
     return (

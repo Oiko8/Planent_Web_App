@@ -70,7 +70,7 @@ export default function MyEventsPage() {
         }
     }
  
-    if (loading && !pageData) return <p>Loading your events...</p>;
+    if (loading && !pageData) return <p className="header">Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
  
     const events = pageData?.content ?? [];
