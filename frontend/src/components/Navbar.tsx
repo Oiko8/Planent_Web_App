@@ -26,19 +26,28 @@ export default function Navbar() {
 
     return (
         <nav className="navbar">
-            <a className="navbar-home">
-                <button className="borderless-button" onClick={() => navigate("/")}>Home</button>
-            </a>
+            {/* Left: primary navigation */}
+            <div className="navbar-left">
+                <button className="nav-link" onClick={() => navigate("/")}>
+                    Home
+                </button>
+                <button className="nav-link" onClick={() => navigate("/events")}>
+                    <span aria-hidden="true">🔍</span> Search Events
+                </button>
+            </div>
 
-            <div className="navbar-search">
-                <button className="borderless-button" onClick={() => navigate("/events")}>&#128269; Search Events</button>
-
+            {/* Right: account + theme */}
+            <div className="navbar-right">
                 {user ? (
                     <UserMenu unreadCount={unreadCount} />
                 ) : (
                     <>
-                        <button className="borderless-button" onClick={() => navigate("/login")}>Login</button>
-                        <button className="borderless-button" onClick={() => navigate("/register")}>Sign up</button>
+                        <button className="nav-link" onClick={() => navigate("/login")}>
+                            Login
+                        </button>
+                        <button className="nav-link" onClick={() => navigate("/register")}>
+                            Sign up
+                        </button>
                     </>
                 )}
 
