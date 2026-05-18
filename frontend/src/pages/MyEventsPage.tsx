@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import Pagination from "../components/Pagination";
 import type { EventItem, PageResponse } from "../types/event";
+import Loader from "../components/Loader";
  
 const PAGE_SIZE = 10;
  
@@ -70,7 +71,7 @@ export default function MyEventsPage() {
         }
     }
  
-    if (loading && !pageData) return <p className="header">Loading...</p>;
+    if (loading && !pageData) return <Loader />;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
  
     const events = pageData?.content ?? [];

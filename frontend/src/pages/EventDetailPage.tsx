@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import api from "../api/axiosConfig";
 import type { EventItem } from "../types/event";
 import { useAuth } from "../context/AuthContext";
+import Loader from "../components/Loader";
 
 export default function EventDetailPage() {
     const { eventId } = useParams();
@@ -57,7 +58,7 @@ export default function EventDetailPage() {
         }
     }
 
-    if (loading) return <p className="header">Loading...</p>;
+    if (loading) return <Loader />;
     if (error) return <p className="header" style={{ color: "red" }}>{error}</p>;
     if (!event) return null;
 

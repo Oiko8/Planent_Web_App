@@ -31,7 +31,7 @@ export default function Navbar() {
             </a>
 
             <div className="navbar-search">
-                <button className="borderless-button" onClick={() => navigate("/events")}>&#128269;</button>
+                <button className="borderless-button" onClick={() => navigate("/events")}>&#128269; Search Events</button>
 
                 {user ? (
                     <UserMenu unreadCount={unreadCount} />

@@ -4,6 +4,7 @@ import api from "../api/axiosConfig";
 import Pagination from "../components/Pagination";
 import type { PageResponse } from "../types/event";
 import type { BookingItem } from "../types/bookingData";
+import Loader from "../components/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -54,7 +55,7 @@ export default function MyBookingsPage() {
         }
     }
 
-    if (loading && !pageData) return <p className="header">Loading...</p>;
+    if (loading && !pageData) return <Loader />;
 
     const bookings = pageData?.content ?? [];
 

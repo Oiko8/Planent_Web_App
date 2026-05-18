@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import { UpdateEventForm } from "../types/updateEventData";
 import LocationAutocomplete from "../components/LocationAutocomplete";
+import Loader from "../components/Loader";
 
 export default function EditEventPage() {
     const { eventId } = useParams();
@@ -147,7 +148,7 @@ export default function EditEventPage() {
         }
     }
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <Loader />;
 
     return (
         <form className="event-creation-body" onSubmit={handleSubmit}>

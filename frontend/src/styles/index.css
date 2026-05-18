@@ -174,6 +174,7 @@ body {
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
+  --border-mode: transparent;
   --border-weak: #1e293b;
   --border-medium: #334155;
 
@@ -213,7 +214,7 @@ body {
 /* Theme toggle button (icon-only, sits in navbar) */
 .theme-toggle {
   background: none;
-  border: 1px solid var(--border-weak);
+  border: 2px solid var(--border-mode);
   color: var(--text-secondary);
   width: 36px;
   height: 36px;
@@ -222,7 +223,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.2rem;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 
@@ -653,51 +654,143 @@ body {
 /* ============================================================
    6b. EVENTS BROWSE FILTERS
    ============================================================ */
-.events-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: center;
-  justify-content: center;
-  max-width: 1000px;
-  margin: 0 auto 1.5rem;
-  padding: 0 1rem;
-}
 
-.events-filter-input {
+.search-container {
+  max-width: 1000px;
+  margin: 0 auto 2rem;
+  padding: 1.25rem 1.5rem;
   background: var(--bg-surface);
   border: 1px solid var(--border-weak);
-  border-radius: 8px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Primary search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-weak);
+  border-radius: 10px;
+  padding: 0.2rem 0.6rem 0.2rem 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar:focus-within {
+  border-color: var(--color-primary-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.search-bar-icon {
+  font-size: 1rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.search-bar-input {
+  flex: 1;
+  background: none;
+  border: none;
   color: var(--text-primary);
-  padding: 0.55rem 0.9rem;
-  font-size: 0.85rem;
+  font-size: 1rem;
+  padding: 0.7rem 0;
   outline: none;
-  transition: border-color 0.2s;
   min-width: 0;
 }
 
-.events-filter-input:focus       { border-color: var(--border-medium); }
-.events-filter-input::placeholder { color: var(--text-placeholder); }
+.search-bar-input::placeholder { color: var(--text-placeholder); }
 
-.events-filter-text {
-  flex: 1 1 280px;
-  min-width: 200px;
+.search-bar-clear {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
 }
 
-.events-result-count {
-  text-align: center;
-  color: var(--text-dim);
-  font-size: 0.85rem;
-  margin: 0 0 1.5rem;
+.search-bar-clear:hover {
+  background: var(--border-weak);
+  color: var(--text-strong);
 }
 
-.events-status-message {
-  text-align: center;
+/* Secondary filter row */
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
+.search-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 130px;
+  flex: 1;
+}
+
+.search-filter-label {
+  font-size: 0.7rem;
+  font-weight: 600;
   color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.search-filter-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  color: var(--text-primary);
+  padding: 0.55rem 0.85rem;
   font-size: 0.9rem;
-  padding: 2rem 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
 }
 
+.search-filter-input:focus        { border-color: var(--color-primary-accent); }
+.search-filter-input::placeholder { color: var(--text-placeholder); }
+
+/* Color the date-picker calendar icon so it's visible in both themes */
+.search-filter-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+[data-theme="light"] .search-filter-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+}
+
+.search-clear-all {
+  background: none;
+  border: 1px solid var(--border-medium);
+  color: var(--text-muted);
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+  align-self: flex-end;
+}
+
+.search-clear-all:hover {
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+
+@media (max-width: 600px) {
+  .search-filter-group {
+    flex: 1 1 calc(50% - 0.45rem);
+    min-width: 0;
+  }
+}
 
 /* ============================================================
    7. EVENT CARD
@@ -1631,4 +1724,51 @@ body {
 .auth-input:disabled {
   opacity: 0.75;
   cursor: not-allowed;
+}
+
+
+/* ============================================================
+   18. LOADER
+   ============================================================ */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+}
+
+.loader-spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid var(--border-weak);
+  border-top-color: var(--color-primary-accent);
+  animation: loader-spin 0.9s linear infinite;
+}
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader-text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.loader-dot {
+  display: inline-block;
+  animation: loader-dot 1.4s infinite both;
+}
+
+.loader-dot:nth-of-type(1) { animation-delay: 0s; }
+.loader-dot:nth-of-type(2) { animation-delay: 0.2s; }
+.loader-dot:nth-of-type(3) { animation-delay: 0.4s; }
+
+@keyframes loader-dot {
+  0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
+  40%           { opacity: 1;   transform: translateY(-3px); }
 }

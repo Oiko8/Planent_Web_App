@@ -4,6 +4,7 @@ import type { MessagePreview, MessageFull } from "../types/message";
 import type { PageResponse } from "../types/event";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
+import Loader from "../components/Loader";
 
 type Tab = "inbox" | "sent";
 
@@ -142,7 +143,7 @@ export default function MessagePage() {
     // Cap large counts to "9+" for visual balance
     const badgeLabel = unreadCount > 9 ? "9+" : unreadCount;
 
-    if (loading && !inboxData) return <p className="header">Loading...</p>;
+    if (loading && !inboxData) return <Loader />;
 
     return (
         <div className="admin-page">

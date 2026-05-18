@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import type { EventItem, PageResponse } from "../types/event";
 import type { BookingItem } from "../types/bookingData";
+import Loader from "../components/Loader";
 
 type BookedEventEntry = { eventId: number; eventTitle: string };
 
@@ -46,7 +47,7 @@ export default function NewMessagePage() {
         fetchAll();
     }, []);
 
-    if (loading) return <p className="header">Loading...</p>;
+    if (loading) return <Loader />;
 
     return (
         <div className="admin-page">

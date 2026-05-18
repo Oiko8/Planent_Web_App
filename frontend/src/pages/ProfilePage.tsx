@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import { useAuth } from "../context/AuthContext";
+import Loader from "../components/Loader";
 
 type ProfileForm = {
     firstName: string;
@@ -100,7 +101,7 @@ export default function ProfilePage() {
         setError("");
     }
 
-    if (loading) return <p className="header">Loading...</p>;
+    if (loading) return <Loader />;
     if (!profile) return null;
 
     return (

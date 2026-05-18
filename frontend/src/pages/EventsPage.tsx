@@ -3,6 +3,7 @@ import EventCard from "../components/EventCard";
 import Pagination from "../components/Pagination";
 import type { EventItem, CategoryResponse, PageResponse } from "../types/event";
 import api from "../api/axiosConfig";
+import Loader from "../components/Loader";
 
 type Filters = {
     text: string;
@@ -110,76 +111,100 @@ export default function EventsPage() {
         <div>
             <h1 className="header">Browse events</h1>
 
-            <div className="events-filters">
-                <input
-                    className="events-filter-input events-filter-text"
-                    type="text"
-                    value={filters.text}
-                    onChange={e => updateFilter("text", e.target.value)}
-                    placeholder="🔍  Search by title or description..."
-                />
+            <div className="search-container">
+                {/* Primary search bar */}
+                <div className="search-bar">
+                    <span className="search-bar-icon">🔍</span>
+                    <input
+                        className="search-bar-input"
+                        type="text"
+                        value={filters.text}
+                        onChange={e => updateFilter("text", e.target.value)}
+                        placeholder="Search events by title or description..."
+                    />
+                    {filters.text && (
+                        <button
+                            className="search-bar-clear"
+                            onClick={() => updateFilter("text", "")}
+                            aria-label="Clear search"
+                            title="Clear search"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
 
-                <select
-                    className="events-filter-input"
-                    value={filters.category}
-                    onChange={e => updateFilter("category", e.target.value)}
-                >
-                    <option value="">All categories</option>
-                    {categories.map(c => (
-                        <option key={c.categoryId} value={c.categoryName}>
-                            {c.categoryName}
-                        </option>
-                    ))}
-                </select>
+                {/* Secondary filters */}
+                <div className="search-filters">
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">Category</label>
+                        <select
+                            className="search-filter-input"
+                            value={filters.category}
+                            onChange={e => updateFilter("category", e.target.value)}
+                        >
+                            <option value="">All categories</option>
+                            {categories.map(c => (
+                                <option key={c.categoryId} value={c.categoryName}>
+                                    {c.categoryName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <input
-                    className="events-filter-input"
-                    type="text"
-                    value={filters.city}
-                    onChange={e => updateFilter("city", e.target.value)}
-                    placeholder="📍  City"
-                />
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">City</label>
+                        <input
+                            className="search-filter-input"
+                            type="text"
+                            value={filters.city}
+                            onChange={e => updateFilter("city", e.target.value)}
+                            placeholder="Any city"
+                        />
+                    </div>
 
-                <input
-                    className="events-filter-input"
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={filters.maxPrice}
-                    onChange={e => updateFilter("maxPrice", e.target.value)}
-                    placeholder="💶  Max price"
-                />
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">Max price</label>
+                        <input
+                            className="search-filter-input"
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={filters.maxPrice}
+                            onChange={e => updateFilter("maxPrice", e.target.value)}
+                            placeholder="No limit"
+                        />
+                    </div>
 
-                <input
-                    className="events-filter-input"
-                    type="date"
-                    value={filters.startDate}
-                    onChange={e => updateFilter("startDate", e.target.value)}
-                    title="Starts from"
-                />
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">From</label>
+                        <input
+                            className="search-filter-input"
+                            type="date"
+                            value={filters.startDate}
+                            onChange={e => updateFilter("startDate", e.target.value)}
+                        />
+                    </div>
 
-                <input
-                    className="events-filter-input"
-                    type="date"
-                    value={filters.endDate}
-                    onChange={e => updateFilter("endDate", e.target.value)}
-                    title="Ends by"
-                />
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">Until</label>
+                        <input
+                            className="search-filter-input"
+                            type="date"
+                            value={filters.endDate}
+                            onChange={e => updateFilter("endDate", e.target.value)}
+                        />
+                    </div>
 
-                {hasActiveFilters && (
-                    <button className="borderless-button" onClick={resetFilters}>
-                        Clear filters
-                    </button>
-                )}
+                    {hasActiveFilters && (
+                        <button className="search-clear-all" onClick={resetFilters}>
+                            Clear all
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {!loading && !error && (
-                <p className="events-result-count">
-                    {totalElements} event{totalElements !== 1 ? "s" : ""} found
-                </p>
-            )}
-
-            {loading && <p className="events-status-message">Loading events...</p>}
+            {loading && <Loader />}
             {error && <p className="events-status-message message-error">{error}</p>}
 
             {!loading && !error && events.length === 0 && (

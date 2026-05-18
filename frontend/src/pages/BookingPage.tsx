@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import type { EventItem, TicketTypeResponse } from "../types/event";
 import { useAuth } from "../context/AuthContext";
+import Loader from "../components/Loader";
 
 export default function BookingPage() {
     const { eventId } = useParams();
@@ -48,7 +49,7 @@ export default function BookingPage() {
         }
     }
 
-    if (loading) return <p className="header">Loading...</p>;
+    if (loading) return <Loader />;
     if (!event) return null;
 
     const totalCost = selectedTicket

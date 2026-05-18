@@ -5,6 +5,7 @@ import Pagination from "../components/Pagination";
 import { useAuth } from "../context/AuthContext";
 import type { EventItem, PageResponse } from "../types/event";
 import type { BookingItem } from "../types/bookingData";
+import Loader from "../components/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -51,7 +52,7 @@ export default function EventBookingsPage() {
         fetchBookings();
     }, [eventId, page]);
 
-    if (loading && !pageData) return <p className="header">Loading bookings...</p>;
+    if (loading && !pageData) return <Loader />;
 
     if (error) {
         return (

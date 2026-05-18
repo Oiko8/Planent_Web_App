@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig";
 import type { PageResponse, EventItem } from "../types/event";
+import Loader from "../components/Loader";
 
 type UserResponse = {
     userId: number;
@@ -257,7 +258,7 @@ export default function AdminPage() {
 
                     {exportError && <div className="message-error">{exportError}</div>}
 
-                    {eventsLoading && <p>Loading events...</p>}
+                    {eventsLoading && <Loader />}
                     {eventsError && <p className="message-error">{eventsError}</p>}
 
                     {events.length === 0 && !eventsLoading && (
