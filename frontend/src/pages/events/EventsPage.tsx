@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import EventCard from "../components/EventCard";
-import Pagination from "../components/Pagination";
-import type { EventItem, CategoryResponse, PageResponse } from "../types/event";
-import api from "../api/axiosConfig";
-import Loader from "../components/Loader";
+import EventCard from "../../components/EventCard";
+import Pagination from "../../components/Pagination";
+import type { EventItem, CategoryResponse, PageResponse } from "../../types/event";
+import api from "../../api/axiosConfig";
+import Loader from "../../components/Loader";
+import DatePicker from "react-datepicker";
+import { format } from "date-fns";
 
 type Filters = {
     text: string;
@@ -178,21 +180,30 @@ export default function EventsPage() {
 
                     <div className="search-filter-group">
                         <label className="search-filter-label">From</label>
-                        <input
+                        <DatePicker
+                            selected={filters.startDate ? new Date(filters.startDate) : null}
+                            onChange={(date: Date | null) =>
+                                updateFilter("startDate", date ? format(date, "yyyy-MM-dd") : "")
+                            }
+                            dateFormat="yyyy-MM-dd"
+                            placeholderText="Any date"
+                            isClearable
                             className="search-filter-input"
-                            type="date"
-                            value={filters.startDate}
-                            onChange={e => updateFilter("startDate", e.target.value)}
                         />
                     </div>
 
                     <div className="search-filter-group">
                         <label className="search-filter-label">Until</label>
-                        <input
+                        <DatePicker
+                            selected={filters.endDate ? new Date(filters.endDate) : null}
+                            onChange={(date: Date | null) =>
+                                updateFilter("endDate", date ? format(date, "yyyy-MM-dd") : "")
+                            }
+                            dateFormat="yyyy-MM-dd"
+                            placeholderText="Any date"
+                            isClearable
+                            minDate={filters.startDate ? new Date(filters.startDate) : undefined}
                             className="search-filter-input"
-                            type="date"
-                            value={filters.endDate}
-                            onChange={e => updateFilter("endDate", e.target.value)}
                         />
                     </div>
 

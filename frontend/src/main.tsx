@@ -8,6 +8,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import "react-datepicker/dist/react-datepicker.css";
 
 L.Marker.prototype.options.icon = L.icon({
     iconUrl: markerIcon,

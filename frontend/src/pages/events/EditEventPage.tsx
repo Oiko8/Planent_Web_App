@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
-import { UpdateEventForm } from "../types/updateEventData";
-import LocationAutocomplete from "../components/LocationAutocomplete";
-import Loader from "../components/Loader";
+import api from "../../api/axiosConfig";
+import { UpdateEventForm } from "../../types/updateEventData";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
+import Loader from "../../components/Loader";
 
 export default function EditEventPage() {
     const { eventId } = useParams();

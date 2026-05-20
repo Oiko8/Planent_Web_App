@@ -11,7 +11,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.uoa.planent.model.Category;
+import com.uoa.planent.repository.CategoryRepository;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.math.BigDecimal;
 
 @SpringBootApplication
@@ -54,6 +59,40 @@ public class PlanentApplication {
                 logger.info("First admin user created with username 'admin'.");
             }else{
                 logger.info("Admin user already exists with username 'admin'.");
+            }
+        };
+    }
+
+
+    // The 10 canonical categories users may pick from.
+    // "Other" stays last as a catch-all.
+    public static final List<String> CANONICAL_CATEGORIES = List.of(
+            "Music",
+            "Sports",
+            "Theatre",
+            "Cinema",
+            "Conference",
+            "Workshop",
+            "Festival",
+            "Exhibition",
+            "Nightlife",
+            "Other"
+    );
+
+    @Bean
+    public CommandLineRunner initCategories(CategoryRepository categoryRepository) {
+        return args -> {
+            Set<String> existing = categoryRepository.findAll().stream()
+                    .map(Category::getCategoryName)
+                    .collect(Collectors.toSet());
+
+            for (String name : CANONICAL_CATEGORIES) {
+                if (!existing.contains(name)) {
+                    Category category = new Category();
+                    category.setCategoryName(name);
+                    categoryRepository.save(category);
+                    logger.info("Seeded category: {}", name);
+                }
             }
         };
     }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
-import type { EventItem } from "../types/event";
+import api from "../../api/axiosConfig";
+import type { EventItem } from "../../types/event";
 
 export default function ComposeMessagePage() {
     const [searchParams] = useSearchParams();

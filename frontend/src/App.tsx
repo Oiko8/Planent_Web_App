@@ -4,23 +4,23 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import AdminNavbar from "./components/AdminNavbar";
 import WelcomePage from "./pages/WelcomePage";
-import EventsPage from "./pages/EventsPage";
+import EventsPage from "./pages/events/EventsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
-import CreateEventPage from "./pages/CreateEventPage";
-import MyEventsPage from "./pages/MyEventsPage";
-import AdminPage from "./pages/AdminPage";
-import EditEventPage from './pages/EditEventPage';
-import EventDetailPage from './pages/EventDetailPage';
-import MyBookingsPage from './pages/MyBookingPage';
-import BookingPage from './pages/BookingPage';
-import MessagePage from './pages/MessagePage';
-import ComposeMessagePage from './pages/ComposeMessagePage';
-import EventBookingsPage from './pages/EventBookingsPage';
-import NewMessagePage from './pages/NewMessagePage';
-import BroadcastMessagePage from './pages/BroadcastMessagePage';
-import ProfilePage from './pages/ProfilePage';
+import CreateEventPage from "./pages/events/CreateEventPage";
+import MyEventsPage from "./pages/events/MyEventsPage";
+import AdminPage from "./pages/admin/AdminPage";
+import EditEventPage from './pages/events/EditEventPage';
+import EventDetailPage from './pages/events/EventDetailPage';
+import MyBookingsPage from './pages/bookings/MyBookingPage';
+import BookingPage from './pages/bookings/BookingPage';
+import MessagePage from './pages/messages/MessagePage';
+import ComposeMessagePage from './pages/messages/ComposeMessagePage';
+import EventBookingsPage from './pages/events/EventBookingsPage';
+import NewMessagePage from './pages/messages/NewMessagePage';
+import BroadcastMessagePage from './pages/messages/BroadcastMessagePage';
+import ProfilePage from './pages/users/ProfilePage';
 
 export default function App() {
     return (

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import api from "../api/axiosConfig";
-import type { MessagePreview, MessageFull } from "../types/message";
-import type { PageResponse } from "../types/event";
+import api from "../../api/axiosConfig";
+import type { MessagePreview, MessageFull } from "../../types/message";
+import type { PageResponse } from "../../types/event";
 import { useNavigate } from "react-router-dom";
-import Pagination from "../components/Pagination";
-import Loader from "../components/Loader";
+import Pagination from "../../components/Pagination";
+import Loader from "../../components/Loader";
 
 type Tab = "inbox" | "sent";
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import api from "../api/axiosConfig";
-import type { PageResponse, EventItem } from "../types/event";
-import Loader from "../components/Loader";
+import api from "../../api/axiosConfig";
+import type { PageResponse, EventItem } from "../../types/event";
+import Loader from "../../components/Loader";
 
 type UserResponse = {
     userId: number;

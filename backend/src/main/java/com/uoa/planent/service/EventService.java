@@ -24,7 +24,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
+import com.uoa.planent.PlanentApplication;
+import java.util.Comparator;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -324,6 +325,14 @@ public class EventService {
     }
 
     public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream().map(EventMapper::toCategoryResponse).toList();
+        return categoryRepository.findAll().stream()
+                // Show only the 10 canonical ones in the dropdowns.
+                // Legacy categories still in the DB are kept for existing events
+                // but won't be selectable for new ones.
+                .filter(c -> PlanentApplication.CANONICAL_CATEGORIES.contains(c.getCategoryName()))
+                // Sort by position in the canonical list — keeps "Other" last.
+                .sorted(Comparator.comparingInt(c -> PlanentApplication.CANONICAL_CATEGORIES.indexOf(c.getCategoryName())))
+                .map(EventMapper::toCategoryResponse)
+                .toList();
     }
 }

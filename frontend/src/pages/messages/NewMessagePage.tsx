@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
-import type { EventItem, PageResponse } from "../types/event";
-import type { BookingItem } from "../types/bookingData";
-import Loader from "../components/Loader";
+import api from "../../api/axiosConfig";
+import type { EventItem, PageResponse } from "../../types/event";
+import type { BookingItem } from "../../types/bookingData";
+import Loader from "../../components/Loader";
 
 type BookedEventEntry = { eventId: number; eventTitle: string };
 

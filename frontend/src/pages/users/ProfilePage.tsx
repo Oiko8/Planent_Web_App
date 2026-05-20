@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
-import { useAuth } from "../context/AuthContext";
-import Loader from "../components/Loader";
+import api from "../../api/axiosConfig";
+import { useAuth } from "../../context/AuthContext";
+import Loader from "../../components/Loader";
 
 type ProfileForm = {
     firstName: string;

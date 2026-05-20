@@ -1,8 +1,9 @@
 import { use, useEffect, useState } from "react";
-import { CreateEventForm } from "../types/createEventData";
-import LocationAutocomplete from "../components/LocationAutocomplete";
+import { CreateEventForm } from "../../types/createEventData";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
+import DatePicker from "react-datepicker";
 
-import api from "../api/axiosConfig";
+import api from "../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateEventPage() {
@@ -77,7 +78,7 @@ export default function CreateEventPage() {
             console.log("Sending payload:", payload);
             
             await api.post("/events", payload);
-            navigate("/events");
+            navigate("/my-events");
 
         } catch (error: any) {
             console.log("Error response:", error.response?.data); 
@@ -164,11 +165,41 @@ export default function CreateEventPage() {
                 <div className="auth-grid-2">
                     <div className="auth-field">
                         <label className="auth-label">Start *</label>
-                        <input className="auth-input" name="startDatetime" type="datetime-local" value={eventForm.startDatetime} onChange={handleChange} />
+                        <DatePicker
+                            selected={eventForm.startDatetime ? new Date(eventForm.startDatetime) : null}
+                            onChange={(date: Date | null) =>
+                                setEventForm(prev => ({
+                                    ...prev,
+                                    startDatetime: date ? date.toISOString() : "",
+                                }))
+                            }
+                            showTimeSelect
+                            timeIntervals={15}
+                            timeFormat="HH:mm"
+                            dateFormat="yyyy-MM-dd  HH:mm"
+                            minDate={new Date()}
+                            placeholderText="Pick start date and time"
+                            className="auth-input"
+                        />
                     </div>
                     <div className="auth-field">
                         <label className="auth-label">End *</label>
-                        <input className="auth-input" name="endDatetime" type="datetime-local" value={eventForm.endDatetime} onChange={handleChange} />
+                        <DatePicker
+                            selected={eventForm.endDatetime ? new Date(eventForm.endDatetime) : null}
+                            onChange={(date: Date | null) =>
+                                setEventForm(prev => ({
+                                    ...prev,
+                                    endDatetime: date ? date.toISOString() : "",
+                                }))
+                            }
+                            showTimeSelect
+                            timeIntervals={15}
+                            timeFormat="HH:mm"
+                            dateFormat="yyyy-MM-dd  HH:mm"
+                            minDate={eventForm.startDatetime ? new Date(eventForm.startDatetime) : new Date()}
+                            placeholderText="Pick end date and time"
+                            className="auth-input"
+                        />
                     </div>
                 </div>
 
@@ -224,16 +255,50 @@ export default function CreateEventPage() {
                 <p className="auth-section-label">Ticket Types</p>
                 {eventForm.ticketTypes.map((ticket, index) => (
                     <div key={index} className="ticket-form-row">
-                        <input className="auth-input" placeholder="Name (e.g. VIP)" value={ticket.name}
-                            onChange={e => handleTicketChange(index, "name", e.target.value)} />
-                        <input className="auth-input" type="number" placeholder="Price (€)" value={ticket.price}
-                            onChange={e => handleTicketChange(index, "price", e.target.value)} />
-                        <input className="auth-input" type="number" placeholder="Quantity" value={ticket.quantity}
-                            onChange={e => handleTicketChange(index, "quantity", e.target.value)} />
-                        <button type="button" className="admin-btn-reject" onClick={() => removeTicketType(index)}>Remove</button>
+                        <div className="auth-field">
+                            <label className="auth-label">Type Name</label>
+                            <input
+                                className="auth-input"
+                                placeholder="e.g. VIP, Standard"
+                                value={ticket.name}
+                                onChange={e => handleTicketChange(index, "name", e.target.value)}
+                            />
+                        </div>
+                        <div className="auth-field">
+                            <label className="auth-label">Price (€)</label>
+                            <input
+                                className="auth-input"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={ticket.price}
+                                onChange={e => handleTicketChange(index, "price", e.target.value)}
+                            />
+                        </div>
+                        <div className="auth-field">
+                            <label className="auth-label">Quantity</label>
+                            <input
+                                className="auth-input"
+                                type="number"
+                                min="0"
+                                placeholder="0"
+                                value={ticket.quantity}
+                                onChange={e => handleTicketChange(index, "quantity", e.target.value)}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            className="admin-btn-reject"
+                            onClick={() => removeTicketType(index)}
+                        >
+                            Remove
+                        </button>
                     </div>
                 ))}
-                <button type="button" className="borderless-button" onClick={addTicketType}>+ Add Ticket Type</button>
+                <button type="button" className="borderless-button" onClick={addTicketType}>
+                    + Add Ticket Type
+                </button>
 
                 {errorMessage && <p className="auth-error">{errorMessage}</p>}
 

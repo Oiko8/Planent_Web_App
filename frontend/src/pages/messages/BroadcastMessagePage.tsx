@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
-import type { EventItem, PageResponse } from "../types/event";
-import type { BookingItem } from "../types/bookingData";
+import api from "../../api/axiosConfig";
+import type { EventItem, PageResponse } from "../../types/event";
+import type { BookingItem } from "../../types/bookingData";
 
 export default function BroadcastMessagePage() {
     const { eventId } = useParams();

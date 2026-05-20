@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axiosConfig";
-import Pagination from "../components/Pagination";
-import type { PageResponse } from "../types/event";
-import type { BookingItem } from "../types/bookingData";
-import Loader from "../components/Loader";
+import api from "../../api/axiosConfig";
+import Pagination from "../../components/Pagination";
+import type { PageResponse } from "../../types/event";
+import type { BookingItem } from "../../types/bookingData";
+import Loader from "../../components/Loader";
 
 const PAGE_SIZE = 10;
 
