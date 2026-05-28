@@ -8,3 +8,5 @@ backend/node_modules/
 *.njsproj
 *.sln
 .DS_Store
+
+dataset/
