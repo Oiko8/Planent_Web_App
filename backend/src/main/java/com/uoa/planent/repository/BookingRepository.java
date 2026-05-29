@@ -30,7 +30,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "JOIN FETCH b.ticketType tt " +
             "JOIN FETCH tt.event " +
             "WHERE tt.event.id = :eventId",
-            countQuery = "SELECT COUNT(b) FROM Booking b WHERE tt.event.id = :eventId")
+            countQuery = "SELECT COUNT(b) FROM Booking b WHERE b.ticketType.event.id = :eventId")
     Page<Booking> findEventBookingsWithRelations(@Param("eventId") Integer eventId, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.ticketType.event.id = :eventId AND b.bookingStatus != 'CANCELLED'")
