@@ -8,6 +8,42 @@ import com.uoa.planent.model.*;
 
 public class EventMapper {
 
+    public static EventSummaryResponse toSummaryResponse(Event event){
+        if (event == null) return null;
+
+        // get first media if it has
+        MediaResponse mainMedia = null;
+        if (event.getMedia() != null && !event.getMedia().isEmpty()) {
+            EventMedia firstMedia = event.getMedia().iterator().next();
+            mainMedia = EventMapper.toMediaResponse(firstMedia);
+        }
+
+        // description summary
+        String descriptionSummary = event.getDescription();
+        if (descriptionSummary.length() > 200) {
+            descriptionSummary = descriptionSummary.substring(0, 200) + "...";
+        }
+
+        return EventSummaryResponse.builder()
+                .eventId(event.getId())
+                .title(event.getTitle())
+                .eventType(event.getEventType())
+                .venue(event.getVenue())
+                .country(event.getCountry())
+                .city(event.getCity())
+                .address(event.getAddress())
+                .latitude(event.getLatitude())
+                .longitude(event.getLongitude())
+                .capacity(event.getCapacity())
+                .status(event.getStatus() != null ? event.getStatus().name() : null)
+                .descriptionSummary(descriptionSummary)
+                .startDatetime(event.getStartDatetime())
+                .endDatetime(event.getEndDatetime())
+                .organizerId(event.getOrganizer() != null ? event.getOrganizer().getId() : null)
+                .mainMedia(mainMedia)
+                .build();
+    }
+
     public static EventResponse toResponse(Event event){
         if (event == null) return null;
 

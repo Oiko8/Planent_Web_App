@@ -49,12 +49,12 @@ public class BookingService {
 
 
     public Page<BookingResponse> getMyBookings(@NotNull Integer attendeeId, Pageable pageable) {
-        return bookingRepository.findAllByAttendeeId(attendeeId, pageable).map(BookingMapper::toResponse);
+        return bookingRepository.findMyBookingsWithRelations(attendeeId, pageable).map(BookingMapper::toResponse);
     }
 
     // Bookings for a specific event — for organizer/admin only (enforced in the controller)
     public Page<BookingResponse> getBookingsByEvent(@NotNull Integer eventId, Pageable pageable) {
-        return bookingRepository.findAllByTicketType_Event_Id(eventId, pageable).map(BookingMapper::toResponse);
+        return bookingRepository.findEventBookingsWithRelations(eventId, pageable).map(BookingMapper::toResponse);
     }
 
     public BookingResponse getBookingById(Integer bookingId) {

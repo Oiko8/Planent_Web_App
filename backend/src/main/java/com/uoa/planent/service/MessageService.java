@@ -93,7 +93,7 @@ public class MessageService {
 
     public Page<MessagePreviewResponse> getInboxMessages(@NotNull Integer currentUserId, Pageable pageable) {
         // Repository method's OrderByIdDesc gives us newest-first by default
-        return messageRepository.findByReceiverIdAndDeletedByReceiverFalseOrderByIdDesc(currentUserId, pageable).map(
+        return messageRepository.findInboxWithRelations(currentUserId, pageable).map(
                 message -> {
                     User otherUser = message.getSender();
                     return MessageMapper.toPreviewResponse(message, otherUser);
@@ -101,7 +101,7 @@ public class MessageService {
     }
 
     public Page<MessagePreviewResponse> getSentMessages(@NotNull Integer currentUserId, Pageable pageable) {
-        return messageRepository.findBySenderIdAndDeletedBySenderFalseOrderByIdDesc(currentUserId, pageable)
+        return messageRepository.findSentWithRelations(currentUserId, pageable)
                 .map(message -> {
                     User otherUser = message.getReceiver();
                     return MessageMapper.toPreviewResponse(message, otherUser);

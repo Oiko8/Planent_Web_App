@@ -25,11 +25,22 @@ public class EventController {
 
     private final EventService eventService;
 
+
+    // Endpoints returning paged event responses return an EventSummaryResponse,
+    // which excludes nested lazy fetched sets (categories, media, ticket types) to avoid frontend overfetching.
+    // Those are loaded on-demand only when viewing a specific event (getEventById).
+    //
+    // To eliminate the N+1 query problem during pagination, a global batch fetch size is set (set at 50).
+    // For example:
+    // - 50 events processed -> 1 main query + 1 batch query for media.
+    // - 51 events processed -> 1 main query + 2 batch queries for media (due to the size-50 boundary).
+
+
     // ---- public endpoints ----
 
     // returns all non-draft events
     @GetMapping
-    public ResponseEntity<Page<EventResponse>> getAllVisibleEvents(Pageable pageable) {
+    public ResponseEntity<Page<EventSummaryResponse>> getAllVisibleEvents(Pageable pageable) {
         return ResponseEntity.ok(eventService.getAllVisibleEvents(pageable));
     }
 
@@ -43,7 +54,7 @@ public class EventController {
 
     // searches from all non-draft events
     @GetMapping("/search")
-    public ResponseEntity<Page<EventResponse>> searchVisibleEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
+    public ResponseEntity<Page<EventSummaryResponse>> searchVisibleEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
         return ResponseEntity.ok(eventService.searchVisibleEvents(request, pageable));
     }
 
@@ -63,7 +74,7 @@ public class EventController {
 
     @GetMapping("/my-events")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Page<EventResponse>> getMyEvents(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser, Pageable pageable) {
+    public ResponseEntity<Page<EventSummaryResponse>> getMyEvents(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser, Pageable pageable) {
         return ResponseEntity.ok(eventService.getMyEvents(currentUser.getId(), pageable)); // authenticated == non-null user id
     }
 

@@ -66,8 +66,8 @@ public class EventService {
 
 
     // returns all non-draft events
-    public Page<EventResponse> getAllVisibleEvents(Pageable pageable) {
-        return eventRepository.findAllVisibleEvents(pageable).map(EventMapper::toResponse);
+    public Page<EventSummaryResponse> getAllVisibleEvents(Pageable pageable) {
+        return eventRepository.findAllVisibleEvents(pageable).map(EventMapper::toSummaryResponse);
     }
 
     public EventResponse getEventById(Integer eventId, @Nullable Integer currentUserId) {
@@ -84,13 +84,13 @@ public class EventService {
     }
 
 
-    public Page<EventResponse> getMyEvents(@NotNull Integer organizerId, Pageable pageable){
-        return eventRepository.findAllByOrganizerId(organizerId, pageable).map(EventMapper::toResponse);
+    public Page<EventSummaryResponse> getMyEvents(@NotNull Integer organizerId, Pageable pageable){
+        return eventRepository.findAllByOrganizerId(organizerId, pageable).map(EventMapper::toSummaryResponse);
     }
 
 
 
-    public Page<EventResponse> searchVisibleEvents(EventSearchRequest request, Pageable pageable) {
+    public Page<EventSummaryResponse> searchVisibleEvents(EventSearchRequest request, Pageable pageable) {
         if (request.getStartDate() != null && request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())){
             throw new IllegalArgumentException("Start date cannot be after end date.");
         }
@@ -140,7 +140,7 @@ public class EventService {
         );
 
         // search with the filters added and return events in our sorted pages
-        return eventRepository.findAll(spec, sortedPageable).map(EventMapper::toResponse);
+        return eventRepository.findAll(spec, sortedPageable).map(EventMapper::toSummaryResponse);
     }
 
 

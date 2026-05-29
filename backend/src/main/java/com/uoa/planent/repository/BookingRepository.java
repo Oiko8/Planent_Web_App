@@ -14,9 +14,24 @@ import java.util.Set;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
-    Page<Booking> findAllByAttendeeId(Integer attendeeId, Pageable pageable);
 
-    Page<Booking> findAllByTicketType_Event_Id(Integer eventId, Pageable pageable);
+    // optimized with joins to fetch the ManyToOne relations as well
+    @Query(value = "SELECT b FROM Booking b " +
+            "JOIN FETCH b.attendee " +
+            "JOIN FETCH b.ticketType tt " +
+            "JOIN FETCH tt.event " +
+            "WHERE b.attendee.id = :attendeeId",
+            countQuery = "SELECT COUNT(b) FROM Booking b WHERE b.attendee.id = :attendeeId")
+    Page<Booking> findMyBookingsWithRelations(@Param("attendeeId") Integer attendeeId, Pageable pageable);
+
+    // optimized with joins to fetch the ManyToOne relations as well
+    @Query(value = "SELECT b FROM Booking b " +
+            "JOIN FETCH b.attendee " +
+            "JOIN FETCH b.ticketType tt " +
+            "JOIN FETCH tt.event " +
+            "WHERE tt.event.id = :eventId",
+            countQuery = "SELECT COUNT(b) FROM Booking b WHERE tt.event.id = :eventId")
+    Page<Booking> findEventBookingsWithRelations(@Param("eventId") Integer eventId, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.ticketType.event.id = :eventId AND b.bookingStatus != 'CANCELLED'")
     List<Booking> findActiveBookingsByEventId(@Param("eventId") Integer eventId);
