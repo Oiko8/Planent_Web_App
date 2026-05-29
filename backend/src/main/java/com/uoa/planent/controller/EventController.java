@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.uoa.planent.service.EventViewService;
 
 // import java.time.Instant;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final EventViewService eventViewService;
 
 
     // Endpoints returning paged event responses return an EventSummaryResponse,
@@ -96,5 +98,15 @@ public class EventController {
     @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
     public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @RequestBody @Valid EventUpdateRequest request){
         return ResponseEntity.ok().body(eventService.updateEvent(eventId, request));
+    }
+
+    @PostMapping("/{eventId}/view")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> recordEventView(
+            @PathVariable Integer eventId,
+            @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser
+    ) {
+        eventViewService.recordView(eventId, currentUser.getId());
+        return ResponseEntity.noContent().build();
     }
 }

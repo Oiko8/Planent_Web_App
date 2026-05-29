@@ -36,6 +36,14 @@ export default function EventDetailPage() {
         fetchEvent();
     }, [eventId]);
 
+    useEffect(() => {
+        if (user && eventId) {
+            api.post(`/events/${eventId}/view`).catch(() => {
+                // do nothing just send the "view" in the backend
+            });
+        }
+    }, [eventId, user]);
+
     async function handleBooking() {
         if (!selectedTicketTypeId) return;
         setBookingError("");
