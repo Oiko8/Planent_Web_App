@@ -1,8 +1,7 @@
-backend/.env
-backend/node_modules/
 .docker-data/
 .vscode/
 .idea/
+.env
 *.suo
 *.ntvs*
 *.njsproj

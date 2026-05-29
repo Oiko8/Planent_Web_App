@@ -28,7 +28,9 @@ USER node
  
  
 # Expose Vite dev server port
-EXPOSE 5173
+ARG FRONTEND_DEV_PORT
+ENV FRONTEND_DEV_PORT=$FRONTEND_DEV_PORT
+EXPOSE ${FRONTEND_DEV_PORT}
  
 # Run Vite in dev mode, accessible outside the container
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -30,8 +30,8 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    @Value("${frontend.url}")
-    private String frontendUrl;
+    @Value("${frontend.urls}")
+    private List<String> frontendUrls;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -65,7 +65,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(frontendUrl)); // allow frontend only
+        config.setAllowedOrigins(frontendUrls); // allow frontend only
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // for these methods
         config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // with these headers
 
