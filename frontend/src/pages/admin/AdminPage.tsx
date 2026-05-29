@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
-import type { PageResponse, EventItem } from "../../types/event";
+import type { PageResponse, EventSummary } from "../../types/event";
 import Loader from "../../components/Loader";
 
 type UserResponse = {
@@ -27,8 +27,8 @@ export default function AdminPage() {
     const [usersError, setUsersError] = useState("");
     const [userMessage, setUserMessage] = useState("");
 
-    // Events state
-    const [events, setEvents] = useState<EventItem[]>([]);
+    // Events state — /events returns EventSummaryResponse, not the full event
+    const [events, setEvents] = useState<EventSummary[]>([]);
     const [eventsLoading, setEventsLoading] = useState(true);
     const [eventsError, setEventsError] = useState("");
 
@@ -43,7 +43,7 @@ export default function AdminPage() {
 
     async function fetchUsers() {
         try {
-            const response = await api.get("/users");
+            const response = await api.get<UserResponse[]>("/users");
             setUsers(response.data);
         } catch (err) {
             setUsersError("Failed to load users.");
@@ -54,7 +54,9 @@ export default function AdminPage() {
 
     async function fetchEvents() {
         try {
-            const response = await api.get("/events?size=100");
+            const response = await api.get<PageResponse<EventSummary>>("/events", {
+                params: { size: 100 },
+            });
             setEvents(response.data.content);
         } catch (err) {
             setEventsError("Failed to load events.");

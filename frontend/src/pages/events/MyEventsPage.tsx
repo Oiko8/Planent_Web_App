@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import Pagination from "../../components/Pagination";
-import type { EventItem, PageResponse } from "../../types/event";
+import type { EventSummary, PageResponse } from "../../types/event";
 import Loader from "../../components/Loader";
- 
+
 const PAGE_SIZE = 10;
- 
+
 export default function MyEventsPage() {
-    const [pageData, setPageData] = useState<PageResponse<EventItem> | null>(null);
+    // /events/my-events returns EventSummaryResponse, not the full event
+    const [pageData, setPageData] = useState<PageResponse<EventSummary> | null>(null);
     const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -16,13 +17,13 @@ export default function MyEventsPage() {
     const [successMessage, setSuccessMessage] = useState("");
     const [deleteError, setDeleteError] = useState("");
     const navigate = useNavigate();
- 
-    // Refetches whenever `page` changes
+
+
     useEffect(() => {
         async function fetchMyEvents() {
             setLoading(true);
             try {
-                const response = await api.get<PageResponse<EventItem>>("/events/my-events", {
+                const response = await api.get<PageResponse<EventSummary>>("/events/my-events", {
                     params: { page, size: PAGE_SIZE },
                 });
                 setPageData(response.data);
@@ -34,11 +35,11 @@ export default function MyEventsPage() {
         }
         fetchMyEvents();
     }, [page]);
- 
+
     async function handleDelete(eventId: number) {
         setSuccessMessage("");
         setDeleteError("");
- 
+
         try {
             await api.delete(`/events/${eventId}`);
             setPageData(prev => prev ? {
@@ -55,7 +56,7 @@ export default function MyEventsPage() {
             setConfirmDeleteId(null);
         }
     }
- 
+
     async function handlePublish(eventId: number) {
         try {
             await api.patch(`/events/${eventId}`, { publish: true });
@@ -70,30 +71,30 @@ export default function MyEventsPage() {
             setDeleteError(err.response?.data?.detail ?? "Failed to publish event.");
         }
     }
- 
+
     if (loading && !pageData) return <Loader />;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
- 
+
     const events = pageData?.content ?? [];
- 
+
     return (
         <div>
             <h1 className="header">My Events</h1>
- 
+
             {successMessage && (
                 <div className="message-success">{successMessage}</div>
             )}
- 
+
             {deleteError && (
                 <div className="message-error">{deleteError}</div>
             )}
- 
+
             <div className="my-events-top-bar">
                 <button className="create-event-button" onClick={() => navigate("/create-event")}>
                     + Create New Event
                 </button>
             </div>
- 
+
             {events.length === 0 ? (
                 <div style={{ textAlign: "center", color: "#64748b", marginTop: "1rem" }}>
                     <p>You have no events yet.</p>
@@ -110,7 +111,7 @@ export default function MyEventsPage() {
                                     {event.status}
                                 </span>
                             </div>
- 
+
                             <div className="my-event-actions">
                                 {/* View Bookings — hidden for DRAFT (no bookings possible yet) */}
                                 {event.status !== "DRAFT" && (
@@ -121,7 +122,7 @@ export default function MyEventsPage() {
                                         View Bookings
                                     </button>
                                 )}
- 
+
                                 {/* Edit — always visible except for completed */}
                                 {event.status !== "COMPLETED" && (
                                     <button
@@ -131,7 +132,7 @@ export default function MyEventsPage() {
                                         Edit
                                     </button>
                                 )}
- 
+
                                 {/* Publish — only for DRAFT */}
                                 {event.status === "DRAFT" && (
                                     <button
@@ -141,7 +142,7 @@ export default function MyEventsPage() {
                                         Publish
                                     </button>
                                 )}
- 
+
                                 {/* Delete — only for DRAFT */}
                                 {event.status === "DRAFT" && confirmDeleteId !== event.eventId && (
                                     <button
@@ -155,7 +156,7 @@ export default function MyEventsPage() {
                                         Delete
                                     </button>
                                 )}
- 
+
                                 {/* Inline delete confirmation */}
                                 {confirmDeleteId === event.eventId && (
                                     <div className="confirm-banner-inline">
@@ -169,9 +170,8 @@ export default function MyEventsPage() {
                     ))}
                 </div>
             )}
- 
+
             <Pagination pageData={pageData} onPageChange={setPage} />
         </div>
     );
 }
- 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import EventCard from "../../components/EventCard";
 import Pagination from "../../components/Pagination";
-import type { EventItem, CategoryResponse, PageResponse } from "../../types/event";
+import type { EventSummary, CategoryResponse, PageResponse } from "../../types/event";
 import api from "../../api/axiosConfig";
 import Loader from "../../components/Loader";
 import DatePicker from "react-datepicker";
@@ -26,14 +26,15 @@ const EMPTY_FILTERS: Filters = {
 };
 
 const DEBOUNCE_MS = 400;
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 4;
 
 export default function EventsPage() {
     const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
     const [debouncedText, setDebouncedText] = useState("");
     const [page, setPage] = useState(0);
 
-    const [pageData, setPageData] = useState<PageResponse<EventItem> | null>(null);
+    // /events/search returns EventSummaryResponse, not the full event
+    const [pageData, setPageData] = useState<PageResponse<EventSummary> | null>(null);
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -76,7 +77,7 @@ export default function EventsPage() {
                     params.endDate = new Date(filters.endDate + "T23:59:59").toISOString();
                 }
 
-                const response = await api.get<PageResponse<EventItem>>("/events/search", {
+                const response = await api.get<PageResponse<EventSummary>>("/events/search", {
                     params,
                     signal: controller.signal,
                 });
@@ -222,7 +223,7 @@ export default function EventsPage() {
                 <p className="events-status-message">No events match your filters.</p>
             )}
 
-            {events.length > 0 && (
+            {!loading && events.length > 0 && (
                 <div className="event-body-grid">
                     {events.map(event => (
                         <EventCard key={event.eventId} event={event} />
