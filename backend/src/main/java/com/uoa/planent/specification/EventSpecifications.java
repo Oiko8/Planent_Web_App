@@ -39,6 +39,8 @@ public class EventSpecifications {
 
     public static Specification<Event> hasCategory(@NotNull String category) {
         return (root, query, criteriaBuilder) -> {
+            query.distinct(true);
+
             // join first on EventCategory (kept in a set in Events)
             Join<Event, EventCategory> eventCategoryJoin = root.join("categories");
 
@@ -51,6 +53,8 @@ public class EventSpecifications {
 
     public static Specification<Event> hasMaxPrice(@NotNull Double price){
         return (root, query, criteriaBuilder) -> {
+            query.distinct(true); // multiple ticket types may be under max price -> multiple rows for the same event
+
             Join<Event, EventTicketType> ticketTypeJoin = root.join("ticketTypes");
             return criteriaBuilder.lessThanOrEqualTo(ticketTypeJoin.get("price"), price);
         };

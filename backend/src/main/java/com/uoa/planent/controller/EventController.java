@@ -10,11 +10,13 @@ import org.springframework.data.domain.Pageable;
 // import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 // import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.uoa.planent.service.EventViewService;
+import org.springframework.web.multipart.MultipartFile;
 
 // import java.time.Instant;
 import java.util.List;
@@ -88,16 +90,16 @@ public class EventController {
     }
 
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (data) + media (multipart)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<EventResponse> createEvent(@RequestBody @Valid EventCreateRequest request, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, currentUser.getId()));
+    public ResponseEntity<EventResponse> createEvent(@ModelAttribute @Valid EventCreateRequest request, @RequestParam(value = "media", required = false) List<MultipartFile> media, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, media, currentUser.getId()));
     }
 
-    @PatchMapping("/{eventId}")
+    @PatchMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (data) + media (multipart)
     @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
-    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @RequestBody @Valid EventUpdateRequest request){
-        return ResponseEntity.ok().body(eventService.updateEvent(eventId, request));
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @ModelAttribute @Valid EventUpdateRequest request, @RequestParam(value = "media", required = false) List<MultipartFile> media){
+        return ResponseEntity.ok().body(eventService.updateEvent(eventId, request, media));
     }
 
     @PostMapping("/{eventId}/view")

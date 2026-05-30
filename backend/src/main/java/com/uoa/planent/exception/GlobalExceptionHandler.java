@@ -18,6 +18,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -105,6 +106,12 @@ public class GlobalExceptionHandler {
             detail = e.getRootCause().getMessage();
         }
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+    }
+
+    // file upload size
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ProblemDetail handleMaxSizeException(MaxUploadSizeExceededException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "File size exceeded! Maximum allowed size per file is 5MB.");
     }
 
 

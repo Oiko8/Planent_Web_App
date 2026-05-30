@@ -1,12 +1,14 @@
 package com.uoa.planent.listener;
 
 import com.uoa.planent.event.EventCancelledEvent;
+import com.uoa.planent.event.MediaDeleteEvent;
 import com.uoa.planent.model.Booking;
 import com.uoa.planent.model.User;
 import com.uoa.planent.model.Event;
 import com.uoa.planent.repository.BookingRepository;
 import com.uoa.planent.repository.EventRepository;
 import com.uoa.planent.service.MessageService;
+import com.uoa.planent.service.StorageService;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ public class EventListener {
     private final BookingRepository bookingRepository;
     private final EventRepository eventRepository;
     private final MessageService messageService;
+    private final StorageService storageService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -45,5 +48,14 @@ public class EventListener {
         // send all messages
         String body = "NOTICE: The event '" + event.getTitle() + "' has been cancelled by the organizer (" + organizer.getFirstName() + " " + organizer.getLastName() + "). Your booking(s) have been automatically cancelled.";
         messageService.sendBulkMessages(event, organizer, attendees, body);
+    }
+
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleMediaDeletion(MediaDeleteEvent payload) {
+        if (payload.getFileUrls() != null) {
+            payload.getFileUrls().forEach(storageService::delete);
+        }
     }
 }

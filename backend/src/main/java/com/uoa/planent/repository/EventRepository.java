@@ -11,11 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-
+import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpecificationExecutor<Event> {
-    Page<Event> findAllByStatus(Event.EventStatus status, Pageable pageable);
     Page<Event> findAllByOrganizerId(Integer organizerId, Pageable pageable);
 
     // return order: published -> completed -> cancelled (same status orders by closest starting date)
@@ -29,6 +28,10 @@ public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpeci
             "  WHEN com.uoa.planent.model.Event.EventStatus.CANCELLED THEN 3 " +
             "  ELSE 4 END, e.startDatetime ASC")
     Page<Event> findAllVisibleEvents(Pageable pageable);
+
+    // optimized to fetch ManyToOne relations as well
+    @Query("SELECT DISTINCT e FROM Event e JOIN FETCH e.organizer")
+    List<Event> findAllForExport();
 
     @Modifying
     @Query("UPDATE Event e SET e.status = 'COMPLETED' WHERE e.status = 'PUBLISHED' AND e.endDatetime <= :now")

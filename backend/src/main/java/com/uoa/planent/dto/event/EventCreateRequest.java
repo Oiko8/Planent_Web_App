@@ -77,10 +77,6 @@ public class EventCreateRequest {
     @Builder.Default
     boolean publish = false; // false -> DRAFT | true -> PUBLISHED (default DRAFT)
 
-    @Nullable // optional
-    @JsonDeserialize(contentUsing = TrimDeserializer.class)
-    List<@NotBlank(message = "Media URL cannot be blank") @Size(max = 255) String> mediaUrls; // if given the list then it cannot be blank
-
     @NotEmpty(message = "Missing event category IDs")
     List<@NotNull Integer> categoryIds;
 

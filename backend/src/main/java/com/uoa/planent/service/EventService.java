@@ -2,6 +2,7 @@ package com.uoa.planent.service;
 
 import com.uoa.planent.dto.event.*;
 import com.uoa.planent.event.EventCancelledEvent;
+import com.uoa.planent.event.MediaDeleteEvent;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.EventMapper;
 import com.uoa.planent.model.*;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import com.uoa.planent.PlanentApplication;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Comparator;
 import java.time.Instant;
 import java.util.List;
@@ -40,6 +43,8 @@ public class EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+
+    private final StorageService storageService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -146,7 +151,9 @@ public class EventService {
 
 
     @Transactional
-    public EventResponse createEvent(EventCreateRequest request, @NotNull Integer organizerId) {
+    public EventResponse createEvent(EventCreateRequest request, List<MultipartFile> media, @NotNull Integer organizerId) {
+        validateMediaFiles(media);
+
         // get organizer user
         User organizer = userRepository.findById(organizerId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + organizerId + "' not found."));
 
@@ -169,11 +176,6 @@ public class EventService {
 
         // add them now
 
-        // media (optional)
-        if (request.getMediaUrls() != null){
-            addMedia(event, request.getMediaUrls());
-        }
-
         // categories
         addCategories(event, request.getCategoryIds());
 
@@ -192,8 +194,12 @@ public class EventService {
         // validate that everything given is correct
         event.validate();
 
-        // all good so save to database
+        // all good so save to database to generate the event's id
         Event savedEvent = eventRepository.save(event);
+
+        // and add media now that we have the event's id
+        uploadAndAddMedia(savedEvent, media);
+
         return EventMapper.toResponse(savedEvent);
     }
 
@@ -204,13 +210,19 @@ public class EventService {
 
         event.checkIfDeletable();
 
-        eventRepository.delete(event); // cascade ALL and orphan removal will take care of media, categories and ticket types
+        // deletable -> delete media from storage
+        List<String> fileUrls = event.getMedia().stream().map(EventMedia::getPhotoUrl).toList();
+        eventPublisher.publishEvent(new MediaDeleteEvent(fileUrls));
+
+        eventRepository.delete(event); // cascade ALL and orphan removal will take care of media, categories and ticket types table rows
     }
 
 
 
     @Transactional
-    public EventResponse updateEvent(Integer eventId, EventUpdateRequest request) {
+    public EventResponse updateEvent(Integer eventId, EventUpdateRequest request, List<MultipartFile> media) {
+        validateMediaFiles(media);
+
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
 
         event.checkIfEditable();
@@ -289,6 +301,55 @@ public class EventService {
         foundCategories.forEach(event::addCategory); // add them to event (automatically adds event id)
     }
 
+    private void validateMediaFiles(List<MultipartFile> media) {
+        if (media == null || media.isEmpty()) { // no media -> good
+            return;
+        }
+
+        for (MultipartFile file : media) {
+            if (file != null && !file.isEmpty()) {
+                // validate content type (MIME allowed)
+                String contentType = file.getContentType();
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    throw new IllegalArgumentException("File '" + file.getOriginalFilename() + "' is not a valid image. Only images are allowed.");
+                }
+            }
+        }
+    }
+
+    // uploads/stores media file and adds it to the media table with its url
+    private void uploadAndAddMedia(@NotNull Event event, @NotNull List<MultipartFile> media) {
+        if (media == null || media.isEmpty()) { // no media -> nothing to upload
+            return;
+        }
+
+        List<String> uploadedUrls = new java.util.ArrayList<>();
+        try {
+            // upload/store
+            for (MultipartFile file : media) {
+                if (file != null) {
+                    String generatedUrl = storageService.storeWithEventId(file, event.getId());
+                    uploadedUrls.add(generatedUrl);
+                }
+            }
+
+            // add to table
+            addMedia(event, uploadedUrls);
+
+            // save event again
+            eventRepository.save(event);
+
+        } catch (Exception e) {
+            // if an upload failed, delete already uploaded media files
+            log.error("Media processing or final save failed for event ID: {}. Cleaning up already uploaded files...", event.getId(), e);
+            uploadedUrls.forEach(storageService::delete);
+
+            // re-throw to rollback
+            throw e;
+        }
+    }
+
+    // just creates the row with the photo url in the media table
     private void addMedia(@NotNull Event event, @NotNull List<@NotNull String> mediaUrls) {
         mediaUrls.forEach(url -> {
             EventMedia media = new EventMedia();
