@@ -28,6 +28,7 @@ import org.springframework.validation.annotation.Validated;
 import com.uoa.planent.PlanentApplication;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.time.Instant;
 import java.util.List;
@@ -152,8 +153,6 @@ public class EventService {
 
     @Transactional
     public EventResponse createEvent(EventCreateRequest request, List<MultipartFile> media, @NotNull Integer organizerId) {
-        validateMediaFiles(media);
-
         // get organizer user
         User organizer = userRepository.findById(organizerId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + organizerId + "' not found."));
 
@@ -215,14 +214,13 @@ public class EventService {
         eventPublisher.publishEvent(new MediaDeleteEvent(fileUrls));
 
         eventRepository.delete(event); // cascade ALL and orphan removal will take care of media, categories and ticket types table rows
+        // after the transaction (database commit), media files will also be deleted by the listener
     }
 
 
 
     @Transactional
     public EventResponse updateEvent(Integer eventId, EventUpdateRequest request, List<MultipartFile> media) {
-        validateMediaFiles(media);
-
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
 
         event.checkIfEditable();
@@ -242,7 +240,7 @@ public class EventService {
 
         // date
         if (request.getStartDatetime() != null || request.getEndDatetime() != null) {
-            event.reschedule(request.getStartDatetime(), request.getEndDatetime()); // handles null
+            event.reschedule(request.getStartDatetime(), request.getEndDatetime()); // handles if one of them is null
         }
 
         // categories (replace)
@@ -252,11 +250,8 @@ public class EventService {
             addCategories(event, request.getCategoryIds());
         }
 
-        // media (replace)
-        if (request.getMediaUrls() != null) {
-            event.getMedia().clear();
-            addMedia(event, request.getMediaUrls());
-        }
+        // media (remove or add new)
+        updateEventMedia(event, request.getMediaUrls(), media);
 
         // ticket Types (complex replace)
         if (request.getTicketTypes() != null) {
@@ -288,9 +283,28 @@ public class EventService {
     }
 
 
+    public List<CategoryResponse> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                // Show only the 10 canonical ones in the dropdowns.
+                // Legacy categories still in the DB are kept for existing events
+                // but won't be selectable for new ones.
+                .filter(c -> PlanentApplication.CANONICAL_CATEGORIES.contains(c.getCategoryName()))
+                // Sort by position in the canonical list — keeps "Other" last.
+                .sorted(Comparator.comparingInt(c -> PlanentApplication.CANONICAL_CATEGORIES.indexOf(c.getCategoryName())))
+                .map(EventMapper::toCategoryResponse)
+                .toList();
+    }
 
 
 
+
+
+
+
+
+    // -------------------------------- helpers --------------------------------
+
+    // add category to event
     private void addCategories(@NotNull Event event, @NotNull List<@NotNull Integer> categoryIds) throws ResourceNotFoundException {
         long requestedIdsCount = categoryIds.stream().distinct().count(); // count distinct sent only
 
@@ -301,39 +315,25 @@ public class EventService {
         foundCategories.forEach(event::addCategory); // add them to event (automatically adds event id)
     }
 
-    private void validateMediaFiles(List<MultipartFile> media) {
-        if (media == null || media.isEmpty()) { // no media -> good
-            return;
-        }
 
-        for (MultipartFile file : media) {
-            if (file != null && !file.isEmpty()) {
-                // validate content type (MIME allowed)
-                String contentType = file.getContentType();
-                if (contentType == null || !contentType.startsWith("image/")) {
-                    throw new IllegalArgumentException("File '" + file.getOriginalFilename() + "' is not a valid image. Only images are allowed.");
-                }
-            }
-        }
-    }
-
+    // add list of media files to event
     // uploads/stores media file and adds it to the media table with its url
-    private void uploadAndAddMedia(@NotNull Event event, @NotNull List<MultipartFile> media) {
-        if (media == null || media.isEmpty()) { // no media -> nothing to upload
+    private void uploadAndAddMedia(@NotNull Event event, List<MultipartFile> media) {
+        if (media == null || media.isEmpty()) { // no media -> nothing to upload -> all good
             return;
         }
 
-        List<String> uploadedUrls = new java.util.ArrayList<>();
+        List<String> uploadedUrls = new ArrayList<>();
         try {
-            // upload/store
+            // upload/store all files
             for (MultipartFile file : media) {
-                if (file != null) {
+                if (file != null && !file.isEmpty()) {
                     String generatedUrl = storageService.storeWithEventId(file, event.getId());
                     uploadedUrls.add(generatedUrl);
                 }
             }
 
-            // add to table
+            // add URLs to media table
             addMedia(event, uploadedUrls);
 
             // save event again
@@ -344,7 +344,7 @@ public class EventService {
             log.error("Media processing or final save failed for event ID: {}. Cleaning up already uploaded files...", event.getId(), e);
             uploadedUrls.forEach(storageService::delete);
 
-            // re-throw to rollback
+            // re-throw to rollback transaction (cancel creation)
             throw e;
         }
     }
@@ -358,10 +358,37 @@ public class EventService {
         });
     }
 
+    // requestMediaUrls should contain a subset of the existing media urls, diff of existing-requested will be deleted from the event
+    // if none sent (null) -> no changes
+    // media contains any new media to be added to the event
+    private void updateEventMedia(@NotNull Event event, List<String> requestMediaUrls, List<MultipartFile> media) {
+        // if got media urls -> keep only those existing ones
+        if (requestMediaUrls != null) {
+            // from request urls -> keep only the ones that actually exist in the event (retained)
+            List<String> existingUrls = event.getMedia().stream().map(EventMedia::getPhotoUrl).toList();
+            List<String> retainedUrls = requestMediaUrls.stream().filter(existingUrls::contains).toList();
+
+            // delete the ones that are not in the retained (diff)
+            List<String> urlsToDelete = existingUrls.stream().filter(url -> !retainedUrls.contains(url)).toList();
+            if (!urlsToDelete.isEmpty()) {
+                eventPublisher.publishEvent(new MediaDeleteEvent(urlsToDelete));
+            }
+
+            // re-add retained urls
+            event.getMedia().clear();
+            addMedia(event, retainedUrls);
+        }
+
+        // upload and add any new media
+        uploadAndAddMedia(event, media);
+    }
+
+    // add list of ticket types to event
     private void addTicketTypes(@NotNull Event event, @NotNull List<@NotNull TicketTypeRequest> ticketTypeRequests) {
         ticketTypeRequests.stream().map(EventMapper::toTicketTypeModel).forEach(event::addTicketType); // event capacity checked during validation
     }
 
+    // update ticket types of event with the given list, if allowed
     private void updateTicketTypes(@NotNull Event event, @NotNull List<@NotNull TicketTypeRequest> ticketTypeRequests) {
         // remove existing ticket types that are not in the requested only if they dont have bookings already
         List<EventTicketType> ticketsToRemove = event.getTicketTypes().stream()
@@ -383,17 +410,5 @@ public class EventService {
                             // doesnt exist -> add
                             () -> event.addTicketType(EventMapper.toTicketTypeModel(request)));
         }
-    }
-
-    public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream()
-                // Show only the 10 canonical ones in the dropdowns.
-                // Legacy categories still in the DB are kept for existing events
-                // but won't be selectable for new ones.
-                .filter(c -> PlanentApplication.CANONICAL_CATEGORIES.contains(c.getCategoryName()))
-                // Sort by position in the canonical list — keeps "Other" last.
-                .sorted(Comparator.comparingInt(c -> PlanentApplication.CANONICAL_CATEGORIES.indexOf(c.getCategoryName())))
-                .map(EventMapper::toCategoryResponse)
-                .toList();
     }
 }

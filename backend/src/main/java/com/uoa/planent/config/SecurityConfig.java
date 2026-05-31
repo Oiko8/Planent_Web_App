@@ -1,6 +1,7 @@
 package com.uoa.planent.config;
 
 import com.uoa.planent.security.JwtAuthFilter;
+import com.uoa.planent.service.FileSystemStorageService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,9 @@ public class SecurityConfig {
     @Value("${frontend.urls}")
     private List<String> frontendUrls;
 
+    @Value("${app.storage.media-folder}")
+    private String mediaFolder;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
@@ -52,6 +56,7 @@ public class SecurityConfig {
                 // api endpoint permissions
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll() // authentication by anyone
+                        .requestMatchers("/" + mediaFolder + "/**").permitAll() // media/photos by anyone
                         .requestMatchers(HttpMethod.GET, "/events/my-events").authenticated() // authenticated to get my events
                         .requestMatchers(HttpMethod.GET, "/events/**").permitAll() // other gets are public on events
                         .anyRequest().authenticated()) // all others need authentication

@@ -1,5 +1,6 @@
 package com.uoa.planent.controller;
 
+import com.uoa.planent.annotation.ValidImage;
 import com.uoa.planent.dto.event.*;
 import com.uoa.planent.security.UserDetailsImpl;
 import com.uoa.planent.service.EventService;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.uoa.planent.service.EventViewService;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
+@Validated
 @RequestMapping("/events")
 public class EventController {
 
@@ -82,6 +85,8 @@ public class EventController {
         return ResponseEntity.ok(eventService.getMyEvents(currentUser.getId(), pageable)); // authenticated == non-null user id
     }
 
+
+
     @DeleteMapping("/{eventId}")
     @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
     public ResponseEntity<Void> deleteEvent(@PathVariable Integer eventId) {
@@ -90,17 +95,25 @@ public class EventController {
     }
 
 
+
+
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (data) + media (multipart)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<EventResponse> createEvent(@ModelAttribute @Valid EventCreateRequest request, @RequestParam(value = "media", required = false) List<MultipartFile> media, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
+    public ResponseEntity<EventResponse> createEvent(@ModelAttribute @Valid EventCreateRequest request, @RequestParam(value = "media", required = false) List<@ValidImage MultipartFile> media, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, media, currentUser.getId()));
     }
 
+
+
     @PatchMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (data) + media (multipart)
     @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
-    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @ModelAttribute @Valid EventUpdateRequest request, @RequestParam(value = "media", required = false) List<MultipartFile> media){
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @ModelAttribute @Valid EventUpdateRequest request, @RequestParam(value = "media", required = false) List<@ValidImage MultipartFile> media){
         return ResponseEntity.ok().body(eventService.updateEvent(eventId, request, media));
     }
+
+
+
 
     @PostMapping("/{eventId}/view")
     @PreAuthorize("isAuthenticated()")
