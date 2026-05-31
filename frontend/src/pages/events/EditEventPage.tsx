@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
+import { mediaUrl } from "../../api/media";
+import { buildEventFormData, statusFormData, validateImages } from "../../types/eventFormData";
 import { UpdateEventForm } from "../../types/updateEventData";
+import type { MediaResponse } from "../../types/event";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import Loader from "../../components/Loader";
 
@@ -26,6 +29,12 @@ export default function EditEventPage() {
         ticketTypes: [],
     });
 
+    // existing images to KEEP (removing one here deletes it on save)
+    const [existingMedia, setExistingMedia] = useState<MediaResponse[]>([]);
+    // newly added image files
+    const [newFiles, setNewFiles] = useState<File[]>([]);
+    const [newPreviews, setNewPreviews] = useState<string[]>([]);
+
     const [eventStatus, setEventStatus] = useState<string>("");
     const [availableCategories, setAvailableCategories] = useState<{ categoryId: number; categoryName: string }[]>([]);
     const [loading, setLoading] = useState(true);
@@ -44,6 +53,7 @@ export default function EditEventPage() {
                 const event = eventRes.data;
                 setEventStatus(event.status);
                 setAvailableCategories(categoriesRes.data);
+                setExistingMedia(event.media ?? []);
 
                 // convert ISO datetimes to datetime-local input format (YYYY-MM-DDTHH:MM)
                 const toLocalInput = (iso: string) =>
@@ -77,6 +87,13 @@ export default function EditEventPage() {
         }
         fetchData();
     }, [eventId]);
+
+    // build/revoke object URLs for new image previews
+    useEffect(() => {
+        const urls = newFiles.map(f => URL.createObjectURL(f));
+        setNewPreviews(urls);
+        return () => urls.forEach(u => URL.revokeObjectURL(u));
+    }, [newFiles]);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         const { name, value, type } = e.target;
@@ -123,16 +140,40 @@ export default function EditEventPage() {
         }));
     }
 
-    async function handleSubmit(e: React.SubmitEvent) {
+    function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+        const picked = Array.from(e.target.files ?? []);
+        if (picked.length === 0) return;
+
+        const err = validateImages(picked);
+        if (err) {
+            setErrorMessage(err);
+            e.target.value = "";
+            return;
+        }
+
+        setNewFiles(prev => [...prev, ...picked]);
+        setErrorMessage("");
+        e.target.value = "";
+    }
+
+    function removeNewFile(index: number) {
+        setNewFiles(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function removeExistingImage(mediaId: number) {
+        setExistingMedia(prev => prev.filter(m => m.mediaId !== mediaId));
+    }
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setErrorMessage("");
 
         try {
-            await api.patch(`/events/${eventId}`, {
-                ...eventForm,
-                startDatetime: new Date(eventForm.startDatetime).toISOString(),
-                endDatetime: new Date(eventForm.endDatetime).toISOString(),
+            const formData = buildEventFormData(eventForm, newFiles, {
+                // URLs of existing images we want to keep; omitted ones get deleted server-side
+                keepMediaUrls: existingMedia.map(m => m.photoUrl),
             });
+            await api.patch(`/events/${eventId}`, formData);
             navigate("/my-events");
         } catch (err: any) {
             setErrorMessage(err.response?.data?.detail ?? "Failed to update event.");
@@ -141,7 +182,8 @@ export default function EditEventPage() {
 
     async function handleCancelEvent() {
         try {
-            await api.patch(`/events/${eventId}`, { cancel: true });
+            // endpoint is multipart-only now -> send a FormData with just `cancel`
+            await api.patch(`/events/${eventId}`, statusFormData({ cancel: true }));
             navigate("/my-events");
         } catch (err: any) {
             setErrorMessage(err.response?.data?.detail ?? "Failed to cancel event.");
@@ -183,7 +225,6 @@ export default function EditEventPage() {
                             address: location.address,
                             city: location.city,
                             country: location.country,
-                            zipcode: location.zipcode,
                             latitude: location.latitude,
                             longitude: location.longitude,
                         }));
@@ -222,6 +263,54 @@ export default function EditEventPage() {
             <div>
                 <label>Description</label>
                 <textarea name="description" value={eventForm.description} onChange={handleChange} />
+            </div>
+
+            {/* Images */}
+            <div>
+                <label>Images</label>
+
+                {existingMedia.length > 0 && (
+                    <div className="media-preview-grid">
+                        {existingMedia.map(m => (
+                            <div key={m.mediaId} className="media-preview-item">
+                                <img src={mediaUrl(m.photoUrl)} alt="event" className="media-preview-img" />
+                                <button
+                                    type="button"
+                                    className="media-preview-remove"
+                                    onClick={() => removeExistingImage(m.mediaId)}
+                                    aria-label="Remove image"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <input
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    multiple
+                    onChange={handleFilesSelected}
+                />
+
+                {newPreviews.length > 0 && (
+                    <div className="media-preview-grid">
+                        {newPreviews.map((src, i) => (
+                            <div key={i} className="media-preview-item">
+                                <img src={src} alt={`new upload ${i + 1}`} className="media-preview-img" />
+                                <button
+                                    type="button"
+                                    className="media-preview-remove"
+                                    onClick={() => removeNewFile(i)}
+                                    aria-label="Remove image"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Categories */}

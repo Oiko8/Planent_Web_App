@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import api from "../../api/axiosConfig";
+import { mediaUrl } from "../../api/media";
 import type { EventItem } from "../../types/event";
 import { useAuth } from "../../context/AuthContext";
 import Loader from "../../components/Loader";
@@ -15,6 +16,9 @@ export default function EventDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // gallery state
+    const [activeImage, setActiveImage] = useState(0);
+
     // booking state
     const [selectedTicketTypeId, setSelectedTicketTypeId] = useState<number | null>(null);
     const [numberOfTickets, setNumberOfTickets] = useState(1);
@@ -27,6 +31,7 @@ export default function EventDetailPage() {
             try {
                 const response = await api.get(`/events/${eventId}`);
                 setEvent(response.data);
+                setActiveImage(0);
             } catch (err) {
                 setError("Event not found.");
             } finally {
@@ -35,14 +40,6 @@ export default function EventDetailPage() {
         }
         fetchEvent();
     }, [eventId]);
-
-    useEffect(() => {
-        if (user && eventId) {
-            api.post(`/events/${eventId}/view`).catch(() => {
-                // do nothing just send the "view" in the backend
-            });
-        }
-    }, [eventId, user]);
 
     async function handleBooking() {
         if (!selectedTicketTypeId) return;
@@ -74,6 +71,9 @@ export default function EventDetailPage() {
     const totalCost = selectedTicket ? (selectedTicket.price * numberOfTickets).toFixed(2) : "0.00";
     const canBook = event.status === "PUBLISHED" && user && event.organizerId !== user.userId;
 
+    const media = event.media ?? [];
+    const heroSrc = mediaUrl(media[activeImage]?.photoUrl);
+
     return (
         <div className="event-detail-page">
 
@@ -86,6 +86,38 @@ export default function EventDetailPage() {
             </div>
 
             <h1 className="event-detail-title">{event.title}</h1>
+
+            {/* Image gallery */}
+            {media.length > 0 && (
+                <div className="event-detail-gallery">
+                    {heroSrc && (
+                        <img
+                            className="event-detail-gallery-main"
+                            src={heroSrc}
+                            alt={event.title}
+                        />
+                    )}
+                    {media.length > 1 && (
+                        <div className="event-detail-gallery-thumbs">
+                            {media.map((m, i) => {
+                                const thumb = mediaUrl(m.photoUrl);
+                                return (
+                                    <img
+                                        key={m.mediaId}
+                                        src={thumb}
+                                        alt={`${event.title} ${i + 1}`}
+                                        className={
+                                            "event-detail-gallery-thumb" +
+                                            (i === activeImage ? " event-detail-gallery-thumb-active" : "")
+                                        }
+                                        onClick={() => setActiveImage(i)}
+                                    />
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Meta info */}
             <div className="event-detail-meta">

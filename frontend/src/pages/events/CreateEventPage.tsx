@@ -1,9 +1,10 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateEventForm } from "../../types/createEventData";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import DatePicker from "react-datepicker";
 
 import api from "../../api/axiosConfig";
+import { buildEventFormData, validateImages } from "../../types/eventFormData";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateEventPage() {
@@ -22,9 +23,10 @@ export default function CreateEventPage() {
         description: "",
         categoryIds: [],
         ticketTypes: [],
-        mediaUrls: [],
     });
 
+    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+    const [previews, setPreviews] = useState<string[]>([]);
     const [errorMessage, setErrorMessage] = useState("");
 
     const navigate = useNavigate();
@@ -43,7 +45,34 @@ export default function CreateEventPage() {
         fetchCategories();
     }, []);
 
-    async function handleNewEvent(e: React.SubmitEvent) {
+    // build/revoke object URLs for image previews
+    useEffect(() => {
+        const urls = mediaFiles.map(f => URL.createObjectURL(f));
+        setPreviews(urls);
+        return () => urls.forEach(u => URL.revokeObjectURL(u));
+    }, [mediaFiles]);
+
+    function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+        const picked = Array.from(e.target.files ?? []);
+        if (picked.length === 0) return;
+
+        const err = validateImages(picked);
+        if (err) {
+            setErrorMessage(err);
+            e.target.value = "";
+            return;
+        }
+
+        setMediaFiles(prev => [...prev, ...picked]);
+        setErrorMessage("");
+        e.target.value = ""; // allow re-picking the same file
+    }
+
+    function removeFile(index: number) {
+        setMediaFiles(prev => prev.filter((_, i) => i !== index));
+    }
+
+    async function handleNewEvent(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         // basic validation
@@ -52,6 +81,11 @@ export default function CreateEventPage() {
             !eventForm.startDatetime || !eventForm.endDatetime ||
             !eventForm.description || eventForm.capacity <= 0) {
             setErrorMessage("Please fill in all required fields.");
+            return;
+        }
+
+        if (eventForm.latitude == null || eventForm.longitude == null) {
+            setErrorMessage("Please select the venue address from the suggestions.");
             return;
         }
 
@@ -68,21 +102,10 @@ export default function CreateEventPage() {
         setErrorMessage("");
 
         try {
-            const payload = {
-                ...eventForm,
-                startDatetime: new Date(eventForm.startDatetime).toISOString(),
-                endDatetime: new Date(eventForm.endDatetime).toISOString(),
-            };
-            const tokenInStorage = localStorage.getItem("token");
-            console.log("Token in storage at submit:", tokenInStorage);
-            console.log("Sending payload:", payload);
-            
-            await api.post("/events", payload);
+            const formData = buildEventFormData(eventForm, mediaFiles);
+            await api.post("/events", formData);
             navigate("/my-events");
-
         } catch (error: any) {
-            console.log("Error response:", error.response?.data); 
-            console.log("Validation errors:", error.response?.data?.errors);
             const message = error.response?.data?.detail
                 ?? "Failed to create event. Please try again.";
             setErrorMessage(message);
@@ -111,15 +134,15 @@ export default function CreateEventPage() {
     }
 
     function handleTicketChange(index: number, field: string, value: string) {
-    setEventForm((prev) => {
-        const updated = [...prev.ticketTypes];
-        updated[index] = {
-            ...updated[index],
-            [field]: field === "price" || field === "quantity" ? Number(value) : value,
-        };
-        return { ...prev, ticketTypes: updated };
-    });
-}
+        setEventForm((prev) => {
+            const updated = [...prev.ticketTypes];
+            updated[index] = {
+                ...updated[index],
+                [field]: field === "price" || field === "quantity" ? Number(value) : value,
+            };
+            return { ...prev, ticketTypes: updated };
+        });
+    }
 
     function addTicketType() {
         setEventForm((prev) => ({
@@ -134,7 +157,7 @@ export default function CreateEventPage() {
             ticketTypes: prev.ticketTypes.filter((_, i) => i !== index),
         }));
     }
-        
+
     return (
         <form className="auth-page" onSubmit={handleNewEvent}>
             <div className="auth-card auth-card-wide">
@@ -214,7 +237,6 @@ export default function CreateEventPage() {
                                 address: location.address,
                                 city: location.city,
                                 country: location.country,
-                                zipcode: location.zipcode,
                                 latitude: location.latitude,
                                 longitude: location.longitude,
                             }));
@@ -236,6 +258,35 @@ export default function CreateEventPage() {
                 <div className="auth-field">
                     <label className="auth-label">Description *</label>
                     <textarea className="auth-input auth-textarea" name="description" value={eventForm.description} onChange={handleChange} placeholder="Describe your event" />
+                </div>
+
+                <p className="auth-section-label">Images</p>
+                <div className="auth-field">
+                    <label className="auth-label">Event photos (JPEG or PNG, up to 5MB each)</label>
+                    <input
+                        className="auth-input"
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        multiple
+                        onChange={handleFilesSelected}
+                    />
+                    {previews.length > 0 && (
+                        <div className="media-preview-grid">
+                            {previews.map((src, i) => (
+                                <div key={i} className="media-preview-item">
+                                    <img src={src} alt={`upload ${i + 1}`} className="media-preview-img" />
+                                    <button
+                                        type="button"
+                                        className="media-preview-remove"
+                                        onClick={() => removeFile(i)}
+                                        aria-label="Remove image"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <p className="auth-section-label">Categories</p>
@@ -308,5 +359,4 @@ export default function CreateEventPage() {
             </div>
         </form>
     );
-
 }
