@@ -73,6 +73,7 @@ public class FileSystemStorageService implements StorageService {
             }
 
             // compress and save with thumbnailator (as .webp)
+            // deletes metadata as well for safety
             try {
                 Thumbnails.of(file.getInputStream())
                         .size(1200, 1200)
