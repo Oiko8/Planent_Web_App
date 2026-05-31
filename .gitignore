@@ -7,5 +7,4 @@
 *.njsproj
 *.sln
 .DS_Store
-media/
 dataset/
