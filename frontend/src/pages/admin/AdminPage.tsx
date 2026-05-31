@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
 import type { PageResponse, EventSummary } from "../../types/event";
+import { statusFormData } from "../../types/eventFormData";
 import Loader from "../../components/Loader";
 
 type UserResponse = {
@@ -89,7 +90,7 @@ export default function AdminPage() {
 
     async function handlePublishEvent(eventId: number) {
         try {
-            await api.patch(`/events/${eventId}`, { publish: true });
+            await api.patch(`/events/${eventId}`, statusFormData({ publish: true }));
             setEvents(prev => prev.map(e =>
                 e.eventId === eventId ? { ...e, status: "PUBLISHED" as const } : e
             ));
@@ -100,7 +101,7 @@ export default function AdminPage() {
 
     async function handleCancelEvent(eventId: number) {
         try {
-            await api.patch(`/events/${eventId}`, { cancel: true });
+            await api.patch(`/events/${eventId}`, statusFormData({ cancel: true }));
             setEvents(prev => prev.map(e =>
                 e.eventId === eventId ? { ...e, status: "CANCELLED" as const } : e
             ));

@@ -15,7 +15,12 @@ export default defineConfig({
               target: process.env.PROXY_TARGET || `http://host.docker.internal:5000`, // backend target proxy
               changeOrigin: true,
               secure: false, // ignore http warnings
-          }
+          },
+          '/media': {
+              target: process.env.PROXY_TARGET || `http://host.docker.internal:5000`,
+              changeOrigin: true,
+              secure: false,
+          },
       }
   },
 })

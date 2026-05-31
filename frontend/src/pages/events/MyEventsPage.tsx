@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import Pagination from "../../components/Pagination";
 import type { EventSummary, PageResponse } from "../../types/event";
+import { statusFormData } from "../../types/eventFormData";
 import Loader from "../../components/Loader";
 
 const PAGE_SIZE = 10;
@@ -18,7 +19,7 @@ export default function MyEventsPage() {
     const [deleteError, setDeleteError] = useState("");
     const navigate = useNavigate();
 
-
+    // Refetches whenever `page` changes
     useEffect(() => {
         async function fetchMyEvents() {
             setLoading(true);
@@ -59,7 +60,7 @@ export default function MyEventsPage() {
 
     async function handlePublish(eventId: number) {
         try {
-            await api.patch(`/events/${eventId}`, { publish: true });
+            await api.patch(`/events/${eventId}`, statusFormData({ publish: true }));
             setPageData(prev => prev ? {
                 ...prev,
                 content: prev.content.map(e =>
@@ -104,7 +105,15 @@ export default function MyEventsPage() {
                     {events.map((event) => (
                         <div key={event.eventId} className="my-event-card">
                             <div>
-                                <h3>{event.title}</h3>
+                                <h3 className="my-event-title">
+                                    <button
+                                        type="button"
+                                        className="event-title-button"
+                                        onClick={() => navigate(`/events/${event.eventId}`)}
+                                    >
+                                        {event.title}
+                                    </button>
+                                </h3>
                                 <p>{event.eventType} — {event.city}, {event.country}</p>
                                 <p>{new Date(event.startDatetime).toLocaleDateString("el-GR")}</p>
                                 <span className={`status-badge status-${event.status.toLowerCase()}`}>

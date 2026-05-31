@@ -102,7 +102,7 @@ export default function CreateEventPage() {
         setErrorMessage("");
 
         try {
-            const formData = buildEventFormData(eventForm, mediaFiles);
+            const formData = buildEventFormData(eventForm, mediaFiles, { publish: false });
             await api.post("/events", formData);
             navigate("/my-events");
         } catch (error: any) {

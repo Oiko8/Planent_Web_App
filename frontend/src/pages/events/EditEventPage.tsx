@@ -4,7 +4,7 @@ import api from "../../api/axiosConfig";
 import { mediaUrl } from "../../api/media";
 import { buildEventFormData, statusFormData, validateImages } from "../../types/eventFormData";
 import { UpdateEventForm } from "../../types/updateEventData";
-import type { MediaResponse } from "../../types/event";
+import type { MediaResponse, EventStatus } from "../../types/event";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import Loader from "../../components/Loader";
 
@@ -35,7 +35,7 @@ export default function EditEventPage() {
     const [newFiles, setNewFiles] = useState<File[]>([]);
     const [newPreviews, setNewPreviews] = useState<string[]>([]);
 
-    const [eventStatus, setEventStatus] = useState<string>("");
+    const [eventStatus, setEventStatus] = useState<EventStatus | "">("");
     const [availableCategories, setAvailableCategories] = useState<{ categoryId: number; categoryName: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
@@ -193,132 +193,143 @@ export default function EditEventPage() {
     if (loading) return <Loader />;
 
     return (
-        <form className="event-creation-body" onSubmit={handleSubmit}>
-            <h1 className="header">Edit Event</h1>
-
-            {/* Title */}
-            <div>
-                <label>Title</label>
-                <input name="title" value={eventForm.title} onChange={handleChange} placeholder="Event title" />
-            </div>
-
-            {/* Event Type */}
-            <div>
-                <label>Event Type</label>
-                <input name="eventType" value={eventForm.eventType} onChange={handleChange} placeholder="e.g. Concert, Workshop" />
-            </div>
-
-            {/* Venue */}
-            <div>
-                <label>Venue</label>
-                <input name="venue" value={eventForm.venue} onChange={handleChange} placeholder="Venue name" />
-            </div>
-
-            {/* Location Autocomplete */}
-            <div>
-                <label>Location</label>
-                <LocationAutocomplete
-                    placeholder="Search new address..."
-                    onSelect={(location) => {
-                        setEventForm(prev => ({
-                            ...prev,
-                            address: location.address,
-                            city: location.city,
-                            country: location.country,
-                            latitude: location.latitude,
-                            longitude: location.longitude,
-                        }));
-                    }}
-                />
-                {/* Show current location */}
-                <div className="location-selected">
-                    <span>📍 {eventForm.address}, {eventForm.city}, {eventForm.country}</span>
-                    {eventForm.latitude && (
-                        <span className="location-coords">
-                            {Number(eventForm.latitude).toFixed(4)}, {Number(eventForm.longitude).toFixed(4)}
+        <form className="auth-page" onSubmit={handleSubmit}>
+            <div className="auth-card auth-card-wide">
+                <div className="edit-event-heading">
+                    <div>
+                        <h1 className="auth-title">Edit Event</h1>
+                        <p className="auth-subtitle">Update the details of your event</p>
+                    </div>
+                    {eventStatus && (
+                        <span className={`status-badge status-${eventStatus.toLowerCase()}`}>
+                            {eventStatus}
                         </span>
                     )}
                 </div>
-            </div>
 
-            {/* Start DateTime */}
-            <div>
-                <label>Start Date & Time</label>
-                <input name="startDatetime" type="datetime-local" value={eventForm.startDatetime} onChange={handleChange} />
-            </div>
-
-            {/* End DateTime */}
-            <div>
-                <label>End Date & Time</label>
-                <input name="endDatetime" type="datetime-local" value={eventForm.endDatetime} onChange={handleChange} />
-            </div>
-
-            {/* Capacity */}
-            <div>
-                <label>Capacity</label>
-                <input name="capacity" type="number" value={eventForm.capacity} onChange={handleChange} />
-            </div>
-
-            {/* Description */}
-            <div>
-                <label>Description</label>
-                <textarea name="description" value={eventForm.description} onChange={handleChange} />
-            </div>
-
-            {/* Images */}
-            <div>
-                <label>Images</label>
-
-                {existingMedia.length > 0 && (
-                    <div className="media-preview-grid">
-                        {existingMedia.map(m => (
-                            <div key={m.mediaId} className="media-preview-item">
-                                <img src={mediaUrl(m.photoUrl)} alt="event" className="media-preview-img" />
-                                <button
-                                    type="button"
-                                    className="media-preview-remove"
-                                    onClick={() => removeExistingImage(m.mediaId)}
-                                    aria-label="Remove image"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        ))}
+                <p className="auth-section-label">Basic Info</p>
+                <div className="auth-grid-2">
+                    <div className="auth-field">
+                        <label className="auth-label">Title</label>
+                        <input className="auth-input" name="title" value={eventForm.title} onChange={handleChange} placeholder="Event title" />
                     </div>
-                )}
-
-                <input
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    multiple
-                    onChange={handleFilesSelected}
-                />
-
-                {newPreviews.length > 0 && (
-                    <div className="media-preview-grid">
-                        {newPreviews.map((src, i) => (
-                            <div key={i} className="media-preview-item">
-                                <img src={src} alt={`new upload ${i + 1}`} className="media-preview-img" />
-                                <button
-                                    type="button"
-                                    className="media-preview-remove"
-                                    onClick={() => removeNewFile(i)}
-                                    aria-label="Remove image"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        ))}
+                    <div className="auth-field">
+                        <label className="auth-label">Event Type</label>
+                        <input className="auth-input" name="eventType" value={eventForm.eventType} onChange={handleChange} placeholder="e.g. Concert, Workshop" />
                     </div>
-                )}
-            </div>
+                    <div className="auth-field">
+                        <label className="auth-label">Venue</label>
+                        <input className="auth-input" name="venue" value={eventForm.venue} onChange={handleChange} placeholder="Venue name" />
+                    </div>
+                    <div className="auth-field">
+                        <label className="auth-label">Capacity</label>
+                        <input className="auth-input" name="capacity" type="number" value={eventForm.capacity} onChange={handleChange} placeholder="Max attendees" />
+                    </div>
+                </div>
 
-            {/* Categories */}
-            <div>
-                <label>Categories</label>
-                <div>
+                <p className="auth-section-label">Date & Time</p>
+                <div className="auth-grid-2">
+                    <div className="auth-field">
+                        <label className="auth-label">Start</label>
+                        <input className="auth-input" name="startDatetime" type="datetime-local" value={eventForm.startDatetime} onChange={handleChange} />
+                    </div>
+                    <div className="auth-field">
+                        <label className="auth-label">End</label>
+                        <input className="auth-input" name="endDatetime" type="datetime-local" value={eventForm.endDatetime} onChange={handleChange} />
+                    </div>
+                </div>
+
+                <p className="auth-section-label">Location</p>
+                <div className="auth-field">
+                    <label className="auth-label">Search new address</label>
+                    <LocationAutocomplete
+                        placeholder="Search new address..."
+                        onSelect={(location) => {
+                            setEventForm(prev => ({
+                                ...prev,
+                                address: location.address,
+                                city: location.city,
+                                country: location.country,
+                                latitude: location.latitude,
+                                longitude: location.longitude,
+                            }));
+                        }}
+                    />
+                    {eventForm.city && (
+                        <div className="location-selected">
+                            <span>📍 {eventForm.address}, {eventForm.city}, {eventForm.country}</span>
+                            {eventForm.latitude && (
+                                <span className="location-coords">
+                                    {Number(eventForm.latitude).toFixed(4)}, {Number(eventForm.longitude).toFixed(4)}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <p className="auth-section-label">Description</p>
+                <div className="auth-field">
+                    <label className="auth-label">Description</label>
+                    <textarea className="auth-input auth-textarea" name="description" value={eventForm.description} onChange={handleChange} placeholder="Describe your event" />
+                </div>
+
+                <p className="auth-section-label">Images</p>
+                <div className="auth-field">
+                    {existingMedia.length > 0 && (
+                        <>
+                            <label className="auth-label">Current images</label>
+                            <div className="media-preview-grid">
+                                {existingMedia.map(m => (
+                                    <div key={m.mediaId} className="media-preview-item">
+                                        <img src={mediaUrl(m.photoUrl)} alt="event" className="media-preview-img" />
+                                        <button
+                                            type="button"
+                                            className="media-preview-remove"
+                                            onClick={() => removeExistingImage(m.mediaId)}
+                                            aria-label="Remove image"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    <label className="auth-label" style={{ marginTop: existingMedia.length > 0 ? "1rem" : 0 }}>
+                        Add images (JPEG or PNG, up to 5MB each)
+                    </label>
+                    <input
+                        className="auth-input"
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        multiple
+                        onChange={handleFilesSelected}
+                    />
+
+                    {newPreviews.length > 0 && (
+                        <div className="media-preview-grid">
+                            {newPreviews.map((src, i) => (
+                                <div key={i} className="media-preview-item">
+                                    <img src={src} alt={`new upload ${i + 1}`} className="media-preview-img" />
+                                    <button
+                                        type="button"
+                                        className="media-preview-remove"
+                                        onClick={() => removeNewFile(i)}
+                                        aria-label="Remove image"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <p className="auth-section-label">Categories</p>
+                <div className="auth-checkboxes">
                     {availableCategories.map(cat => (
-                        <label key={cat.categoryId}>
+                        <label key={cat.categoryId} className="auth-checkbox-label">
                             <input
                                 type="checkbox"
                                 checked={eventForm.categoryIds.includes(cat.categoryId)}
@@ -328,66 +339,96 @@ export default function EditEventPage() {
                         </label>
                     ))}
                 </div>
-            </div>
 
-            {/* Ticket Types */}
-            <div>
-                <label>Ticket Types</label>
+                <p className="auth-section-label">Ticket Types</p>
                 {eventForm.ticketTypes.map((ticket, index) => (
-                    <div key={index}>
-                        <input
-                            placeholder="Name (e.g. VIP)"
-                            value={ticket.name}
-                            onChange={e => handleTicketChange(index, "name", e.target.value)}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Price"
-                            value={ticket.price}
-                            onChange={e => handleTicketChange(index, "price", e.target.value)}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Quantity"
-                            value={ticket.quantity}
-                            onChange={e => handleTicketChange(index, "quantity", e.target.value)}
-                        />
-                        <button type="button" onClick={() => removeTicketType(index)}>Remove</button>
-                    </div>
-                ))}
-                <button type="button" onClick={addTicketType}>+ Add Ticket Type</button>
-            </div>
-
-            {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-
-            {/* Action buttons */}
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "1rem" }}>
-                <button type="submit" className="create-event-button">Save Changes</button>
-                <button type="button" className="borderless-button" onClick={() => navigate("/my-events")}>
-                    Back
-                </button>
-            </div>
-
-            {/* Cancel event — only for PUBLISHED */}
-            {eventStatus === "PUBLISHED" && (
-                <div style={{ marginTop: "2rem" }}>
-                    {!confirmCancel ? (
+                    <div key={index} className="ticket-form-row">
+                        <div className="auth-field">
+                            <label className="auth-label">Type Name</label>
+                            <input
+                                className="auth-input"
+                                placeholder="e.g. VIP, Standard"
+                                value={ticket.name}
+                                onChange={e => handleTicketChange(index, "name", e.target.value)}
+                            />
+                        </div>
+                        <div className="auth-field">
+                            <label className="auth-label">Price (€)</label>
+                            <input
+                                className="auth-input"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={ticket.price}
+                                onChange={e => handleTicketChange(index, "price", e.target.value)}
+                            />
+                        </div>
+                        <div className="auth-field">
+                            <label className="auth-label">Quantity</label>
+                            <input
+                                className="auth-input"
+                                type="number"
+                                min="0"
+                                placeholder="0"
+                                value={ticket.quantity}
+                                onChange={e => handleTicketChange(index, "quantity", e.target.value)}
+                            />
+                        </div>
                         <button
                             type="button"
                             className="admin-btn-reject"
-                            onClick={() => setConfirmCancel(true)}
+                            onClick={() => removeTicketType(index)}
                         >
-                            Cancel Event
+                            Remove
                         </button>
-                    ) : (
-                        <div className="confirm-banner">
-                            <p>Are you sure? This will cancel the event and notify all attendees.</p>
-                            <button type="button" onClick={handleCancelEvent}>Yes, cancel event</button>
-                            <button type="button" onClick={() => setConfirmCancel(false)}>Go back</button>
-                        </div>
-                    )}
+                    </div>
+                ))}
+                <button type="button" className="borderless-button" onClick={addTicketType}>
+                    + Add Ticket Type
+                </button>
+
+                {errorMessage && <p className="auth-error">{errorMessage}</p>}
+
+                <div className="edit-event-actions">
+                    <button type="submit" className="auth-button">Save Changes</button>
+                    <button type="button" className="borderless-button" onClick={() => navigate("/my-events")}>
+                        Back
+                    </button>
                 </div>
-            )}
+
+                {/* Cancel event — only for PUBLISHED */}
+                {eventStatus === "PUBLISHED" && (
+                    <div className="edit-danger-zone">
+                        <div className="edit-danger-zone-text">
+                            <strong>Cancel this event</strong>
+                            <span>Attendees will be notified and bookings closed. This can't be undone.</span>
+                        </div>
+
+                        {!confirmCancel ? (
+                            <button
+                                type="button"
+                                className="admin-btn-reject"
+                                onClick={() => setConfirmCancel(true)}
+                            >
+                                Cancel Event
+                            </button>
+                        ) : (
+                            <div className="confirm-banner">
+                                <p>Are you sure? This will cancel the event and notify all attendees.</p>
+                                <div className="confirm-banner-actions">
+                                    <button type="button" className="admin-btn-reject" onClick={handleCancelEvent}>
+                                        Yes, cancel event
+                                    </button>
+                                    <button type="button" className="borderless-button" onClick={() => setConfirmCancel(false)}>
+                                        Go back
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </form>
     );
 }

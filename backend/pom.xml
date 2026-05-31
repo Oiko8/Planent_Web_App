@@ -127,6 +127,11 @@
             <artifactId>thumbnailator</artifactId>
             <version>0.4.21</version>
         </dependency>
+		<dependency>
+			<groupId>com.github.usefulness</groupId>
+			<artifactId>webp-imageio</artifactId>
+			<version>0.10.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>

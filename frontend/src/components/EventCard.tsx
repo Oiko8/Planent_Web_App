@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { EventSummary } from "../types/event";
+import { mediaUrl } from "../api/media";
 
 type EventCardProps = {
     event: EventSummary;
@@ -16,15 +17,10 @@ export default function EventCard({ event }: EventCardProps) {
         minute: "2-digit",
     });
 
+    const imageSrc = mediaUrl(event.mainMedia?.photoUrl);
+
     return (
         <div className="event-card">
-            {event.mainMedia && (
-                <img
-                    className="event-card-image"
-                    src={event.mainMedia.photoUrl}
-                    alt={event.title}
-                />
-            )}
 
             <div className="event-card-top">
                 <span className="event-card-type">{event.eventType}</span>

@@ -17,6 +17,10 @@
    14. Pagination
    15. Event Bookings Page
    16. Compose Message Picker
+   17. USER DROPDOWN MENU
+   18. LOADER
+   19. REACT-DATEPICKER THEME
+   20. Media
    ============================================================ */
 
 
@@ -933,6 +937,16 @@ body {
 
 .event-card-button-primary:hover { background: var(--color-primary-hover); }
 
+.event-card-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: block;
+}
+
+
 
 /* ============================================================
    8. EVENT DETAIL PAGE
@@ -1003,6 +1017,45 @@ body {
 .event-detail-description p {
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+.event-detail-gallery {
+    margin: 1rem 0 1.5rem;
+}
+ 
+.event-detail-gallery-main {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+ 
+.event-detail-gallery-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+ 
+.event-detail-gallery-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0.7;
+    border: 2px solid transparent;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+ 
+.event-detail-gallery-thumb:hover {
+    opacity: 1;
+}
+ 
+.event-detail-gallery-thumb-active {
+    opacity: 1;
+    border-color: #6366f1;
 }
 
 /* Ticket type cards (shared: EventDetail + BookingPage) */
@@ -1208,6 +1261,34 @@ body {
   display: flex;
   gap: 0.8rem;
   align-items: center;
+}
+
+.my-event-title {
+    margin: 0 0 0.25rem;
+}
+
+.event-title-button {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;        
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.event-title-button:hover {
+    color: #6366f1;       
+    text-decoration: underline;
+}
+
+.event-title-button:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 
@@ -1900,4 +1981,146 @@ body {
 .react-datepicker__input-container input {
   width: 100%;
   font-family: inherit;
+}
+
+
+/* ============================================================
+   20. MEDIA
+   ============================================================ */
+
+
+.media-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+ 
+.media-preview-item {
+    position: relative;
+    width: 110px;
+    height: 110px;
+}
+ 
+.media-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+ 
+.media-preview-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+/* ============================================================
+   21. EDIT
+   ============================================================ */
+
+.edit-event-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.edit-event-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.edit-event-actions .auth-button {
+    width: auto;
+    padding-inline: 1.75rem;
+    margin-top: 0; /* override the create-page top margin if inherited */
+}
+
+.edit-danger-zone {
+    margin-top: 2.5rem;
+    padding: 1.25rem;
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.edit-danger-zone-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.edit-danger-zone-text strong {
+    color: #b91c1c;
+    font-size: 0.98rem;
+}
+
+.edit-danger-zone-text span {
+    color: #7f1d1d;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.confirm-banner {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.confirm-banner p {
+    margin: 0 0 0.75rem;
+    color: #7f1d1d;
+    font-size: 0.9rem;
+}
+
+.confirm-banner-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.auth-input[type="file"] {
+    padding: 0.55rem;
+    cursor: pointer;
+}
+
+@media (max-width: 540px) {
+    .edit-danger-zone {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .edit-event-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .edit-event-actions .auth-button,
+    .edit-event-actions .borderless-button {
+        width: 100%;
+    }
 }
