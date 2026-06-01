@@ -7,7 +7,7 @@ export type CategoryResponse = {
 
 export type TicketTypeResponse = {
     ticketTypeId: number;
-    eventId: number;        
+    eventId: number;
     name: string;
     price: number;
     quantity: number;
@@ -33,7 +33,7 @@ export type EventSummary = {
     endDatetime: string;
     capacity: number;
     status: EventStatus;
-    descriptionSummary: string;       // NOT `description`
+    descriptionSummary: string;       
     organizerId: number;
     mainMedia: MediaResponse | null;  // nullable
 };
@@ -55,17 +55,17 @@ export type EventItem = {
     description: string;
     organizerId: number;
     canDelete: boolean;
-    media: MediaResponse[] | null;    
+    media: MediaResponse[] | null;
     categories: CategoryResponse[];
     ticketTypes: TicketTypeResponse[];
 };
 
 export type PageResponse<T> = {
     content: T[];
-    totalPages: number;
-    totalElements: number;
-    number: number;
-    size: number;
-    last: boolean;
-    first: boolean;
+    page: {
+        size: number;
+        number: number;
+        totalElements: number;
+        totalPages: number;
+    };
 };

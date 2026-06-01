@@ -1,8 +1,10 @@
 import './styles/index.css'
+import { useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import AdminNavbar from "./components/AdminNavbar";
+import SplashScreen from './components/SplashScreen';
 import WelcomePage from "./pages/WelcomePage";
 import EventsPage from "./pages/events/EventsPage";
 import LoginPage from "./pages/LoginPage";
@@ -20,6 +22,7 @@ import ComposeMessagePage from './pages/messages/ComposeMessagePage';
 import EventBookingsPage from './pages/events/EventBookingsPage';
 import NewMessagePage from './pages/messages/NewMessagePage';
 import BroadcastMessagePage from './pages/messages/BroadcastMessagePage';
+import MessageDetailPage from './pages/messages/MessageDetailPage';
 import ProfilePage from './pages/users/ProfilePage';
 
 export default function App() {
@@ -35,10 +38,14 @@ function AppContent() {
     const location = useLocation();
     const isAdminRoute = location.pathname.startsWith("/admin");
 
+    const [showSplash, setShowSplash] = useState(() => location.pathname === "/");
+
     if (authLoading) return null;
 
     return (
         <>
+            {showSplash && <SplashScreen onDismiss={() => setShowSplash(false)} />}
+
             {isAdminRoute ? <AdminNavbar /> : <Navbar />}
             <Routes>
                 <Route path="/" element={<WelcomePage />} />
@@ -49,7 +56,7 @@ function AppContent() {
                 <Route path="/pending-approval" element={<PendingApprovalPage />} />
 
                 <Route path="/profile" element={<ProfilePage />} />
-                
+
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/events/:eventId" element={<EventDetailPage />} />
                 <Route path="/create-event" element={<CreateEventPage />} />
@@ -65,6 +72,7 @@ function AppContent() {
                 <Route path="/messages" element={<MessagePage />} />
                 <Route path="/messages/new" element={<NewMessagePage />} />
                 <Route path="/messages/compose" element={<ComposeMessagePage />} />
+                <Route path="/messages/:messageId" element={<MessageDetailPage />} />
             </Routes>
         </>
     );

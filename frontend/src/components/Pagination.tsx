@@ -1,16 +1,18 @@
 import type { PageResponse } from "../types/event";
 
 type Props = {
-    // accepts any PageResponse — the component doesn't care about T
     pageData: PageResponse<unknown> | null;
     onPageChange: (page: number) => void;
 };
 
 export default function Pagination({ pageData, onPageChange }: Props) {
     // Hide pagination entirely when there's nothing or only one page
-    if (!pageData || pageData.totalPages <= 1) return null;
+    if (!pageData || pageData.page.totalPages <= 1) return null;
 
-    const { number: currentPage, totalPages, first, last } = pageData;
+    const { number: currentPage, totalPages } = pageData.page;
+    // Spring's PagedModel no longer ships `first`/`last`. Compute them.
+    const first = currentPage === 0;
+    const last  = currentPage >= totalPages - 1;
 
     function goTo(newPage: number) {
         onPageChange(newPage);

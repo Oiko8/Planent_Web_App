@@ -1584,6 +1584,96 @@ body {
   white-space: pre-wrap;
 }
 
+.message-card-subject {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 600px;
+}
+ 
+.message-card-subject strong {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+/* Message details Page */
+.message-detail {
+  max-width: 760px;
+  margin: 1rem auto 2.5rem;
+  padding: 2rem 2.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+ 
+.message-detail-subject {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-weak);
+}
+ 
+.message-detail-subject-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+ 
+.message-detail-subject-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1.35;
+  word-break: break-word;
+}
+ 
+.message-detail-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+ 
+.message-detail-from {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+ 
+.message-detail-username {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+ 
+.message-detail-body {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border-weak);
+  border-bottom: 1px solid var(--border-weak);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 180px;
+}
+ 
+.message-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
 
 /* ============================================================
    14. PAGINATION
@@ -2123,4 +2213,257 @@ body {
     .edit-event-actions .borderless-button {
         width: 100%;
     }
+}
+
+/* ============================================================
+   22. SPLASH SCREEN (intro)
+   ============================================================ */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  background: radial-gradient(ellipse at 50% 40%, #0b1e4d 0%, #050a1f 60%, #020617 100%);
+  animation: splash-fadein 0.4s ease both;
+}
+.splash-screen:focus { outline: none; }
+
+/* Smooth dismiss — earth zooms in like flying into the planet,
+   atmosphere expands, stars accelerate outward, text drifts up & fades. */
+.splash-leaving {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s cubic-bezier(.4, 0, .2, 1) 0.15s;
+}
+.splash-leaving .splash-earth-stage {
+  transform: scale(1.6);
+  opacity: 0;
+  transition:
+    transform 1.05s cubic-bezier(.5, 0, .75, 0),
+    opacity   0.9s  cubic-bezier(.4, 0, 1, 1) 0.15s;
+}
+.splash-leaving .splash-atmosphere {
+  transform: scale(3);
+  opacity: 0;
+  transition: transform 1s ease-out, opacity 0.8s ease-out;
+}
+.splash-leaving .splash-stars,
+.splash-leaving .splash-stars-2 {
+  transform: scale(1.15);
+  opacity: 0;
+  transition: transform 1s cubic-bezier(.5, 0, .75, 0), opacity 0.85s ease-out;
+}
+.splash-leaving .splash-title,
+.splash-leaving .splash-tagline {
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.5s ease-out, transform 0.65s cubic-bezier(.4, 0, .2, 1);
+}
+.splash-leaving .splash-hint {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Stars — two layers of tiny dots painted via radial-gradient */
+.splash-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 8%  12%, #fff, transparent),
+    radial-gradient(1px 1px at 22% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 35%  8%, #fff, transparent),
+    radial-gradient(2px 2px at 48% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 62% 14%, #fff, transparent),
+    radial-gradient(1px 1px at 75%  6%, #fff, transparent),
+    radial-gradient(2px 2px at 88% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 12% 78%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 88%, #fff, transparent),
+    radial-gradient(1px 1px at 42% 72%, #fff, transparent),
+    radial-gradient(2px 2px at 58% 92%, #fff, transparent),
+    radial-gradient(1px 1px at 72% 84%, #fff, transparent),
+    radial-gradient(1px 1px at 92% 76%, #fff, transparent),
+    radial-gradient(1px 1px at 15% 45%, #fff, transparent),
+    radial-gradient(1px 1px at 85% 52%, #fff, transparent);
+  animation: splash-twinkle 4s ease-in-out infinite alternate;
+}
+.splash-stars-2 {
+  background-image:
+    radial-gradient(1px 1px at 18% 35%, #93c5fd, transparent),
+    radial-gradient(1px 1px at 38% 62%, #fff,    transparent),
+    radial-gradient(1px 1px at 55% 38%, #c4b5fd, transparent),
+    radial-gradient(1px 1px at 78% 65%, #fff,    transparent),
+    radial-gradient(1px 1px at  8% 65%, #93c5fd, transparent),
+    radial-gradient(1px 1px at 95% 35%, #fff,    transparent);
+  animation: splash-twinkle 6s ease-in-out infinite alternate-reverse;
+}
+
+.splash-content {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 1rem;
+}
+
+/* Earth */
+.splash-earth-stage {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  animation: splash-rise 1.4s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.splash-atmosphere {
+  position: absolute;
+  inset: -28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.55) 48%, rgba(59,130,246,0.15) 62%, transparent 72%);
+  filter: blur(8px);
+  animation: splash-glow 3s ease-in-out infinite;
+}
+
+.splash-earth {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.25);
+}
+
+/* Real Earth texture — equirectangular image sized to fill the circle vertically,
+   then scrolled horizontally to simulate rotation.  */
+.splash-earth-texture {
+  position: absolute;
+  inset: 0;
+  background-image: url("/earth.jpg");
+  background-repeat: repeat-x;
+  background-size: auto 100%;   /* image height = container height; width is auto (≈ 2× container) */
+  background-position: 0 50%;
+  animation: splash-earth-spin 32s linear infinite;
+}
+
+/* Static shading — gives the 3D illusion regardless of spin */
+.splash-shading {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.08) 25%, transparent 50%),
+    radial-gradient(circle at 72% 75%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.22) 45%, transparent 75%);
+  pointer-events: none;
+}
+
+/* Orbit + moon */
+.splash-orbit {
+  position: absolute;
+  inset: -42px;
+  border-radius: 50%;
+  animation: splash-spin 12s linear infinite;
+}
+.splash-moon {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f1f5f9 0%, #cbd5e1 60%, #64748b 100%);
+  box-shadow: 0 0 14px rgba(203, 213, 225, 0.6);
+}
+
+/* Title — letter-by-letter rise */
+.splash-title {
+  margin: 0;
+  font-size: clamp(56px, 10vw, 96px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f1f5f9;
+  text-shadow: 0 0 36px rgba(59, 130, 246, 0.55);
+  display: flex;
+  gap: 4px;
+}
+.splash-title span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(28px);
+  animation: splash-letter 0.7s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.splash-tagline {
+  margin: -8px 0 0;
+  font-size: clamp(13px, 1.6vw, 16px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  opacity: 0;
+  animation: splash-fadein-keyframe 0.8s ease 1.8s forwards;
+}
+
+.splash-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: rgba(203, 213, 225, 0.7);
+  opacity: 0;
+  animation:
+    splash-fadein-keyframe 0.6s ease 2.4s forwards,
+    splash-pulse 2s ease-in-out 3s infinite;
+}
+
+
+@keyframes splash-earth-spin {
+  from { background-position: 0    50%; }
+  to   { background-position: -440px 50%; }
+}
+
+@keyframes splash-spin   { to { transform: rotate(360deg); } }
+@keyframes splash-fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-fadein-keyframe { to { opacity: 1; } }
+@keyframes splash-glow {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.04); }
+}
+@keyframes splash-rise {
+  from { opacity: 0; transform: translateY(18px) scale(0.85); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes splash-letter { to { opacity: 1; transform: translateY(0); } }
+@keyframes splash-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+@keyframes splash-twinkle {
+  0%   { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen,
+  .splash-stars,
+  .splash-stars-2,
+  .splash-earth-stage,
+  .splash-atmosphere,
+  .splash-earth-texture,
+  .splash-orbit,
+  .splash-title span,
+  .splash-tagline,
+  .splash-hint {
+    animation: none;
+  }
+  .splash-title span { opacity: 1; transform: none; }
+  .splash-tagline,
+  .splash-hint { opacity: 1; }
 }

@@ -107,7 +107,7 @@ export default function EventsPage() {
     }
 
     const events = pageData?.content ?? [];
-    const totalElements = pageData?.totalElements ?? 0;
+    const totalElements = pageData?.page.totalElements ?? 0;
     const hasActiveFilters = Object.values(filters).some(v => v !== "");
 
     return (

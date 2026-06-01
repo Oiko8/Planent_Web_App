@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
-import type { MessagePreview, MessageFull } from "../../types/message";
+import type { MessagePreview } from "../../types/message";
 import type { PageResponse } from "../../types/event";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/Pagination";
@@ -23,13 +23,12 @@ export default function MessagePage() {
     const [unreadCount, setUnreadCount] = useState(0);
 
     const [loading, setLoading] = useState(true);
-    const [expandedMessage, setExpandedMessage] = useState<MessageFull | null>(null);
-    const [expandedId, setExpandedId] = useState<number | null>(null);
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
 
-    // Fetch unread count on mount
+    // Fetch unread count on mount. This page remounts when the user returns
+    // from the detail view, so the count refreshes naturally.
     useEffect(() => {
         api.get<{ count: number }>("/messages/unread-count")
             .then(res => setUnreadCount(res.data.count))
@@ -68,40 +67,8 @@ export default function MessagePage() {
         fetchSent();
     }, [sentPage]);
 
-    async function handleOpenMessage(messageId: number) {
-        // Toggle — close if already open
-        if (expandedId === messageId) {
-            setExpandedId(null);
-            setExpandedMessage(null);
-            return;
-        }
-
-        try {
-            const response = await api.get<MessageFull>(`/messages/${messageId}`);
-            setExpandedMessage(response.data);
-            setExpandedId(messageId);
-
-            // If this was an unread inbox message, the server just marked it read.
-            // Reflect that locally: decrement the global count + flip isRead in the list.
-            const wasUnread = inboxData?.content.some(
-                m => m.messageId === messageId && !m.isRead
-            );
-            if (wasUnread) {
-                setUnreadCount(prev => Math.max(0, prev - 1));
-            }
-
-            setInboxData(prev => prev ? {
-                ...prev,
-                content: prev.content.map(m =>
-                    m.messageId === messageId ? { ...m, isRead: true } : m
-                ),
-            } : prev);
-        } catch {
-            setError("Failed to load message.");
-        }
-    }
-
-    async function handleDelete(messageId: number) {
+    async function handleDelete(e: React.MouseEvent, messageId: number) {
+        e.stopPropagation(); // don't trigger the row's navigate
         try {
             await api.delete(`/messages/${messageId}`);
 
@@ -113,23 +80,18 @@ export default function MessagePage() {
                 setUnreadCount(prev => Math.max(0, prev - 1));
             }
 
-            // The same messageId can only appear in one of the two lists for the
-            // current user, but filtering both is safe and saves a branch.
+            // The same messageId only appears in one of the two lists for a given
+            // user, but filtering both is safe and saves a branch.
             setInboxData(prev => prev ? {
                 ...prev,
                 content: prev.content.filter(m => m.messageId !== messageId),
-                totalElements: prev.totalElements - 1,
+                page: { ...prev.page, totalElements: prev.page.totalElements - 1 },
             } : prev);
             setSentData(prev => prev ? {
                 ...prev,
                 content: prev.content.filter(m => m.messageId !== messageId),
-                totalElements: prev.totalElements - 1,
+                page: { ...prev.page, totalElements: prev.page.totalElements - 1 },
             } : prev);
-
-            if (expandedId === messageId) {
-                setExpandedId(null);
-                setExpandedMessage(null);
-            }
         } catch {
             setError("Failed to delete message.");
         }
@@ -190,52 +152,38 @@ export default function MessagePage() {
             )}
 
             {currentMessages.map(message => (
-                <div key={message.messageId}>
-                    <div
-                        className={`message-card ${!message.isRead && activeTab === "inbox" ? "message-unread" : ""}`}
-                        onClick={() => handleOpenMessage(message.messageId)}
-                    >
-                        <div className="message-card-info">
-                            <div className="message-card-header">
-                                <span className="message-card-user">
-                                    {activeTab === "inbox" ? "From" : "To"}: {message.otherUser.firstName} {message.otherUser.lastName}
-                                    <span className="message-card-username"> @{message.otherUser.username}</span>
-                                </span>
-                                {!message.isRead && activeTab === "inbox" && (
-                                    <span className="message-unread-dot" />
-                                )}
-                            </div>
-                            <p className="message-card-preview">{message.bodyPreview}</p>
-                        </div>
-
-                        <button
-                            className="admin-btn-reject"
-                            onClick={e => {
-                                e.stopPropagation();
-                                handleDelete(message.messageId);
-                            }}
-                        >
-                            Delete
-                        </button>
-                    </div>
-
-                    {/* Expanded message body */}
-                    {expandedId === message.messageId && expandedMessage && (
-                        <div className="message-body-expanded">
-                            <p>{expandedMessage.body}</p>
-                            {activeTab === "inbox" && expandedMessage.eventId && (
-                                <button
-                                    className="event-card-button-secondary"
-                                    style={{ marginTop: "1rem" }}
-                                    onClick={() => navigate(
-                                        `/messages/compose?eventId=${expandedMessage.eventId}&receiverId=${expandedMessage.otherUser.userId}`
-                                    )}
-                                >
-                                    ↩ Reply
-                                </button>
+                <div
+                    key={message.messageId}
+                    className={`message-card ${!message.isRead && activeTab === "inbox" ? "message-unread" : ""}`}
+                    onClick={() => navigate(`/messages/${message.messageId}`)}
+                >
+                    <div className="message-card-info">
+                        <div className="message-card-header">
+                            <span className="message-card-user">
+                                {activeTab === "inbox" ? "From" : "To"}: {message.otherUser.firstName} {message.otherUser.lastName}
+                                <span className="message-card-username"> @{message.otherUser.username}</span>
+                            </span>
+                            {!message.isRead && activeTab === "inbox" && (
+                                <span className="message-unread-dot" />
                             )}
                         </div>
-                    )}
+
+                        {/* Subject — the event this message refers to */}
+                        {message.eventTitle && (
+                            <p className="message-card-subject">
+                                Re: <strong>{message.eventTitle}</strong>
+                            </p>
+                        )}
+
+                        <p className="message-card-preview">{message.bodyPreview}</p>
+                    </div>
+
+                    <button
+                        className="admin-btn-reject"
+                        onClick={e => handleDelete(e, message.messageId)}
+                    >
+                        Delete
+                    </button>
                 </div>
             ))}
 

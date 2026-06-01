@@ -82,7 +82,7 @@ export default function ComposeMessagePage() {
                 {event && (
                     <div className="booking-event-summary" style={{ marginBottom: "1.5rem" }}>
                         <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem" }}>
-                            Regarding: <strong style={{ color: "#f1f5f9" }}>{event.title}</strong>
+                            Subject: <strong style={{ color: "#f1f5f9" }}>Re: {event.title}</strong>
                         </p>
                         <p style={{ margin: "0.3rem 0 0", color: "#64748b", fontSize: "0.8rem" }}>
                             Organizer will receive your message

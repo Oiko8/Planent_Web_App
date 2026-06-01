@@ -68,7 +68,7 @@ export default function EventBookingsPage() {
     }
 
     const bookings = pageData?.content ?? [];
-    const totalBookings = pageData?.totalElements ?? 0;
+    const totalBookings = pageData?.page.totalElements ?? 0;
 
     return (
         <div className="admin-page">

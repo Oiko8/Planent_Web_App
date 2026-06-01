@@ -26,7 +26,7 @@ export default function BroadcastMessagePage() {
                 ]);
                 setEvent(eventRes.data);
                 // totalElements is enough — we don't need the actual content
-                setAttendeeCount(bookingsRes.data.totalElements);
+                setAttendeeCount(bookingsRes.data.page.totalElements);
             } catch (err: any) {
                 const status = err.response?.status;
                 if (status === 403) setError("You are not authorized to broadcast to this event.");
@@ -120,7 +120,7 @@ export default function BroadcastMessagePage() {
 
             {event && (
                 <p className="events-result-count">
-                    Event: <strong>{event.title}</strong>
+                    Subject: <strong>Re: {event.title}</strong>
                 </p>
             )}
             {attendeeCount !== null && (

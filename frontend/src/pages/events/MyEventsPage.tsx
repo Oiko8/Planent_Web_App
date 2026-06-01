@@ -46,7 +46,7 @@ export default function MyEventsPage() {
             setPageData(prev => prev ? {
                 ...prev,
                 content: prev.content.filter(e => e.eventId !== eventId),
-                totalElements: prev.totalElements - 1,
+                page: { ...prev.page, totalElements: prev.page.totalElements - 1 },
             } : prev);
             setSuccessMessage("Event deleted successfully!");
         } catch (err: any) {
