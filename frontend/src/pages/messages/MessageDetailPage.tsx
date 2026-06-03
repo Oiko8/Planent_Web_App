@@ -14,13 +14,21 @@ export default function MessageDetailPage() {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    // Fetch the full message on mount. The backend marks it as read inside this GET.
+    // Fetch the full message on mount.
     useEffect(() => {
         if (!messageId) return;
         async function fetchMessage() {
             try {
+                // GET to read message
                 const response = await api.get<MessageFull>(`/messages/${messageId}`);
                 setMessage(response.data);
+
+                // PATCH to mark as read on the backend (backend allows receiver only to change it)
+                if (!response.data.isRead) {
+                    api.patch(`/messages/${messageId}/read`).catch(err => {
+                        console.error("Failed to mark message as read", err);
+                    });
+                }
             } catch (err: any) {
                 const status = err.response?.status;
                 if (status === 403) setError("You are not authorized to view this message.");

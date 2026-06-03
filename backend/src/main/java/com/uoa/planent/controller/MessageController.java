@@ -70,6 +70,14 @@ public class MessageController {
         return ResponseEntity.ok(messageService.getMessageById(messageId, currentUser.getId()));
     }
 
+    @PatchMapping("/{messageId}/read")
+    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)") // can only be updated by the receiver, allowing sender as well for frontend simplicity
+    public ResponseEntity<Void> markMessageAsRead(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
+        messageService.markMessageAsRead(messageId, currentUser.getId());
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping
     @PreAuthorize("@messageService.canSendMessage(#request.eventId, #currentUser.id, #request.receiverId)")

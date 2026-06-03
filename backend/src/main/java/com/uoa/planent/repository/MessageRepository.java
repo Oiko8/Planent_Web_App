@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
@@ -27,6 +29,13 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             countQuery = "SELECT COUNT(m) FROM Message m WHERE m.sender.id = :senderId AND m.deletedBySender = false")
     Page<Message> findSentWithRelations(@Param("senderId") Integer senderId, Pageable pageable);
 
+
+    @Query("SELECT m FROM Message m " +
+            "JOIN FETCH m.sender " +
+            "JOIN FETCH m.receiver " +
+            "LEFT JOIN FETCH m.event " +
+            "WHERE m.id = :id")
+    Optional<Message> findByIdWithRelations(@Param("id") Integer id);
 
     // Number of unread messages in the receiver's inbox.
     // Spring Data's `countBy...` runs SELECT COUNT(*) instead of SELECT *.

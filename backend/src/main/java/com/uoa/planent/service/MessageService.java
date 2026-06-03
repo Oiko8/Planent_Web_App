@@ -112,14 +112,8 @@ public class MessageService {
         return messageRepository.countByReceiverIdAndIsReadFalseAndDeletedByReceiverFalse(currentUserId);
     }
 
-    @Transactional
     public MessageResponse getMessageById(@NotNull Integer messageId, @NotNull Integer currentUserId) {
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
-
-        if (!message.getIsRead() && isReceiver(message, currentUserId)) {
-            message.setIsRead(true);
-            message = messageRepository.save(message);
-        }
+        Message message = messageRepository.findByIdWithRelations(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
 
         User otherUser;
         if (isSender(message, currentUserId)) {
@@ -131,6 +125,16 @@ public class MessageService {
         return MessageMapper.toResponse(message, otherUser);
     }
 
+    @Transactional
+    public void markMessageAsRead(@NotNull Integer messageId, @NotNull Integer currentUserId) {
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
+
+        // mark read only by the receiver
+        if (!message.getIsRead() && message.getReceiver().getId().equals(currentUserId)) {
+            message.setIsRead(true);
+            messageRepository.save(message);
+        }
+    }
 
     @Transactional
     public MessageResponse sendMessage(MessageSendRequest request, @NotNull Integer senderId) {
@@ -151,6 +155,7 @@ public class MessageService {
         Message savedMessage = messageRepository.save(message);
         return MessageMapper.toResponse(savedMessage, receiver);
     }
+
 
 
     @Transactional

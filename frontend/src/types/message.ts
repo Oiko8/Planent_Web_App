@@ -23,4 +23,5 @@ export type MessageFull = {
     eventTitle: string | null;
     otherUser: UserPublicInfo;
     body: string;
+    isRead: boolean;
 };

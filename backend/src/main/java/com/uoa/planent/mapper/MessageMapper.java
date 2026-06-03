@@ -29,6 +29,7 @@ public class MessageMapper {
                 .eventTitle(message.getEvent() != null ? message.getEvent().getTitle() : null)
                 .otherUser(UserMapper.toPublicInfo(otherUser))
                 .body(message.getBody())
+                .isRead(message.getIsRead())
                 .build();
     }
 }

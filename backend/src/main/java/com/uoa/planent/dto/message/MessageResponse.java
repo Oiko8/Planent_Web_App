@@ -15,4 +15,5 @@ public class MessageResponse {
     String eventTitle;
     UserPublicInfo otherUser;
     String body;
+    Boolean isRead;
 }
