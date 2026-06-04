@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.uoa.planent.service.EventViewService;
 import org.springframework.web.multipart.MultipartFile;
 
 // import java.time.Instant;
@@ -30,7 +29,6 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
-    private final EventViewService eventViewService;
 
 
     // Endpoints returning paged event responses return an EventSummaryResponse,
@@ -117,11 +115,7 @@ public class EventController {
 
     @PostMapping("/{eventId}/view")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> recordEventView(
-            @PathVariable Integer eventId,
-            @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser
-    ) {
-        eventViewService.recordView(eventId, currentUser.getId());
+    public ResponseEntity<Void> recordEventView(@PathVariable Integer eventId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
         return ResponseEntity.noContent().build();
     }
 }

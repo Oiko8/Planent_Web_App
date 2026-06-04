@@ -15,7 +15,10 @@ import java.util.Objects;
 @Table(name = "Event_Ticket_Type", indexes = {
         @Index(name = "fk_Event_TicketType_Event1_idx", columnList = "event_id"),
         @Index(name = "price", columnList = "price")
-})
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "ticket_name_per_event_UNIQUE", columnNames = {"event_id", "name"})
+        })
 public class EventTicketType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
