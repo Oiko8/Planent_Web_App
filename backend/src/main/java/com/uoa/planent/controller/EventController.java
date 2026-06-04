@@ -46,24 +46,28 @@ public class EventController {
 
     // ---- public endpoints ----
 
-    // returns all non-draft events
+    // returns all recommended (as per the BMF data) non-draft events
+    // documentation in EventRepository#findAllRecommendedVisibleEvents
     @GetMapping
-    public ResponseEntity<Page<EventSummaryResponse>> getAllVisibleEvents(Pageable pageable) {
-        return ResponseEntity.ok(eventService.getAllVisibleEvents(pageable));
+    public ResponseEntity<Page<EventSummaryResponse>> getAllRecommendedVisibleEvents(Pageable pageable, @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        Integer currentUserId = (currentUser != null) ? currentUser.getId() : null; // null when not signed in
+        return ResponseEntity.ok(eventService.getAllRecommendedVisibleEvents(currentUserId, pageable));
     }
 
     // returns draft events only to the organizer of that event (if authenticated)
     @GetMapping("/{eventId}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable Integer eventId, @AuthenticationPrincipal UserDetailsImpl currentUser){
-        Integer currentUserId = (currentUser != null) ? currentUser.getId() : null; // null when not signed in
+        Integer currentUserId = (currentUser != null) ? currentUser.getId() : null;
         return ResponseEntity.ok(eventService.getEventById(eventId, currentUserId));
     }
 
 
-    // searches from all non-draft events
+    // searches from all recommended (as per the BMF data) non-draft events
+    // documentation in EventRepository#searchRecommendedVisibleEvents
     @GetMapping("/search")
-    public ResponseEntity<Page<EventSummaryResponse>> searchVisibleEvents(@ModelAttribute @Valid EventSearchRequest request, Pageable pageable){
-        return ResponseEntity.ok(eventService.searchVisibleEvents(request, pageable));
+    public ResponseEntity<Page<EventSummaryResponse>> searchRecommendedVisibleEvents(@ModelAttribute @Valid EventSearchRequest request, @AuthenticationPrincipal UserDetailsImpl currentUser, Pageable pageable){
+        Integer currentUserId = (currentUser != null) ? currentUser.getId() : null;
+        return ResponseEntity.ok(eventService.searchRecommendedVisibleEvents(request, currentUserId, pageable));
     }
 
 

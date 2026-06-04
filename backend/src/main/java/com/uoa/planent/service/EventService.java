@@ -2,7 +2,6 @@ package com.uoa.planent.service;
 
 import com.uoa.planent.dto.event.*;
 import com.uoa.planent.event.EventCancelledEvent;
-import com.uoa.planent.event.EventViewedEvent;
 import com.uoa.planent.event.MediaDeleteEvent;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.EventMapper;
@@ -11,17 +10,14 @@ import com.uoa.planent.repository.CategoryRepository;
 import com.uoa.planent.repository.EventRepository;
 import com.uoa.planent.repository.UserRepository;
 import com.uoa.planent.security.UserDetailsImpl;
-import com.uoa.planent.specification.EventSpecifications;
 import jakarta.annotation.Nullable;
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,9 +68,10 @@ public class EventService {
     }
 
 
-    // returns all non-draft events
-    public Page<EventSummaryResponse> getAllVisibleEvents(Pageable pageable) {
-        return eventRepository.findAllVisibleEvents(pageable).map(EventMapper::toSummaryResponse);
+    // returns all recommended (as per the BMF data) non-draft events
+    // documentation in EventRepository#findAllRecommendedVisibleEvents
+    public Page<EventSummaryResponse> getAllRecommendedVisibleEvents(@Nullable Integer currentUserId, Pageable pageable) {
+        return eventRepository.findAllRecommendedVisibleEvents(currentUserId, pageable).map(EventMapper::toSummaryResponse);
     }
 
     public EventResponse getEventById(Integer eventId, @Nullable Integer currentUserId) {
@@ -97,57 +94,37 @@ public class EventService {
 
 
 
-    public Page<EventSummaryResponse> searchVisibleEvents(EventSearchRequest request, Pageable pageable) {
+    public Page<EventSummaryResponse> searchRecommendedVisibleEvents(EventSearchRequest request, @Nullable Integer currentUserId, Pageable pageable) {
         if (request.getStartDate() != null && request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())){
             throw new IllegalArgumentException("Start date cannot be after end date.");
         }
 
-        // dynamically add the filters
-        Specification<Event> spec = Specification.where(EventSpecifications.isVisible()); // start with visible events
-
+        // sanitize and extract the requested statuses (remove draft if included)
+        List<Event.EventStatus> statuses;
         if (request.getStatuses() != null && !request.getStatuses().isEmpty()) {
-            // remove draft if given
-            List<Event.EventStatus> filteredStatuses = request.getStatuses().stream().filter(s -> s != Event.EventStatus.DRAFT).toList();
-            if (!filteredStatuses.isEmpty()){
-                spec = spec.and(EventSpecifications.hasStatuses(filteredStatuses));
-            }
+            statuses = request.getStatuses().stream().filter(s -> s != Event.EventStatus.DRAFT).toList();
+        } else {
+            // non-draft statuses if none were selected
+            statuses = List.of(Event.EventStatus.PUBLISHED, Event.EventStatus.COMPLETED, Event.EventStatus.CANCELLED);
         }
 
-        if (request.getText() != null && !request.getText().trim().isEmpty()) {
-            spec = spec.and(EventSpecifications.hasText(request.getText().trim()));
-        }
+        // safely extract strings
+        String text = (request.getText() != null && !request.getText().trim().isEmpty()) ? request.getText().trim() : null;
+        String city = (request.getCity() != null && !request.getCity().trim().isEmpty()) ? request.getCity().trim() : null;
+        String category = (request.getCategory() != null && !request.getCategory().trim().isEmpty()) ? request.getCategory().trim() : null;
 
-        if (request.getCity() != null && !request.getCity().trim().isEmpty()) {
-            spec = spec.and(EventSpecifications.inCity(request.getCity().trim()));
-        }
-
-        if (request.getCategory() != null && !request.getCategory().trim().isEmpty()) {
-            spec = spec.and(EventSpecifications.hasCategory(request.getCategory().trim()));
-        }
-
-        if (request.getMaxPrice() != null) {
-            spec = spec.and(EventSpecifications.hasMaxPrice(request.getMaxPrice()));
-        }
-
-        if (request.getStartDate() != null) {
-            spec = spec.and(EventSpecifications.startsAfter(request.getStartDate()));
-        }
-
-        if (request.getEndDate() != null) {
-            spec = spec.and(EventSpecifications.endsBefore(request.getEndDate()));
-        }
-
-        // sort the pageable to always show first PUBLISHED -> COMPLETED -> CANCELLED
-        // and then add any secondary criteria given by the user (date, price asc/desc etc...)
-        Pageable sortedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "status") // sorts by alphabetic order of enum, only works with these names
-                        .and(pageable.getSort())
-        );
-
-        // search with the filters added and return events in our sorted pages
-        return eventRepository.findAll(spec, sortedPageable).map(EventMapper::toSummaryResponse);
+        // native sql search query (handles null values)
+        return eventRepository.searchRecommendedVisibleEvents(
+                currentUserId,
+                statuses,
+                text,
+                city,
+                category,
+                request.getMaxPrice(),
+                request.getStartDate(),
+                request.getEndDate(),
+                pageable
+        ).map(EventMapper::toSummaryResponse);
     }
 
 
@@ -284,11 +261,12 @@ public class EventService {
     }
 
 
+    // Show only the 10 canonical ones in the dropdowns.
+    // Legacy categories still in the DB are kept for existing events
+    // but won't be selectable for new ones.
+    @Cacheable(value = "categories") // caching since categories are static
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll().stream()
-                // Show only the 10 canonical ones in the dropdowns.
-                // Legacy categories still in the DB are kept for existing events
-                // but won't be selectable for new ones.
                 .filter(c -> PlanentApplication.CANONICAL_CATEGORIES.contains(c.getCategoryName()))
                 // Sort by position in the canonical list — keeps "Other" last.
                 .sorted(Comparator.comparingInt(c -> PlanentApplication.CANONICAL_CATEGORIES.indexOf(c.getCategoryName())))
