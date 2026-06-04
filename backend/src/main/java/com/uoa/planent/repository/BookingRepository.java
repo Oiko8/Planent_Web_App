@@ -10,10 +10,24 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
+
+    @Query("SELECT b FROM Booking b " +
+            "LEFT JOIN FETCH b.attendee " +
+            "LEFT JOIN FETCH b.ticketType tt " +
+            "LEFT JOIN FETCH tt.event " +
+            "WHERE b.id = :id")
+    Optional<Booking> findByIdWithRelations(@Param("id") Integer id);
+
+    @Query("SELECT b FROM Booking b " +
+            "LEFT JOIN FETCH b.ticketType tt " +
+            "LEFT JOIN FETCH tt.event " +
+            "WHERE b.id = :id")
+    Optional<Booking> findByIdWithEvent(@Param("id") Integer id);
 
     // optimized with joins to fetch the ManyToOne relations as well
     @Query(value = "SELECT b FROM Booking b " +
@@ -47,5 +61,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "JOIN FETCH tt.event")
     List<Booking> findAllForExport();
 
-    boolean existsByTicketType_Event_IdAndAttendee_Id(Integer eventId, Integer userId);
+    boolean existsByIdAndAttendee_Id(Integer bookingId, Integer attendeeId);
+    boolean existsByTicketType_Event_IdAndAttendee_Id(Integer eventId, Integer attendeeId);
 }

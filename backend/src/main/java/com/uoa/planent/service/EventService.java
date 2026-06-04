@@ -2,6 +2,7 @@ package com.uoa.planent.service;
 
 import com.uoa.planent.dto.event.*;
 import com.uoa.planent.event.EventCancelledEvent;
+import com.uoa.planent.event.EventViewedEvent;
 import com.uoa.planent.event.MediaDeleteEvent;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.EventMapper;

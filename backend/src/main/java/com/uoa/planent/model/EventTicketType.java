@@ -49,7 +49,7 @@ public class EventTicketType {
         return !hasBookings();
     }
 
-    // checks if theres enough available tickets and then proceeds to book them by reducing available count
+    // checks if theres enough available tickets and then proceeds to book them by reducing available count (requires save on callee)
     // returns total cost
     public BigDecimal tryBook(@NotNull Integer numberOfTickets) throws IllegalArgumentException {
         checkCanBook(numberOfTickets);

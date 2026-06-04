@@ -30,7 +30,7 @@ public class Booking {
     @Column(name = "booking_time", nullable = false)
     private Instant bookingTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ticket_type_id", nullable = false)
     private EventTicketType ticketType;
 

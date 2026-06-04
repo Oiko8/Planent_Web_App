@@ -2,10 +2,12 @@ package com.uoa.planent.controller;
 
 import com.uoa.planent.annotation.ValidImage;
 import com.uoa.planent.dto.event.*;
+import com.uoa.planent.event.EventViewedEvent;
 import com.uoa.planent.security.UserDetailsImpl;
 import com.uoa.planent.service.EventService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 // import org.springframework.format.annotation.DateTimeFormat;
@@ -29,6 +31,7 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     // Endpoints returning paged event responses return an EventSummaryResponse,
@@ -112,10 +115,11 @@ public class EventController {
 
 
 
-
+    // async on interaction listener
     @PostMapping("/{eventId}/view")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> recordEventView(@PathVariable Integer eventId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
+        eventPublisher.publishEvent(new EventViewedEvent(currentUser.getId(), eventId));
         return ResponseEntity.noContent().build();
     }
 }

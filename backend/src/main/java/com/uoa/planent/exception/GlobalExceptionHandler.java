@@ -1,5 +1,6 @@
 package com.uoa.planent.exception;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
@@ -24,6 +25,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @RestControllerAdvice
@@ -124,6 +127,30 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
+
+
+    // turn: "Unable to find com.uoa.planent.model.User with id 999" to "User with ID '999' not found."
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, cleanHibernateMessage(e.getMessage()));
+    }
+    private static final Pattern HIBERNATE_ERROR_PATTERN = Pattern.compile("Unable to find .*\\.(\\w+) with id (\\d+)");
+    private String cleanHibernateMessage(String message) {
+        if (message == null) {
+            return "Resource not found.";
+        }
+
+        Matcher matcher = HIBERNATE_ERROR_PATTERN.matcher(message);
+        if (matcher.find()) {
+            String entityName = matcher.group(1); // e.g. User
+            String id = matcher.group(2);         // e.g. 999
+            return entityName + " with ID '" + id + "' not found.";
+        }
+
+        return message; // failsafe
+    }
+
+
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ProblemDetail handleNoResourceFound(NoResourceFoundException e, HttpServletRequest request) {

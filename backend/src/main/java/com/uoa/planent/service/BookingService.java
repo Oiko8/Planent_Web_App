@@ -2,6 +2,7 @@ package com.uoa.planent.service;
 
 import com.uoa.planent.dto.booking.BookingCreateRequest;
 import com.uoa.planent.dto.booking.BookingResponse;
+import com.uoa.planent.event.BookingConfirmedEvent;
 import com.uoa.planent.exception.ResourceNotFoundException;
 import com.uoa.planent.mapper.BookingMapper;
 import com.uoa.planent.model.Booking;
@@ -13,6 +14,7 @@ import com.uoa.planent.repository.UserRepository;
 import com.uoa.planent.security.UserDetailsImpl;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ public class BookingService {
     private final UserRepository userRepository;
     private final EventTicketTypeRepository ticketTypeRepository;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     public boolean isAttendeeOrAdmin(@NotNull Integer bookingId, UserDetailsImpl user) throws ResourceNotFoundException {
         if (user == null) return false; // access denied exception by default if false
 
@@ -41,8 +45,7 @@ public class BookingService {
         if (isAdmin) return true;
 
         // check if attendee (the user that made the booking)
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
-        return booking.getAttendee().getId().equals(user.getId());
+        return bookingRepository.existsByIdAndAttendee_Id(bookingId, user.getId());
     }
 
 
@@ -58,7 +61,7 @@ public class BookingService {
     }
 
     public BookingResponse getBookingById(Integer bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
+        Booking booking = bookingRepository.findByIdWithEvent(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
         return BookingMapper.toResponse(booking);
     }
 
@@ -67,8 +70,8 @@ public class BookingService {
         // get attendee
         User attendee = userRepository.findById(attendeeId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + attendeeId + "' not found."));
 
-        // get ticket type
-        EventTicketType ticketType = ticketTypeRepository.findById(request.getTicketTypeId()).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID '" + request.getTicketTypeId() + "' not found."));
+        // get ticket type and lock its row to avoid race conditions (overbooking). eagerly fetch event as well since we use it
+        EventTicketType ticketType = ticketTypeRepository.findByIdWithEventForBooking(request.getTicketTypeId()).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID '" + request.getTicketTypeId() + "' not found."));
 
         // try booking on the ticket type
         // will throw an exception if unable to book
@@ -86,12 +89,15 @@ public class BookingService {
                 .build();
         Booking savedBooking = bookingRepository.save(booking);
 
+        // record interaction (async after transaction commit)
+        eventPublisher.publishEvent(new BookingConfirmedEvent(attendeeId, ticketType.getEvent().getId()));
+
         return BookingMapper.toResponse(savedBooking);
     }
 
     @Transactional
     public BookingResponse cancelBooking(Integer bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
+        Booking booking = bookingRepository.findByIdWithRelations(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
 
         // try cancelling the booking
         // will throw an exception if unable to
