@@ -69,12 +69,6 @@ public class UserService {
         return UserMapper.toResponse(user);
     }
 
-    public UserResponse getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User with username '" + username + "' not found."));
-
-        return UserMapper.toResponse(user);
-    }
-
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
             .stream()

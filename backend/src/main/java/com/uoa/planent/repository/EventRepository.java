@@ -12,10 +12,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpecificationExecutor<Event> {
     Page<Event> findAllByOrganizerId(Integer organizerId, Pageable pageable);
+
+    @Query("SELECT e.organizer.id FROM Event e WHERE e.id = :id")
+    Optional<Integer> findOrganizerIdById(@Param("id") Integer id);
 
     // return order: published -> completed -> cancelled (same status orders by closest starting date)
     @Query("SELECT e FROM Event e " +

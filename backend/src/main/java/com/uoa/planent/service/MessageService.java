@@ -60,15 +60,14 @@ public class MessageService {
     public boolean canSendMessage(Integer eventId, Integer senderId, Integer receiverId){
         if (eventId == null || senderId == null || receiverId == null) return false;
 
+        // cannot send to self
         if (senderId.equals(receiverId)) {
             return false;
         }
 
-        Event event = eventRepository.findById(eventId).orElse(null);
-        if (event == null) {
-            return false;
-        }
-        Integer organizerId = event.getOrganizer().getId();
+        // allow only organizer -> attendee or attendee -> organizer
+        Integer organizerId = eventRepository.findOrganizerIdById(eventId).orElse(null);
+        if (organizerId == null) return false;
 
         if (senderId.equals(organizerId)) {
             return hasBooking(eventId, receiverId);
@@ -138,7 +137,7 @@ public class MessageService {
 
     @Transactional
     public MessageResponse sendMessage(MessageSendRequest request, @NotNull Integer senderId) {
-        User sender = userRepository.findById(senderId).orElseThrow(() -> new ResourceNotFoundException("Sender with ID '" + senderId + "' not found."));
+        User sender = userRepository.getReferenceById(senderId); // reference of sender since we just need it for foreign key matching
         User receiver = userRepository.findById(request.getReceiverId()).orElseThrow(() -> new ResourceNotFoundException("Receiving user with ID '" + request.getReceiverId() + "' not found."));
         Event event = eventRepository.findById(request.getEventId()).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + request.getEventId() + "' not found."));
 
@@ -185,10 +184,8 @@ public class MessageService {
     // Reuses the existing sendBulkMessages — no new persistence code.
     @Transactional
     public int broadcastToEventAttendees(@NotNull Integer eventId, @NotNull Integer senderId, @NotNull String body) {
-        User sender = userRepository.findById(senderId).orElseThrow(
-                () -> new ResourceNotFoundException("User with ID '" + senderId + "' not found."));
-        Event event = eventRepository.findById(eventId).orElseThrow(
-                () -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
+        User sender = userRepository.getReferenceById(senderId); // reference of sender since we just need it for foreign key matching
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
 
         // Only active (non-cancelled) bookings — cancelled attendees shouldn't get more updates
         List<Booking> activeBookings = bookingRepository.findActiveBookingsByEventId(eventId);
