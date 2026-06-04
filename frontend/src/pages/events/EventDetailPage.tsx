@@ -41,6 +41,20 @@ export default function EventDetailPage() {
         fetchEvent();
     }, [eventId]);
 
+    useEffect(() => {
+        if (!user) return; // abort if anonymous guest
+
+        async function recordViewInteraction() {
+            try {
+                await api.post(`/events/${eventId}/view`);
+            } catch (err) {
+                // silent failure
+                console.error("Interaction tracking failed:", err);
+            }
+        }
+        recordViewInteraction();
+    }, [eventId, user]);
+
     async function handleBooking() {
         if (!selectedTicketTypeId) return;
         setBookingError("");

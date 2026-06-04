@@ -11,6 +11,7 @@ import com.uoa.planent.repository.EventRepository;
 import com.uoa.planent.repository.UserRepository;
 import com.uoa.planent.security.UserDetailsImpl;
 import jakarta.annotation.Nullable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,7 @@ public class EventService {
     // scheduled every 15 mins
     @Scheduled(fixedRate = 900000)
     @Transactional
+    @CacheEvict(value = "recommendedEvents", allEntries = true)
     public void completePastEvents() {
         int updatedCount = eventRepository.markPastEventsAsCompleted(Instant.now());
         log.info("Successfully marked {} events as COMPLETED.", updatedCount);
@@ -70,6 +73,11 @@ public class EventService {
 
     // returns all recommended (as per the BMF data) non-draft events
     // documentation in EventRepository#findAllRecommendedVisibleEvents
+    @Cacheable( // cached exclusively for anonymous guests to maximize performance since they share the most popular events. evicting whenever a event creation/update/deletion happens
+            value = "recommendedEvents",
+            key = "'guest_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize",
+            condition = "#currentUserId == null"
+    )
     public Page<EventSummaryResponse> getAllRecommendedVisibleEvents(@Nullable Integer currentUserId, Pageable pageable) {
         return eventRepository.findAllRecommendedVisibleEvents(currentUserId, pageable).map(EventMapper::toSummaryResponse);
     }
@@ -130,6 +138,7 @@ public class EventService {
 
 
     @Transactional
+    @CacheEvict(value = "recommendedEvents", allEntries = true)
     public EventResponse createEvent(EventCreateRequest request, List<MultipartFile> media, @NotNull Integer organizerId) {
         // get organizer user
         User organizer = userRepository.findById(organizerId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + organizerId + "' not found."));
@@ -182,6 +191,7 @@ public class EventService {
 
 
     @Transactional
+    @CacheEvict(value = "recommendedEvents", allEntries = true)
     public void deleteEvent(Integer eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
 
@@ -198,6 +208,7 @@ public class EventService {
 
 
     @Transactional
+    @CacheEvict(value = "recommendedEvents", allEntries = true)
     public EventResponse updateEvent(Integer eventId, EventUpdateRequest request, List<MultipartFile> media) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
 

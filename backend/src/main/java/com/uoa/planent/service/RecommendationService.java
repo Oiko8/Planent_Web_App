@@ -4,18 +4,16 @@ import com.uoa.planent.model.EventRecommendationVector;
 import com.uoa.planent.model.RecommendationConfig;
 import com.uoa.planent.model.UserEventInteraction;
 import com.uoa.planent.model.UserRecommendationVector;
-import com.uoa.planent.repository.EventRecommendationVectorRepository;
-import com.uoa.planent.repository.RecommendationConfigRepository;
-import com.uoa.planent.repository.UserEventInteractionRepository;
-import com.uoa.planent.repository.UserRecommendationVectorRepository;
+import com.uoa.planent.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,7 +29,15 @@ public class RecommendationService {
     private final EventRecommendationVectorRepository eventVectorRepository;
     private final RecommendationConfigRepository configRepository;
 
-    @Async
+    private final UserRepository userRepository;
+    private final EventRepository eventRepository;
+
+    // fully automated background matrix factorization training pipeline
+    // runs automatically every 30 minutes (async))
+    // evicts the current guest recommended events cache automatically
+    @Async("recommendationTaskExecutor")
+    @Scheduled(fixedRate = 1800000)
+    @CacheEvict(value = "recommendedEvents", allEntries = true)
     @Transactional
     public void trainRecommendationModel() {
         log.info("Starting recommendation model training via SGD...");
@@ -59,7 +65,6 @@ public class RecommendationService {
 
 
         // start training
-        Random random = new Random();
         for (int epoch = 0; epoch < epochs; epoch++) {
             // shuffle interactions to avoid ordering bias in sgd
             Collections.shuffle(interactions);
@@ -72,14 +77,14 @@ public class RecommendationService {
                 // get or create user vector in memory using its default values
                 UserRecommendationVector userVector = userVectorsMap.computeIfAbsent(userId, id -> {
                     UserRecommendationVector vector = new UserRecommendationVector();
-                    vector.setUserId(id);
+                    vector.setUser(userRepository.getReferenceById(userId)); // lazy reference of User model to fix hibernate @MapsId error
                     return vector;
                 });
 
                 // get or create event vector in memory using its default values
                 EventRecommendationVector eventVector = eventVectorsMap.computeIfAbsent(eventId, id -> {
                     EventRecommendationVector vector = new EventRecommendationVector();
-                    vector.setEventId(id);
+                    vector.setEvent(eventRepository.getReferenceById(id));
                     return vector;
                 });
 

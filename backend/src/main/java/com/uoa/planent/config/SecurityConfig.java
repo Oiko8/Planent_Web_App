@@ -73,6 +73,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(frontendUrls); // allow frontend only
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // for these methods
         config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // with these headers
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

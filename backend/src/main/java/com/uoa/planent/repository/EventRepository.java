@@ -64,17 +64,14 @@ public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpeci
     // database search filter with the above recommendation ranking query
     // processes dynamic search parameters natively using null-safe evaluations (AND :parameter IS NULL OR condition)
     // avoiding jpa specifications to integrate the recommendation query directly
-    @Query("SELECT DISTINCT e FROM Event e " +
+    @Query("SELECT e FROM Event e " +
             "LEFT JOIN UserRecommendationVector uv ON uv.userId = :userId " +
             "LEFT JOIN EventRecommendationVector ev ON ev.eventId = e.id " +
-            "LEFT JOIN e.categories ec " +
-            "LEFT JOIN ec.category c " +
-            "LEFT JOIN e.ticketTypes tt " +
             "WHERE e.status IN :statuses " +
             "  AND (:text IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :text, '%')) OR LOWER(CAST(e.description AS string)) LIKE LOWER(CONCAT('%', :text, '%'))) " +
             "  AND (:city IS NULL OR LOWER(e.city) = LOWER(:city)) " +
-            "  AND (:category IS NULL OR LOWER(c.categoryName) = LOWER(:category)) " +
-            "  AND (:maxPrice IS NULL OR tt.price <= :maxPrice) " +
+            "  AND (:category IS NULL OR EXISTS (SELECT 1 FROM e.categories ec WHERE LOWER(ec.category.categoryName) = LOWER(:category))) " +
+            "  AND (:maxPrice IS NULL OR EXISTS (SELECT 1 FROM e.ticketTypes tt WHERE tt.price <= :maxPrice)) " +
             "  AND (CAST(:startDate AS timestamp) IS NULL OR e.startDatetime >= :startDate) " +
             "  AND (CAST(:endDate AS timestamp) IS NULL OR e.endDatetime <= :endDate) " +
             "ORDER BY CASE e.status " +
