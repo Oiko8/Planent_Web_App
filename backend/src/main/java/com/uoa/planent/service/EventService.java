@@ -59,8 +59,7 @@ public class EventService {
         if (isAdmin) return true;
 
         // check if organizer
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
-        return event.getOrganizer().getId().equals(user.getId());
+        return eventRepository.existsByIdAndOrganizerId(eventId, user.getId());
     }
 
     // scheduled every 15 mins

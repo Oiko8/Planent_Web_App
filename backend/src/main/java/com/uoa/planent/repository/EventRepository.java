@@ -36,4 +36,7 @@ public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpeci
     @Modifying
     @Query("UPDATE Event e SET e.status = 'COMPLETED' WHERE e.status = 'PUBLISHED' AND e.endDatetime <= :now")
     int markPastEventsAsCompleted(@Param("now") Instant now);
+
+
+    boolean existsByIdAndOrganizerId(Integer eventId, Integer organizerId);
 }

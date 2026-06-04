@@ -40,8 +40,8 @@ public class EventController {
     //
     // To eliminate the N+1 query problem during pagination, a global batch fetch size is set (set at 50).
     // For example:
-    // - 50 events processed -> 1 main query + 1 batch query for media.
-    // - 51 events processed -> 1 main query + 2 batch queries for media (due to the size-50 boundary).
+    // - 50 events processed -> 1 main query + 1 batch query for main media.
+    // - 51 events processed -> 1 main query + 2 batch queries for main media (due to the size-50 boundary).
 
 
     // ---- public endpoints ----
