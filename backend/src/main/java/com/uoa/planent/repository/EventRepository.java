@@ -27,7 +27,8 @@ public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpeci
     Optional<Integer> findOrganizerIdById(@Param("eventId") Integer eventId);
 
 
-    // unified personalized and popularity feed query supporting both guests and authenticated users
+    // personalized query supporting both guests and authenticated users (BMF algorithm)
+    // we dont need the global bias since its a constant
     //
     // sorting hierarchy:
     // 1. event status group: groups by published (1), completed (2) and then cancelled (3)

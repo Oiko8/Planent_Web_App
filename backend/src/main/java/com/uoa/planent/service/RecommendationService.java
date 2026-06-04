@@ -44,17 +44,20 @@ public class RecommendationService {
 
         // load config (hyperparameters)
         RecommendationConfig config = configRepository.getOrCreateConfig();
-        double globalBias = config.getGlobalBias();
         double alpha = config.getLearningRate();    // lr: 0.025
         double lambda = config.getRegularization(); // reg: 0.03
         int epochs = config.getEpochs();            // epochs: 60
 
-        // load all interactions
+        // load all interactions and get their global bias
         List<UserEventInteraction> interactions = interactionRepository.findAll();
         if (interactions.isEmpty()) {
             log.warn("No user interactions found. Training aborted.");
             return;
         }
+        double globalBias = interactions.stream()
+                .mapToDouble(interaction -> interaction.getRating().doubleValue())
+                .average()
+                .orElse(0.0);
 
         // load all user/event vector in a hashmap from the database for fast lookups and updates
         Map<Integer, UserRecommendationVector> userVectorsMap = userVectorRepository.findAll()
@@ -136,6 +139,9 @@ public class RecommendationService {
 
         userVectorRepository.saveAll(userVectorsMap.values());
         eventVectorRepository.saveAll(eventVectorsMap.values());
+
+        config.setGlobalBias(globalBias);
+        configRepository.save(config);
 
         log.info("Recommendation model training completed successfully.");
     }
