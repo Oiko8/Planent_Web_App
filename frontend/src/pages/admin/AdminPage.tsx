@@ -1,35 +1,32 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
 import type { PageResponse, EventSummary } from "../../types/event";
+import type { User } from "../../types/user";
 import { statusFormData } from "../../types/eventFormData";
 import Loader from "../../components/Loader";
-
-type UserResponse = {
-    userId: number;
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    country: string;
-    city: string;
-    isApproved: boolean;
-    isAdmin: boolean;
-};
+import UserDropdownDetails from "../../components/UserDropdown";
+import Pagination from "../../components/Pagination";
+import { useNavigate } from "react-router-dom";
 
 type Tab = "users" | "events";
 
+const PAGE_SIZE = 10;
+
 export default function AdminPage() {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<Tab>("users");
 
     // Users state
-    const [users, setUsers] = useState<UserResponse[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [usersLoading, setUsersLoading] = useState(true);
     const [usersError, setUsersError] = useState("");
     const [userMessage, setUserMessage] = useState("");
+    // User dropdown for details
+    const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
 
     // Events state — /events returns EventSummaryResponse, not the full event
-    const [events, setEvents] = useState<EventSummary[]>([]);
+    const [eventsPageData, setEventsPageData] = useState<PageResponse<EventSummary> | null>(null);
+    const [eventsPage, setEventsPage] = useState(0);
     const [eventsLoading, setEventsLoading] = useState(true);
     const [eventsError, setEventsError] = useState("");
 
@@ -37,14 +34,19 @@ export default function AdminPage() {
     const [exporting, setExporting] = useState<"xml" | "json" | null>(null);
     const [exportError, setExportError] = useState("");
 
+    // Fetch users once when first loading
     useEffect(() => {
         fetchUsers();
-        fetchEvents();
     }, []);
+
+    // Fetch on page change
+    useEffect(() => {
+        fetchEvents();
+    }, [eventsPage]);
 
     async function fetchUsers() {
         try {
-            const response = await api.get<UserResponse[]>("/users");
+            const response = await api.get<User[]>("/users");
             setUsers(response.data);
         } catch (err) {
             setUsersError("Failed to load users.");
@@ -56,15 +58,23 @@ export default function AdminPage() {
     async function fetchEvents() {
         try {
             const response = await api.get<PageResponse<EventSummary>>("/events", {
-                params: { size: 100 },
+                params: {
+                    page: eventsPage,
+                    size: PAGE_SIZE
+                },
             });
-            setEvents(response.data.content);
+            setEventsPageData(response.data);
         } catch (err) {
             setEventsError("Failed to load events.");
         } finally {
             setEventsLoading(false);
         }
     }
+
+    // User dropdown
+    const toggleUserDropdown = (userId: number) => {
+        setExpandedUserId(prev => (prev === userId ? null : userId));
+    };
 
     async function handleApprove(userId: number) {
         try {
@@ -91,9 +101,15 @@ export default function AdminPage() {
     async function handlePublishEvent(eventId: number) {
         try {
             await api.patch(`/events/${eventId}`, statusFormData({ publish: true }));
-            setEvents(prev => prev.map(e =>
-                e.eventId === eventId ? { ...e, status: "PUBLISHED" as const } : e
-            ));
+            setEventsPageData(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    content: prev.content.map(e =>
+                        e.eventId === eventId ? { ...e, status: "PUBLISHED" as const } : e
+                    )
+                };
+            });
         } catch (err: any) {
             setEventsError(err.response?.data?.detail ?? "Failed to publish event.");
         }
@@ -102,9 +118,15 @@ export default function AdminPage() {
     async function handleCancelEvent(eventId: number) {
         try {
             await api.patch(`/events/${eventId}`, statusFormData({ cancel: true }));
-            setEvents(prev => prev.map(e =>
-                e.eventId === eventId ? { ...e, status: "CANCELLED" as const } : e
-            ));
+            setEventsPageData(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    content: prev.content.map(e =>
+                        e.eventId === eventId ? { ...e, status: "CANCELLED" as const } : e
+                    )
+                };
+            });
         } catch (err: any) {
             setEventsError(err.response?.data?.detail ?? "Failed to cancel event.");
         }
@@ -158,6 +180,7 @@ export default function AdminPage() {
 
     const pendingUsers = users.filter(u => !u.isApproved && !u.isAdmin);
     const approvedUsers = users.filter(u => u.isApproved && !u.isAdmin);
+    const events = eventsPageData?.content ?? [];
 
     return (
         <div className="admin-page">
@@ -197,20 +220,32 @@ export default function AdminPage() {
                                 <span className="admin-badge">{pendingUsers.length}</span>
                             </h2>
                             {pendingUsers.map(user => (
-                                <div key={user.userId} className="admin-user-card admin-user-pending">
-                                    <div className="admin-user-info">
-                                        <strong>{user.firstName} {user.lastName}</strong>
-                                        <span className="admin-user-username">@{user.username}</span>
-                                        <span className="admin-user-meta">{user.email} · {user.city}, {user.country}</span>
+                                <div key={user.userId} className="admin-user-container">
+                                    <div
+                                        className="admin-user-card admin-user-pending admin-clickable"
+                                        onClick={() => toggleUserDropdown(user.userId)}
+                                    >
+                                        <div className="admin-user-info">
+                                            <strong>{user.firstName} {user.lastName}</strong>
+                                            <span className="admin-user-username">@{user.username}</span>
+                                            <span className="admin-user-meta">{user.email} · {user.city}, {user.country}</span>
+                                        </div>
+                                        <div className="admin-user-actions" onClick={(e) => e.stopPropagation()}>
+                                            <button className="admin-btn-approve" onClick={() => handleApprove(user.userId)}>
+                                                Approve
+                                            </button>
+                                            <button className="admin-btn-reject" onClick={() => handleReject(user.userId)}>
+                                                Reject
+                                            </button>
+                                            <span className="admin-dropdown-arrow" onClick={() => toggleUserDropdown(user.userId)}>
+                                                {expandedUserId === user.userId ? "▲" : "▼"}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="admin-user-actions">
-                                        <button className="admin-btn-approve" onClick={() => handleApprove(user.userId)}>
-                                            Approve
-                                        </button>
-                                        <button className="admin-btn-reject" onClick={() => handleReject(user.userId)}>
-                                            Reject
-                                        </button>
-                                    </div>
+
+                                    {expandedUserId === user.userId && (
+                                        <UserDropdownDetails user={user} />
+                                    )}
                                 </div>
                             ))}
                         </>
@@ -221,18 +256,32 @@ export default function AdminPage() {
                     )}
 
                     {/* Approved users */}
-                    <h2 className="admin-section-title" style={{ marginTop: "2rem" }}>
+                    <h2 className="admin-section-title">
                         Approved Users
                         <span className="admin-badge">{approvedUsers.length}</span>
                     </h2>
                     {approvedUsers.map(user => (
-                        <div key={user.userId} className="admin-user-card">
-                            <div className="admin-user-info">
-                                <strong>{user.firstName} {user.lastName}</strong>
-                                <span className="admin-user-username">@{user.username}</span>
-                                <span className="admin-user-meta">{user.email} · {user.city}, {user.country}</span>
+                        <div key={user.userId} className="admin-user-container">
+                            <div
+                                className="admin-user-card admin-clickable"
+                                onClick={() => toggleUserDropdown(user.userId)}
+                            >
+                                <div className="admin-user-info">
+                                    <strong>{user.firstName} {user.lastName}</strong>
+                                    <span className="admin-user-username">@{user.username}</span>
+                                    <span className="admin-user-meta">{user.email} · {user.city}, {user.country}</span>
+                                </div>
+                                <div className="admin-user-actions flex-actions" onClick={(e) => e.stopPropagation()}>
+                                    <span className="status-badge status-published">Active</span>
+                                    <span className="admin-dropdown-arrow" onClick={() => toggleUserDropdown(user.userId)}>
+                                        {expandedUserId === user.userId ? "▲" : "▼"}
+                                    </span>
+                                </div>
                             </div>
-                            <span className="status-badge status-published">Active</span>
+
+                            {expandedUserId === user.userId && (
+                                <UserDropdownDetails user={user} />
+                            )}
                         </div>
                     ))}
                 </div>
@@ -264,7 +313,7 @@ export default function AdminPage() {
                     {eventsLoading && <Loader />}
                     {eventsError && <p className="message-error">{eventsError}</p>}
 
-                    {events.length === 0 && !eventsLoading && (
+                    {!eventsLoading && !eventsError && events.length === 0 && (
                         <p className="admin-empty">No events found.</p>
                     )}
 
@@ -302,6 +351,8 @@ export default function AdminPage() {
                             </div>
                         </div>
                     ))}
+
+                    <Pagination pageData={eventsPageData} onPageChange={setEventsPage} />
                 </div>
             )}
         </div>

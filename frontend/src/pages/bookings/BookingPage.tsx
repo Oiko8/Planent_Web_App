@@ -74,6 +74,25 @@ export default function BookingPage() {
         );
     }
 
+    // error for organizer
+    if (user && event.organizerId === user.userId) {
+        return (
+            <div className="booking-page">
+                <h1 className="header">Book Your Place</h1>
+                <div className="booking-success-screen booking-denied-screen">
+                    <h2 className="booking-denied-title">Access Denied</h2>
+                    <p>You are the <strong>organizer</strong> of this event.</p>
+                    <p>You cannot buy tickets or book a place for an event you host.</p>
+                    <div className="booking-denied-actions">
+                        <button className="create-event-button" onClick={() => navigate(-1)}>
+                            ← Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // success screen
     if (bookingSuccess) {
         return (
@@ -116,27 +135,30 @@ export default function BookingPage() {
             {/* Ticket selection */}
             <div className="booking-tickets">
                 <h3>Select Ticket Type</h3>
-                {event.ticketTypes.map(ticket => (
-                    <div
-                        key={ticket.ticketTypeId}
-                        className={`booking-ticket-type-card ${selectedTicket?.ticketTypeId === ticket.ticketTypeId ? "ticket-selected" : ""} ${ticket.available === 0 ? "ticket-soldout" : ""}`}
-                        onClick={() => {
-                            if (ticket.available > 0) {
-                                setSelectedTicket(ticket);
-                                setNumberOfTickets(1);
-                                setBookingError("");
-                            }
-                        }}
-                    >
-                        <div>
-                            <strong>{ticket.name}</strong>
-                            <span className="ticket-available">
-                                {ticket.available > 0 ? `${ticket.available} available` : "Sold out"}
-                            </span>
+                {/* Tickets — show availability and sort such that available ones are first*/}
+                {[...event.ticketTypes]
+                    .sort((a, b) => (a.available === 0 ? 1 : 0) - (b.available === 0 ? 1 : 0))
+                    .map(ticket => (
+                        <div
+                            key={ticket.ticketTypeId}
+                            className={`booking-ticket-type-card ${selectedTicket?.ticketTypeId === ticket.ticketTypeId ? "ticket-selected" : ""} ${ticket.available === 0 ? "ticket-soldout" : ""}`}
+                            onClick={() => {
+                                if (ticket.available > 0) {
+                                    setSelectedTicket(ticket);
+                                    setNumberOfTickets(1);
+                                    setBookingError("");
+                                }
+                            }}
+                        >
+                            <div>
+                                <strong>{ticket.name}</strong>
+                                <span className={`ticket-available ${ticket.available > 0 ? "" : "ticket-soldout-text"}`}>
+                                    {ticket.available > 0 ? `${ticket.available} available` : "Sold out"}
+                                </span>
+                            </div>
+                            <span className="ticket-price">€{Number(ticket.price).toFixed(2)}</span>
                         </div>
-                        <span className="ticket-price">€{Number(ticket.price).toFixed(2)}</span>
-                    </div>
-                ))}
+                    ))}
             </div>
 
             {/* Quantity + confirm */}
@@ -171,11 +193,17 @@ export default function BookingPage() {
                     ) : (
                         <div className="confirm-banner">
                             <p>
-                                Confirm {numberOfTickets} × {selectedTicket.name} for €{totalCost}?
-                                This cannot be undone.
+                                Confirm <strong>{numberOfTickets} × {selectedTicket.name}</strong> for <strong>€{totalCost}</strong>?
+                                <span className="confirm-warning"> This cannot be undone.</span>
                             </p>
-                            <button onClick={handleBooking}>Yes, confirm</button>
-                            <button onClick={() => setConfirmBooking(false)}>Cancel</button>
+                            <div className="confirm-buttons">
+                                <button className="admin-btn-reject" onClick={handleBooking}>
+                                    Yes, confirm
+                                </button>
+                                <button className="event-card-button-secondary" onClick={() => setConfirmBooking(false)}>
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

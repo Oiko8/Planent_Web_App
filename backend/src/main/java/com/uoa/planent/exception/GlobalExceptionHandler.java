@@ -184,11 +184,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        String detail = "Malformed JSON request.";
+        String detail = "Malformed JSON request payload.";
+
         if (e.getMostSpecificCause() != null) {
-            detail = e.getMostSpecificCause().getMessage();
+            String rawMessage = e.getMostSpecificCause().getMessage();
+
+            if (rawMessage != null && rawMessage.contains("out of range")) {
+                detail = "The numeric value provided is too large or out of range for this field.";
+            } else {
+                detail = "Invalid input format or corrupted data structure.";
+            }
         }
 
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+    }
+
+
+
+
+    // -------------- global catch-all fallback --------------
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleAllUnhandledExceptions(Exception e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected internal server error occurred. Please try again later.");
     }
 }

@@ -177,19 +177,26 @@ export default function EventDetailPage() {
             {/* Tickets */}
             <div className="event-detail-tickets">
                 <h3>Tickets</h3>
-                {/* Tickets — just show availability */}
-                {event.ticketTypes.map(ticket => (
-                    <div key={ticket.ticketTypeId} className="ticket-type-card">
-                        <div>
-                            <strong>{ticket.name}</strong>
-                            <span className="ticket-available">available</span>
+                {/* Tickets — show availability and sort such that available ones are first*/}
+                {[...event.ticketTypes]
+                    .sort((a, b) => (a.available === 0 ? 1 : 0) - (b.available === 0 ? 1 : 0))
+                    .map(ticket => (
+                        <div
+                            key={ticket.ticketTypeId}
+                            className={`ticket-type-card ${ticket.available === 0 ? "ticket-soldout" : ""}`}
+                        >
+                            <div>
+                                <strong>{ticket.name}</strong>
+                                <span className={`ticket-available ${ticket.available > 0 ? "" : "ticket-soldout-text"}`}>
+                        {ticket.available > 0 ? `${ticket.available} Available` : "Sold out"}
+                    </span>
+                            </div>
+                            <span className="ticket-price">€{Number(ticket.price).toFixed(2)}</span>
                         </div>
-                        <span className="ticket-price">€{Number(ticket.price).toFixed(2)}</span>
-                    </div>
-                ))}
+                    ))}
 
-                {/* Book button */}
-                {event.status === "PUBLISHED" && (
+                {/* Book button (published non-organizer only)*/}
+                {event.status === "PUBLISHED" && event.organizerId !== user?.userId && (
                     <div style={{ marginTop: "1.5rem" }}>
                         {event.ticketTypes.some(t => t.available > 0) ? (
                             <button

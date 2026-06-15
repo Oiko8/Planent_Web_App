@@ -1,5 +1,5 @@
 // react context, any component can read something from here directly 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import { User } from "../types/user";
 import api from "../api/axiosConfig";
 
@@ -16,30 +16,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
 
-    // on app load — check if token exists and restore user
-    useEffect(() => {
-        async function restoreUser() {
-            const token = localStorage.getItem("token");
+    const restoreUser = useCallback(async () => {
+        const token = localStorage.getItem("token");
 
-            // no valid token → skip
-            if (!token || token === "null" || token === "undefined") {
-                setAuthLoading(false);
-                return;
-            }
-
-            try {
-                const response = await api.get("/users/me");
-                setUser(response.data);
-            } catch {
-                // token expired or invalid → clean up
-                localStorage.removeItem("token");
-            } finally {
-                setAuthLoading(false);
-            }
+        // no valid token → skip
+        if (!token || token === "null" || token === "undefined") {
+            setUser(null);
+            setAuthLoading(false);
+            return;
         }
 
-        restoreUser();
+        try {
+            const response = await api.get("/users/me");
+            setUser(response.data);
+        } catch {
+            // token expired or invalid → clean up
+            localStorage.removeItem("token");
+            setUser(null);
+        } finally {
+            setAuthLoading(false);
+        }
     }, []);
+
+    // on app load — check if token exists and restore user
+    useEffect(() => {
+        restoreUser();
+    }, [restoreUser]);
+
+    // storage listener if multiple tabs are open to refresh auth context (re-restore user)
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "token") {
+                setAuthLoading(true);
+                restoreUser();
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, [restoreUser]);
+
 
     function login(user: User) {
         setUser(user);

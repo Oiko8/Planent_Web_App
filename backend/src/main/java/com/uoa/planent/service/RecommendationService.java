@@ -48,6 +48,7 @@ public class RecommendationService {
         double lambda = config.getRegularization(); // reg: 0.03
         int epochs = config.getEpochs();            // epochs: 60
 
+
         // load all interactions and get their global bias
         List<UserEventInteraction> interactions = interactionRepository.findAll();
         if (interactions.isEmpty()) {
@@ -59,12 +60,14 @@ public class RecommendationService {
                 .average()
                 .orElse(0.0);
 
+
         // load all user/event vector in a hashmap from the database for fast lookups and updates
         Map<Integer, UserRecommendationVector> userVectorsMap = userVectorRepository.findAll()
                 .stream().collect(Collectors.toMap(UserRecommendationVector::getUserId, vector -> vector));
 
         Map<Integer, EventRecommendationVector> eventVectorsMap = eventVectorRepository.findAll()
                 .stream().collect(Collectors.toMap(EventRecommendationVector::getEventId, vector -> vector));
+
 
 
         // start training
@@ -135,8 +138,7 @@ public class RecommendationService {
             }
         }
 
-        log.info("Writing updated vectors back to the database...");
-
+        // training done -> save
         userVectorRepository.saveAll(userVectorsMap.values());
         eventVectorRepository.saveAll(eventVectorsMap.values());
 

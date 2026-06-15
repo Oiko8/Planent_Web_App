@@ -1,7 +1,8 @@
 import './styles/index.css'
-import { useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import api from "./api/axiosConfig";
 import Navbar from "./components/Navbar";
 import AdminNavbar from "./components/AdminNavbar";
 import SplashScreen from './components/SplashScreen';
@@ -34,11 +35,49 @@ export default function App() {
 }
 
 function AppContent() {
-    const { authLoading } = useAuth();
+    const { user, authLoading, logout } = useAuth();
+    const navigate = useNavigate();
     const location = useLocation();
-    const isAdminRoute = location.pathname.startsWith("/admin");
+    const isAdminRoute = location.pathname === "/admin";
 
     const [showSplash, setShowSplash] = useState(() => location.pathname === "/");
+
+    // Global interceptor for unauthorized/forbidden responses (prompt to login)
+    useEffect(() => {
+        const interceptor = api.interceptors.response.use(
+            (response) => response, // successful response
+            (error) => { // unsuccessful
+                // 401 or 403
+                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                    logout();
+                    navigate("/login", { replace: true });
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => api.interceptors.response.eject(interceptor);
+    }, [navigate, logout]);
+
+    // interceptor for admin page
+    useEffect(() => {
+        // not logged in and going to /admin -> /login page
+        if (!authLoading && !user && isAdminRoute) {
+            navigate("/login", { replace: true });
+            return;
+        }
+
+        // logged in but not admin and going to /admin -> /events page
+        if (!authLoading && user && !user.isAdmin && isAdminRoute) {
+            navigate("/events", { replace: true });
+            return;
+        }
+
+        // logged in and admin but not in /admin -> force in /admin page
+        if (!authLoading && user?.isAdmin && !isAdminRoute) {
+            navigate("/admin", { replace: true });
+        }
+    }, [user, authLoading, isAdminRoute, location.pathname, navigate]);
 
     if (authLoading) return null;
 

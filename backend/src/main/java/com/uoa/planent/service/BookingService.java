@@ -73,6 +73,11 @@ public class BookingService {
         // get ticket type and lock its row to avoid race conditions (overbooking). eagerly fetch event as well since we use it
         EventTicketType ticketType = ticketTypeRepository.findByIdWithEventForBooking(request.getTicketTypeId()).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID '" + request.getTicketTypeId() + "' not found."));
 
+        // organizer cannot book on his own event
+        if (Objects.equals(ticketType.getEvent().getOrganizer().getId(), attendeeId)) {
+            throw new IllegalArgumentException("Organizers cannot book tickets for their own events.");
+        }
+
         // try booking on the ticket type
         // will throw an exception if unable to book
         BigDecimal totalCost = ticketType.tryBook(request.getNumberOfTickets());

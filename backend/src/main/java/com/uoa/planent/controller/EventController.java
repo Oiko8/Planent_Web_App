@@ -111,9 +111,9 @@ public class EventController {
 
 
 
-    @PatchMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (data) + media (multipart)
+    @PatchMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (request) + media (media)
     @PreAuthorize("@eventService.isOrganizerOrAdmin(#eventId, principal)") // organizer or admin can delete only
-    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @ModelAttribute @Valid EventUpdateRequest request, @RequestParam(value = "media", required = false) List<@ValidImage MultipartFile> media){
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Integer eventId, @RequestPart("request") @Valid EventUpdateRequest request, @RequestParam(value = "media", required = false) List<@ValidImage MultipartFile> media){
         return ResponseEntity.ok().body(eventService.updateEvent(eventId, request, media));
     }
 

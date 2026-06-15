@@ -519,6 +519,14 @@ body {
   margin: 0.8rem 0 0;
 }
 
+.auth-error-inline {
+  color: var(--color-danger-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
 .auth-footer {
   text-align: center;
   font-size: 0.85rem;
@@ -565,6 +573,16 @@ body {
   gap: 0.8rem;
   align-items: end;
   margin-bottom: 0.8rem;
+}
+
+.ticket-error-block {
+  width: 100%;
+  color: var(--color-danger-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
 }
 
 
@@ -1058,6 +1076,13 @@ body {
     border-color: #6366f1;
 }
 
+.events-status-message {
+  text-align: center;
+  margin: 3rem auto;
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
 /* Ticket type cards (shared: EventDetail + BookingPage) */
 .ticket-type-card {
   display: flex;
@@ -1231,6 +1256,21 @@ body {
 .booking-event-link:hover {
   color: var(--color-primary-accent);
   text-decoration: underline;
+}
+
+.booking-success-screen.booking-denied-screen {
+  border-color: #ef4444;
+}
+
+.booking-denied-title {
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.booking-denied-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 
@@ -1434,6 +1474,85 @@ body {
   max-width: 800px;
   margin: 0 auto 1.5rem;
   flex-wrap: wrap;
+}
+
+/* Dropdown */
+.admin-user-container {
+  margin-bottom: 1rem;
+}
+
+.admin-clickable {
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.flex-actions {
+  display: flex;
+  align-items: center;
+}
+
+.admin-dropdown-arrow {
+  margin-left: 15px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.admin-user-card:hover .admin-dropdown-arrow {
+  color: var(--text-strong);
+}
+
+.admin-user-dropdown {
+  padding: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.admin-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.admin-details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.admin-column-subtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary-accent);
+  border-bottom: 1px solid var(--border-weak);
+  padding-bottom: 0.4rem;
+  margin: 0 0 0.2rem 0;
+}
+
+.admin-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-detail-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+.admin-detail-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  word-break: break-all;
 }
 
 
@@ -2176,23 +2295,47 @@ body {
 }
 
 .confirm-banner {
-    width: 100%;
-    background: #fff;
-    border: 1px solid #fecaca;
-    border-radius: 10px;
-    padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-weak);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .confirm-banner p {
-    margin: 0 0 0.75rem;
-    color: #7f1d1d;
-    font-size: 0.9rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-strong);
 }
 
-.confirm-banner-actions {
-    display: flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
+.confirm-warning {
+  color: var(--color-danger-text);
+  font-weight: 500;
+  margin-left: 0.2rem;
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.confirm-buttons .admin-btn-reject {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.confirm-buttons .event-card-button-secondary {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
+  margin: 0;
 }
 
 .auth-input[type="file"] {
