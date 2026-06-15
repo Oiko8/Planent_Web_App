@@ -40,20 +40,16 @@ public class MessageService {
 
     // ----- helper methods -----
 
-    public boolean isSender(@NotNull Message message, @NotNull Integer currentUserId) {
+    private boolean isSender(@NotNull Message message, @NotNull Integer currentUserId) {
         return Objects.equals(message.getSender().getId(), currentUserId);
     }
 
-    public boolean isReceiver(@NotNull Message message, @NotNull Integer currentUserId) {
+    private boolean isReceiver(@NotNull Message message, @NotNull Integer currentUserId) {
         return Objects.equals(message.getReceiver().getId(), currentUserId);
     }
 
-    public boolean isSenderOrReceiver(@NotNull Integer messageId, UserDetailsImpl user) {
-        if (user == null) return false;
-
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException("Message with ID '" + messageId + "' not found."));
-
-        return isSender(message, user.getId()) || isReceiver(message, user.getId());
+    public boolean isSenderOrReceiver(@NotNull Integer messageId, @NotNull Integer currentUserId) {
+        return messageRepository.existsByIdAndSenderOrReceiver(messageId, currentUserId);
     }
 
 

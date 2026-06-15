@@ -1,10 +1,11 @@
 package com.uoa.planent.config;
 
 import com.uoa.planent.security.JwtAuthFilter;
-import com.uoa.planent.service.FileSystemStorageService;
+import com.uoa.planent.security.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,7 +30,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
     private final AuthenticationProvider authenticationProvider;
 
     @Value("${frontend.urls}")
@@ -61,9 +64,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/events/**").permitAll() // other gets are public on events
                         .anyRequest().authenticated()) // all others need authentication
 
-                // authorization
-                .authenticationProvider(authenticationProvider) // retrieves user details from the database via the user details service and uses the password encrypter to verify that the provided password and the password on the database match
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // authenticate automatically with a JSON web token
+                // jwt authorization
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(new JwtAuthFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class); // authenticate automatically with a JSON web token
         return http.build();
     }
 

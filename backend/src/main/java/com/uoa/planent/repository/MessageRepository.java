@@ -13,6 +13,9 @@ import java.util.Optional;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
+    @Query("SELECT CASE WHEN (COUNT(m) > 0) THEN true ELSE false END FROM Message m WHERE m.id = :id AND (m.sender.id = :uid OR m.receiver.id = :uid)")
+    boolean existsByIdAndSenderOrReceiver(@Param("id") Integer id, @Param("uid") Integer uid);
+
     // inbox (optimized with joins to fetch the ManyToOne relations as well)
     @Query(value = "SELECT m FROM Message m " +
             "JOIN FETCH m.sender " +

@@ -2,6 +2,7 @@ package com.uoa.planent.controller;
 
 import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserUpdateRequest;
+import com.uoa.planent.mapper.UserMapper;
 import com.uoa.planent.security.UserDetailsImpl;
 import com.uoa.planent.service.UserService;
 import jakarta.validation.Valid;
@@ -29,7 +30,7 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getMyUser(@AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
-        return ResponseEntity.ok(userService.getUserById(currentUser.getId()));
+        return ResponseEntity.ok(UserMapper.toResponse(currentUser));
     }
 
     @GetMapping("/{userId}")

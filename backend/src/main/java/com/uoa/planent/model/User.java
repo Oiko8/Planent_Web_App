@@ -71,20 +71,4 @@ public class User {
 
     @Column(name = "afm", nullable = false, length = 9)
     private String afm;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "attendee")
-    private Set<Booking> bookings = new LinkedHashSet<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "organizer")
-    private Set<Event> events = new LinkedHashSet<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "sender")
-    private Set<Message> sentMessages = new LinkedHashSet<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "receiver")
-    private Set<Message> receivedMessages = new LinkedHashSet<>();
 }

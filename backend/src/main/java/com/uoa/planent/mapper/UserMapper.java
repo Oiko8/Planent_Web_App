@@ -4,10 +4,13 @@ import com.uoa.planent.dto.user.UserPublicInfo;
 import com.uoa.planent.dto.user.UserResponse;
 import com.uoa.planent.dto.user.UserRegisterRequest;
 import com.uoa.planent.model.User;
+import com.uoa.planent.security.UserDetailsImpl;
+
+import java.util.Objects;
 
 public class UserMapper {
 
-    // UserRegisterRequest → User (for registration)
+    // UserRegisterRequest -> User (for registration)
     public static User toModel(UserRegisterRequest request) {
         if (request == null) return null;
 
@@ -35,7 +38,7 @@ public class UserMapper {
     }
 
 
-    // User → UserDataResponse (for all of user's data, except sensitive info)
+    // User -> UserResponse (for all of user's data, except sensitive info)
     public static UserResponse toResponse(User user) {
         if (user == null) return null;
 
@@ -55,6 +58,27 @@ public class UserMapper {
                 .longitude(user.getLongitude())
                 .latitude(user.getLatitude())
                 .afm(user.getAfm())
+                .build();
+    }
+
+    // UserDetailsImpl -> UserResponse
+    public static UserResponse toResponse(UserDetailsImpl userDetails) {
+        if (userDetails == null) return null;
+
+        return UserResponse.builder()
+                .userId(userDetails.getId())
+                .username(userDetails.getUsername())
+                .firstName(userDetails.getFirstName())
+                .lastName(userDetails.getLastName())
+                .email(userDetails.getEmail())
+                .phone(userDetails.getPhone())
+                .country(userDetails.getCountry())
+                .city(userDetails.getCity())
+                .address(userDetails.getAddress())
+                .zipcode(userDetails.getZipcode())
+                .afm(userDetails.getAfm())
+                .isApproved(userDetails.getIsApproved())
+                .isAdmin(userDetails.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN")))
                 .build();
     }
 

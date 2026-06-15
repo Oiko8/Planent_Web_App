@@ -14,14 +14,12 @@ import java.util.Optional;
 
 @Repository
 public interface UserEventInteractionRepository extends JpaRepository<UserEventInteraction, UserEventInteractionId> {
-    Optional<UserEventInteraction> findByIdUserIdAndIdEventId(Integer userId, Integer eventId);
-
     // upsert (update or create) interaction
     // doesnt allow the event's organizer to interact with it
     @Modifying
-    @Query(value = "INSERT INTO user_event_interaction (user_id, event_id, rating) " +
+    @Query(value = "INSERT INTO User_Event_Interaction (user_id, event_id, rating) " +
             "SELECT :userId, e.event_id, :rating " +
-            "FROM event e " +
+            "FROM Event e " +
             "WHERE e.event_id = :eventId AND e.organizer_id != :userId " +
             "ON DUPLICATE KEY UPDATE rating = GREATEST(rating, :rating)",
             nativeQuery = true)

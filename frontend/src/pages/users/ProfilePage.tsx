@@ -41,23 +41,12 @@ export default function ProfilePage() {
     const [success, setSuccess] = useState("");
 
     useEffect(() => {
-        if (!user) {
-            navigate("/login");
-            return;
+        if (user) {
+            setProfile(user);
+            setForm(toForm(user));
+            setLoading(false);
         }
-        async function fetchProfile() {
-            try {
-                const res = await api.get("/users/me");
-                setProfile(res.data);
-                setForm(toForm(res.data));
-            } catch {
-                setGlobalError("Failed to load your profile.");
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchProfile();
-    }, [user, navigate]);
+    }, [user]);
 
     function toForm(data: any): ProfileForm {
         return {

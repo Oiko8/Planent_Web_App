@@ -70,10 +70,7 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-            .stream()
-            .map(UserMapper::toResponse)
-            .collect(Collectors.toList());
+        return userRepository.findAll().stream().map(UserMapper::toResponse).toList();
     } 
 
     @Transactional
@@ -91,8 +88,8 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + userId + "' not found."));
-        userRepository.delete(user);
+        if (!userRepository.existsById(userId)) throw new ResourceNotFoundException("User with ID '" + userId + "' not found.");
+        userRepository.deleteById(userId);
     }
 
     @Transactional
