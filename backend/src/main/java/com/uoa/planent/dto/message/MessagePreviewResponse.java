@@ -15,6 +15,6 @@ public class MessagePreviewResponse {
     String eventTitle;
     UserPublicInfo otherUser;
     String bodyPreview;
-    @JsonProperty("isRead")
     boolean isRead;
+    boolean sentByMe;
 }

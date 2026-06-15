@@ -80,7 +80,7 @@ export default function BookingPage() {
             <div className="booking-page">
                 <h1 className="header">Book Your Place</h1>
                 <div className="booking-success-screen booking-denied-screen">
-                    <h2 className="booking-denied-title">Access Denied</h2>
+                    <h2 className="booking-denied-title">🚫 Access Denied</h2>
                     <p>You are the <strong>organizer</strong> of this event.</p>
                     <p>You cannot buy tickets or book a place for an event you host.</p>
                     <div className="booking-denied-actions">

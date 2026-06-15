@@ -15,6 +15,7 @@ export type MessagePreview = {
     otherUser: UserPublicInfo;
     bodyPreview: string;
     isRead: boolean;
+    sentByMe: boolean;
 };
 
 export type MessageFull = {
@@ -24,4 +25,5 @@ export type MessageFull = {
     otherUser: UserPublicInfo;
     body: string;
     isRead: boolean;
+    sentByMe: boolean;
 };

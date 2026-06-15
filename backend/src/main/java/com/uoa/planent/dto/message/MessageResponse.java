@@ -16,4 +16,5 @@ public class MessageResponse {
     UserPublicInfo otherUser;
     String body;
     Boolean isRead;
+    boolean sentByMe;
 }

@@ -7,7 +7,7 @@ import com.uoa.planent.model.Message;
 import com.uoa.planent.model.User;
 
 public class MessageMapper {
-    public static MessagePreviewResponse toPreviewResponse(Message message, User otherUser){
+    public static MessagePreviewResponse toPreviewResponse(Message message, User otherUser, boolean sentByMe){
         if (message == null || otherUser == null) return null;
 
         return MessagePreviewResponse.builder()
@@ -17,10 +17,11 @@ public class MessageMapper {
                 .otherUser(UserMapper.toPublicInfo(otherUser))
                 .bodyPreview(message.getBody().length() > 50 ? message.getBody().substring(0, 50) + "..." : message.getBody())
                 .isRead(message.getIsRead())
+                .sentByMe(sentByMe)
                 .build();
     }
 
-    public static MessageResponse toResponse(Message message, User otherUser){
+    public static MessageResponse toResponse(Message message, User otherUser, boolean sentByMe){
         if (message == null || otherUser == null) return null;
 
         return MessageResponse.builder()
@@ -30,6 +31,7 @@ public class MessageMapper {
                 .otherUser(UserMapper.toPublicInfo(otherUser))
                 .body(message.getBody())
                 .isRead(message.getIsRead())
+                .sentByMe(sentByMe)
                 .build();
     }
 }

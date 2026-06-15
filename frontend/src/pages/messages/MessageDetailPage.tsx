@@ -95,10 +95,10 @@ export default function MessageDetailPage() {
                     </header>
                 )}
 
-                {/* Meta — who it's from + a link back to the event */}
+                {/* Meta — who it's from/το + a link back to the event */}
                 <div className="message-detail-meta">
                     <p className="message-detail-from">
-                        From{" "}
+                        {message.sentByMe ? "To " : "From "}
                         <strong>
                             {message.otherUser.firstName} {message.otherUser.lastName}
                         </strong>
@@ -121,7 +121,8 @@ export default function MessageDetailPage() {
 
                 {/* Actions */}
                 <footer className="message-detail-actions">
-                    {message.eventId && (
+                    {/* Show reply only if we arent the senders */}
+                    {message.eventId && !message.sentByMe && (
                         <button
                             className="auth-button"
                             style={{ marginTop: 0 }}

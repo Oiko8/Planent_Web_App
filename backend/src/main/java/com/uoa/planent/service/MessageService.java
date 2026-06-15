@@ -95,7 +95,7 @@ public class MessageService {
         return messageRepository.findInboxWithRelations(currentUserId, pageable).map(
                 message -> {
                     User otherUser = message.getSender();
-                    return MessageMapper.toPreviewResponse(message, otherUser);
+                    return MessageMapper.toPreviewResponse(message, otherUser, false);
                 });
     }
 
@@ -103,7 +103,7 @@ public class MessageService {
         return messageRepository.findSentWithRelations(currentUserId, pageable)
                 .map(message -> {
                     User otherUser = message.getReceiver();
-                    return MessageMapper.toPreviewResponse(message, otherUser);
+                    return MessageMapper.toPreviewResponse(message, otherUser, true);
                 });
     }
 
@@ -121,7 +121,7 @@ public class MessageService {
             otherUser = message.getSender();
         }
 
-        return MessageMapper.toResponse(message, otherUser);
+        return MessageMapper.toResponse(message, otherUser, isSender(message, currentUserId));
     }
 
     @Transactional
@@ -152,7 +152,7 @@ public class MessageService {
                 .build();
 
         Message savedMessage = messageRepository.save(message);
-        return MessageMapper.toResponse(savedMessage, receiver);
+        return MessageMapper.toResponse(savedMessage, receiver, true);
     }
 
 
