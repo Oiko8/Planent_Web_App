@@ -26,7 +26,7 @@ const EMPTY_FILTERS: Filters = {
 };
 
 const DEBOUNCE_MS = 400;
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 10;
 
 export default function EventsPage() {
     const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);

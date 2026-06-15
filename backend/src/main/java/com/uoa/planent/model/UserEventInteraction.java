@@ -34,11 +34,4 @@ public class UserEventInteraction {
     @NotNull
     @Column(name = "rating", nullable = false, precision = 2, scale = 1)
     private BigDecimal rating;
-
-    public UserEventInteraction(User user, Event event, BigDecimal rating) {
-        this.user = user;
-        this.event = event;
-        this.rating = rating;
-        this.id = new UserEventInteractionId(user.getId(), event.getId());
-    }
 }

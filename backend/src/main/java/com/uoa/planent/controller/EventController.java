@@ -120,6 +120,7 @@ public class EventController {
 
 
     // async on interaction listener
+    // doesnt record a view if organizer
     @PostMapping("/{eventId}/view")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> recordEventView(@PathVariable Integer eventId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {

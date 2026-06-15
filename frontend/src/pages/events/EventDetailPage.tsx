@@ -41,8 +41,11 @@ export default function EventDetailPage() {
         fetchEvent();
     }, [eventId]);
 
+    // event view interaction
     useEffect(() => {
-        if (!user) return; // abort if anonymous guest
+        if (!user || !event) return; // abort if anonymous guest or event hasnt loaded yet
+
+        if (event.organizerId === user.userId) return; // abort if organizer
 
         async function recordViewInteraction() {
             try {
@@ -53,7 +56,7 @@ export default function EventDetailPage() {
             }
         }
         recordViewInteraction();
-    }, [eventId, user]);
+    }, [eventId, user, event]);
 
     async function handleBooking() {
         if (!selectedTicketTypeId) return;

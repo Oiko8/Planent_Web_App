@@ -7,6 +7,8 @@ import Loader from "../../components/Loader";
 import UserDropdownDetails from "../../components/UserDropdown";
 import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import ErrorPage from "../ErrorPage";
 
 type Tab = "users" | "events";
 
@@ -15,6 +17,7 @@ const PAGE_SIZE = 10;
 export default function AdminPage() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<Tab>("users");
+    const { user, authLoading } = useAuth();
 
     // Users state
     const [users, setUsers] = useState<User[]>([]);
@@ -178,6 +181,14 @@ export default function AdminPage() {
         }
     }
 
+    // allow admin only
+    if (authLoading) return <Loader />;
+    if (!user || !user.isAdmin) {
+        return (
+            <ErrorPage code={404} />
+        );
+    }
+
     const pendingUsers = users.filter(u => !u.isApproved && !u.isAdmin);
     const approvedUsers = users.filter(u => u.isApproved && !u.isAdmin);
     const events = eventsPageData?.content ?? [];
@@ -290,64 +301,31 @@ export default function AdminPage() {
             {/* Events Tab */}
             {activeTab === "events" && (
                 <div className="admin-section">
-                    {/* Export bar */}
                     <div className="admin-export-bar">
-                        <button
-                            className="create-event-button"
-                            onClick={() => handleExport("xml")}
-                            disabled={exporting !== null}
-                        >
+                        <button className="create-event-button" onClick={() => handleExport("xml")} disabled={exporting !== null}>
                             {exporting === "xml" ? "Exporting..." : "📥 Export XML"}
                         </button>
-                        <button
-                            className="create-event-button"
-                            onClick={() => handleExport("json")}
-                            disabled={exporting !== null}
-                        >
+                        <button className="create-event-button" onClick={() => handleExport("json")} disabled={exporting !== null}>
                             {exporting === "json" ? "Exporting..." : "📥 Export JSON"}
                         </button>
                     </div>
 
                     {exportError && <div className="message-error">{exportError}</div>}
-
                     {eventsLoading && <Loader />}
                     {eventsError && <p className="message-error">{eventsError}</p>}
-
-                    {!eventsLoading && !eventsError && events.length === 0 && (
-                        <p className="admin-empty">No events found.</p>
-                    )}
+                    {!eventsLoading && !eventsError && events.length === 0 && <p className="admin-empty">No events found.</p>}
 
                     {events.map(event => (
                         <div key={event.eventId} className="admin-user-card">
                             <div className="admin-user-info">
                                 <strong>{event.title}</strong>
-                                <span className="admin-user-meta">
-                                    {event.eventType} · {event.city}, {event.country}
-                                </span>
-                                <span className="admin-user-meta">
-                                    {new Date(event.startDatetime).toLocaleDateString("el-GR")}
-                                </span>
+                                <span className="admin-user-meta">{event.eventType} · {event.city}, {event.country}</span>
+                                <span className="admin-user-meta">{new Date(event.startDatetime).toLocaleDateString("el-GR")}</span>
                             </div>
                             <div className="admin-user-actions">
-                                <span className={`status-badge status-${event.status.toLowerCase()}`}>
-                                    {event.status}
-                                </span>
-                                {event.status === "DRAFT" && (
-                                    <button
-                                        className="admin-btn-approve"
-                                        onClick={() => handlePublishEvent(event.eventId)}
-                                    >
-                                        Publish
-                                    </button>
-                                )}
-                                {event.status === "PUBLISHED" && (
-                                    <button
-                                        className="admin-btn-reject"
-                                        onClick={() => handleCancelEvent(event.eventId)}
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
+                                <span className={`status-badge status-${event.status.toLowerCase()}`}>{event.status}</span>
+                                {event.status === "DRAFT" && <button className="admin-btn-approve" onClick={() => handlePublishEvent(event.eventId)}>Publish</button>}
+                                {event.status === "PUBLISHED" && <button className="admin-btn-reject" onClick={() => handleCancelEvent(event.eventId)}>Cancel</button>}
                             </div>
                         </div>
                     ))}

@@ -12,31 +12,94 @@ export default function RegisterPage() {
         address: "", zipcode: "", afm: "",
         latitude: null, longitude: null,
     });
-    const [errorMessage, setErrorMessage] = useState("");
+    // errors for each field
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [globalError, setGlobalError] = useState("");
     const navigate = useNavigate();
+
+    // Client-side Validation (before POST)
+    function validateForm(): boolean {
+        const errors: Record<string, string> = {};
+
+        // Required fields
+        const requiredFields: (keyof RegisterFormData)[] = [
+            "username", "password", "confirmPassword", "firstName",
+            "lastName", "email", "phone", "afm", "address", "city", "country", "zipcode"
+        ];
+
+        requiredFields.forEach(field => {
+            if (!formData[field] || String(formData[field]).trim() === "") {
+                errors[field] = "This field is required.";
+            }
+        });
+
+        // Password match
+        if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+            errors.confirmPassword = "Passwords do not match.";
+        }
+
+        // Regex for other fields
+        if (formData.username && !/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+            errors.username = "Use only latin letters, numbers and underscores.";
+        }
+
+        if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            errors.email = "Invalid email format.";
+        }
+
+        if (formData.phone && !/^[0-9]{10}$/.test(formData.phone)) {
+            errors.phone = "Phone number must contain exactly 10 digits.";
+        }
+
+        if (formData.afm && !/^[0-9]{9}$/.test(formData.afm)) {
+            errors.afm = "AFM must contain exactly 9 digits.";
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!formData.username || !formData.password || !formData.confirmPassword ||
-            !formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-            setErrorMessage("Please fill in all required fields.");
-            return;
-        }
-        if (formData.password !== formData.confirmPassword) {
-            setErrorMessage("Passwords do not match.");
-            return;
-        }
-        setErrorMessage("");
+        setGlobalError("");
+
+        if (!validateForm()) return;
+
         try {
             await api.post("/auth/register", formData);
             navigate("/pending-approval");
         } catch (error: any) {
-            setErrorMessage(error.response?.data?.detail ?? "Registration failed. Please try again.");
+            const data = error.response?.data;
+
+            if (error.response?.status === 400 && data?.errors) {
+                // from MethodArgumentNotValidException handler
+                setFieldErrors(data.errors);
+            } else if (data?.detail) {
+                // from ValidationException ("Username already exists" / "Email already exists")
+                const detail = data.detail;
+                if (detail.includes("Username")) {
+                    setFieldErrors(prev => ({ ...prev, username: detail }));
+                } else if (detail.includes("Email")) {
+                    setFieldErrors(prev => ({ ...prev, email: detail }));
+                } else {
+                    setGlobalError(detail);
+                }
+            } else {
+                setGlobalError("Registration failed. Please try again.");
+            }
         }
     }
 
+    // Clear error in the field the user is typing
     function handleChange(field: keyof RegisterFormData, value: string) {
         setFormData(prev => ({ ...prev, [field]: value }));
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => {
+                const copy = { ...prev };
+                delete copy[field];
+                return copy;
+            });
+        }
     }
 
     return (
@@ -51,23 +114,27 @@ export default function RegisterPage() {
                     <div className="auth-grid-2">
                         <div className="auth-field">
                             <label className="auth-label">Username *</label>
-                            <input className="auth-input" value={formData.username}
-                                onChange={e => handleChange("username", e.target.value)} placeholder="Choose a username" />
+                            <input className={`auth-input ${fieldErrors.username ? "auth-input-error" : ""}`} value={formData.username}
+                                   onChange={e => handleChange("username", e.target.value)} placeholder="Choose a username" />
+                            {fieldErrors.username && <span className="error-text">{fieldErrors.username}</span>}
                         </div>
                         <div className="auth-field">
                             <label className="auth-label">Email *</label>
-                            <input className="auth-input" type="email" value={formData.email}
-                                onChange={e => handleChange("email", e.target.value)} placeholder="your@email.com" />
+                            <input className={`auth-input ${fieldErrors.email ? "auth-input-error" : ""}`} type="email" value={formData.email}
+                                   onChange={e => handleChange("email", e.target.value)} placeholder="your@email.com" />
+                            {fieldErrors.email && <span className="error-text">{fieldErrors.email}</span>}
                         </div>
                         <div className="auth-field">
                             <label className="auth-label">Password *</label>
-                            <input className="auth-input" type="password" value={formData.password}
-                                onChange={e => handleChange("password", e.target.value)} placeholder="Create password" />
+                            <input className={`auth-input ${fieldErrors.password ? "auth-input-error" : ""}`} type="password" value={formData.password}
+                                   onChange={e => handleChange("password", e.target.value)} placeholder="Create password" />
+                            {fieldErrors.password && <span className="error-text">{fieldErrors.password}</span>}
                         </div>
                         <div className="auth-field">
                             <label className="auth-label">Confirm Password *</label>
-                            <input className="auth-input" type="password" value={formData.confirmPassword}
-                                onChange={e => handleChange("confirmPassword", e.target.value)} placeholder="Confirm password" />
+                            <input className={`auth-input ${fieldErrors.confirmPassword ? "auth-input-error" : ""}`} type="password" value={formData.confirmPassword}
+                                   onChange={e => handleChange("confirmPassword", e.target.value)} placeholder="Confirm password" />
+                            {fieldErrors.confirmPassword && <span className="error-text">{fieldErrors.confirmPassword}</span>}
                         </div>
                     </div>
 
@@ -76,32 +143,36 @@ export default function RegisterPage() {
                     <div className="auth-grid-2">
                         <div className="auth-field">
                             <label className="auth-label">First Name *</label>
-                            <input className="auth-input" value={formData.firstName}
-                                onChange={e => handleChange("firstName", e.target.value)} placeholder="First name" />
+                            <input className={`auth-input ${fieldErrors.firstName ? "auth-input-error" : ""}`} value={formData.firstName}
+                                   onChange={e => handleChange("firstName", e.target.value)} placeholder="First name" />
+                            {fieldErrors.firstName && <span className="error-text">{fieldErrors.firstName}</span>}
                         </div>
                         <div className="auth-field">
                             <label className="auth-label">Last Name *</label>
-                            <input className="auth-input" value={formData.lastName}
-                                onChange={e => handleChange("lastName", e.target.value)} placeholder="Last name" />
+                            <input className={`auth-input ${fieldErrors.lastName ? "auth-input-error" : ""}`} value={formData.lastName}
+                                   onChange={e => handleChange("lastName", e.target.value)} placeholder="Last name" />
+                            {fieldErrors.lastName && <span className="error-text">{fieldErrors.lastName}</span>}
                         </div>
                         <div className="auth-field">
                             <label className="auth-label">Phone *</label>
-                            <input className="auth-input" value={formData.phone}
-                                onChange={e => handleChange("phone", e.target.value)} placeholder="10-digit number" />
+                            <input className={`auth-input ${fieldErrors.phone ? "auth-input-error" : ""}`} value={formData.phone}
+                                   onChange={e => handleChange("phone", e.target.value)} placeholder="10-digit number" />
+                            {fieldErrors.phone && <span className="error-text">{fieldErrors.phone}</span>}
                         </div>
                         <div className="auth-field">
-                            <label className="auth-label">AFM</label>
-                            <input className="auth-input" value={formData.afm}
-                                onChange={e => handleChange("afm", e.target.value)} placeholder="9-digit AFM" />
+                            <label className="auth-label">AFM *</label>
+                            <input className={`auth-input ${fieldErrors.afm ? "auth-input-error" : ""}`} value={formData.afm}
+                                   onChange={e => handleChange("afm", e.target.value)} placeholder="9-digit AFM" />
+                            {fieldErrors.afm && <span className="error-text">{fieldErrors.afm}</span>}
                         </div>
                     </div>
 
                     {/* Address */}
-                    <p className="auth-section-label">Address</p>
+                    <p className="auth-section-label">Location</p>
                     <div className="auth-field">
-                        <label className="auth-label">Search Address</label>
+                        <label className="auth-label">Search address via autocomplete</label>
                         <LocationAutocomplete
-                            placeholder="Search your address..."
+                            placeholder="Search your address"
                             onSelect={(location) => {
                                 handleChange("address", location.address);
                                 handleChange("city", location.city);
@@ -112,51 +183,60 @@ export default function RegisterPage() {
                                     latitude: location.latitude,
                                     longitude: location.longitude,
                                 }));
+
+                                setFieldErrors(prev => {
+                                    const c = { ...prev };
+                                    delete c.address; delete c.city; delete c.country; delete c.zipcode;
+                                    return c;
+                                });
                             }}
                         />
-                        {formData.city && (
-                            <div className="location-selected">
-                                <span>📍 {formData.address}, {formData.city}, {formData.country}</span>
-                                {formData.latitude && (
-                                <span className="location-coords">
-                                    {formData.latitude.toFixed(4)}, {formData.longitude?.toFixed(4)}
-                                </span>
-                            )}
-                            </div>
+                        {(fieldErrors.address || fieldErrors.city || fieldErrors.country || fieldErrors.zipcode) && (
+                            <span className="error-text" style={{ display: "block", marginTop: "0.4rem" }}>
+                                Please select a valid address from the autocomplete dropdown.
+                            </span>
                         )}
                     </div>
 
-                    {/* Keep these as read-only confirmation fields or hidden */}
+                    {/* Read-only feedback layout */}
                     <div className="auth-grid-2" style={{ marginTop: "0.8rem" }}>
                         <div className="auth-field">
-                            <label className="auth-label">Country</label>
+                            <label className="auth-label">Country *</label>
                             <input className="auth-input" value={formData.country}
-                                onChange={e => handleChange("country", e.target.value)}
-                                placeholder="Auto-filled" />
+                                   readOnly
+                                   autoComplete="off"
+                                   placeholder="Auto-filled"
+                            />
                         </div>
                         <div className="auth-field">
-                            <label className="auth-label">City</label>
+                            <label className="auth-label">City *</label>
                             <input className="auth-input" value={formData.city}
-                                onChange={e => handleChange("city", e.target.value)}
-                                placeholder="Auto-filled" />
+                                   readOnly
+                                   autoComplete="off"
+                                   placeholder="Auto-filled"
+                            />
                         </div>
                         <div className="auth-field">
-                            <label className="auth-label">Address</label>
+                            <label className="auth-label">Address *</label>
                             <input className="auth-input" value={formData.address}
-                                onChange={e => handleChange("address", e.target.value)}
-                                placeholder="Auto-filled" />
+                                   readOnly
+                                   autoComplete="off"
+                                   placeholder="Auto-filled"
+                            />
                         </div>
                         <div className="auth-field">
-                            <label className="auth-label">Zipcode</label>
+                            <label className="auth-label">Zipcode *</label>
                             <input className="auth-input" value={formData.zipcode}
-                                onChange={e => handleChange("zipcode", e.target.value)}
-                                placeholder="Auto-filled" />
+                                   readOnly
+                                   autoComplete="off"
+                                   placeholder="Auto-filled"
+                            />
                         </div>
                     </div>
 
-                    {errorMessage && <p className="auth-error">{errorMessage}</p>}
+                    {globalError && <p className="auth-error">{globalError}</p>}
 
-                    <button className="auth-button" type="submit">Create Account</button>
+                    <button className="auth-button" type="submit" style={{ marginTop: "1.5rem" }}>Create Account</button>
 
                     <p className="auth-footer">
                         Already have an account?{" "}

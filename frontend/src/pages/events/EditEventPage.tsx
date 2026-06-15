@@ -7,10 +7,14 @@ import { UpdateEventForm } from "../../types/updateEventData";
 import type { MediaResponse, EventStatus } from "../../types/event";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import Loader from "../../components/Loader";
+import DatePicker from "react-datepicker";
+import { useAuth } from "../../context/AuthContext";
+import ErrorPage from "../ErrorPage";
 
 export default function EditEventPage() {
     const { eventId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [eventForm, setEventForm] = useState<UpdateEventForm>({
         title: "",
@@ -38,11 +42,14 @@ export default function EditEventPage() {
     const [eventStatus, setEventStatus] = useState<EventStatus | "">("");
     const [availableCategories, setAvailableCategories] = useState<{ categoryId: number; categoryName: string }[]>([]);
     const [loading, setLoading] = useState(true);
+    const [confirmCancel, setConfirmCancel] = useState(false);
 
+    // for error page
+    const [errorStatus, setErrorStatus] = useState<403 | 404 | null>(null);
+
+    // field errors
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [globalError, setGlobalError] = useState("");
-
-    const [confirmCancel, setConfirmCancel] = useState(false);
 
     // fetch event data and categories on mount
     useEffect(() => {
@@ -54,16 +61,27 @@ export default function EditEventPage() {
                 ]);
 
                 const event = eventRes.data;
+
+                // has access (is organizer)?
+                const isOwner = user && event.organizerId && event.organizerId === user.userId;
+                if (!isOwner) {
+                    setErrorStatus(403);
+                    setLoading(false);
+                    return;
+                }
+
+                // is editable (published or draft)?
+                if (event.status === "COMPLETED" || event.status === "CANCELLED") {
+                    const formattedStatus = event.status.charAt(0) + event.status.slice(1).toLowerCase();
+
+                    setErrorStatus(403);
+                    setLoading(false);
+                    return;
+                }
+
                 setEventStatus(event.status);
                 setAvailableCategories(categoriesRes.data);
                 setExistingMedia(event.media ?? []);
-
-                // convert ISO datetimes to datetime-local input format (YYYY-MM-DDTHH:MM)
-                const toLocalInput = (iso: string) => {
-                    const d = new Date(iso);
-                    const pad = (n: number) => String(n).padStart(2, "0");
-                    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-                };
 
                 setEventForm({
                     title: event.title,
@@ -74,8 +92,8 @@ export default function EditEventPage() {
                     address: event.address,
                     latitude: event.latitude,
                     longitude: event.longitude,
-                    startDatetime: toLocalInput(event.startDatetime),
-                    endDatetime: toLocalInput(event.endDatetime),
+                    startDatetime: event.startDatetime,
+                    endDatetime: event.endDatetime,
                     capacity: event.capacity,
                     description: event.description,
                     categoryIds: event.categories.map((c: any) => c.categoryId),
@@ -85,8 +103,13 @@ export default function EditEventPage() {
                         quantity: t.quantity,
                     })),
                 });
-            } catch (err) {
-                setGlobalError("Failed to load event.");
+            } catch (err: any) {
+                const status = err.response?.status;
+                if (status === 404 || status === 403) {
+                    setErrorStatus(status);
+                } else {
+                    setGlobalError("Failed to load event.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -202,14 +225,14 @@ export default function EditEventPage() {
         setGlobalError("");
 
         // Basic Info Validations (@Size & @NotBlank)
-        if (!eventForm.title.trim()) localErrors.title = "Missing event title";
-        else if (eventForm.title.length > 100) localErrors.title = "Event title too long (max 100 characters)";
+        if (!eventForm.title.trim()) localErrors.title = "Missing title";
+        else if (eventForm.title.length > 100) localErrors.title = "Title too long (max 100 characters)";
 
-        if (!eventForm.eventType.trim()) localErrors.eventType = "Missing event type";
-        else if (eventForm.eventType.length > 100) localErrors.eventType = "Event type too long (max 100 characters)";
+        if (!eventForm.eventType.trim()) localErrors.eventType = "Missing type";
+        else if (eventForm.eventType.length > 100) localErrors.eventType = "Type too long (max 100 characters)";
 
-        if (!eventForm.venue.trim()) localErrors.venue = "Missing event venue";
-        else if (eventForm.venue.length > 100) localErrors.venue = "Event venue too long (max 100 characters)";
+        if (!eventForm.venue.trim()) localErrors.venue = "Missing venue";
+        else if (eventForm.venue.length > 100) localErrors.venue = "Venue too long (max 100 characters)";
 
         if (!eventForm.capacity || eventForm.capacity < 1) {
             localErrors.capacity = "Capacity must be at least 1";
@@ -218,25 +241,25 @@ export default function EditEventPage() {
         // Date & Time Validations (@Future)
         const now = new Date();
         if (!eventForm.startDatetime) {
-            localErrors.startDatetime = "Missing event start date time";
+            localErrors.startDatetime = "Missing start date time";
         } else if (new Date(eventForm.startDatetime) <= now) {
             localErrors.startDatetime = "Event must start in the future";
         }
 
         if (!eventForm.endDatetime) {
-            localErrors.endDatetime = "Missing event end date time";
+            localErrors.endDatetime = "Missing end date time";
         } else if (eventForm.startDatetime && new Date(eventForm.endDatetime) <= new Date(eventForm.startDatetime)) {
-            localErrors.endDatetime = "Event end date must be after the start date";
+            localErrors.endDatetime = "End date must be after the start date";
         }
 
         // Location Validations
         if (!eventForm.address || eventForm.latitude == null || eventForm.longitude == null) {
-            localErrors.location = "Please select the venue address from the suggestions";
+            localErrors.location = "Please select the venue's address from the autocomplete";
         }
 
         // Description Validation
         if (!eventForm.description.trim()) {
-            localErrors.description = "Missing event description";
+            localErrors.description = "Missing description";
         }
 
         // Validation of ticket types (if they exist when updating)
@@ -289,6 +312,7 @@ export default function EditEventPage() {
     }
 
     if (loading) return <Loader />;
+    if (errorStatus) return <ErrorPage code={errorStatus} />;
 
     return (
         <form className="auth-page" onSubmit={handleSubmit}>
@@ -305,51 +329,106 @@ export default function EditEventPage() {
                     )}
                 </div>
 
+                {/* Basic Info */}
                 <p className="auth-section-label">Basic Info</p>
                 <div className="auth-grid-2">
                     <div className="auth-field">
-                        <label className="auth-label">Title</label>
-                        {errors.title && <span className="auth-error-inline">⚠️ {errors.title}</span>}
-                        <input className="auth-input" name="title" value={eventForm.title} onChange={handleChange} placeholder="Event title" />
+                        <label className="auth-label">Title *</label>
+                        <input
+                            className={`auth-input ${errors.title ? "auth-input-error" : ""}`}
+                            name="title"
+                            value={eventForm.title}
+                            onChange={handleChange}
+                            placeholder="Event title"
+                        />
+                        {errors.title && <span className="error-text">{errors.title}</span>}
                     </div>
                     <div className="auth-field">
-                        <label className="auth-label">Event Type</label>
-                        {errors.eventType && <span className="auth-error-inline">⚠️ {errors.eventType}</span>}
-                        <input className="auth-input" name="eventType" value={eventForm.eventType} onChange={handleChange} placeholder="e.g. Concert, Workshop" />
+                        <label className="auth-label">Event Type *</label>
+                        <input
+                            className={`auth-input ${errors.eventType ? "auth-input-error" : ""}`}
+                            name="eventType"
+                            value={eventForm.eventType}
+                            onChange={handleChange}
+                            placeholder="e.g. Concert, Workshop"
+                        />
+                        {errors.eventType && <span className="error-text">{errors.eventType}</span>}
                     </div>
                     <div className="auth-field">
-                        <label className="auth-label">Venue</label>
-                        {errors.venue && <span className="auth-error-inline">⚠️ {errors.venue}</span>}
-                        <input className="auth-input" name="venue" value={eventForm.venue} onChange={handleChange} placeholder="Venue name" />
+                        <label className="auth-label">Venue *</label>
+                        <input
+                            className={`auth-input ${errors.venue ? "auth-input-error" : ""}`}
+                            name="venue"
+                            value={eventForm.venue}
+                            onChange={handleChange}
+                            placeholder="Venue name"
+                        />
+                        {errors.venue && <span className="error-text">{errors.venue}</span>}
                     </div>
                     <div className="auth-field">
-                        <label className="auth-label">Capacity</label>
-                        {errors.capacity && <span className="auth-error-inline">⚠️ {errors.capacity}</span>}
-                        <input className="auth-input" name="capacity" type="number" value={eventForm.capacity} onChange={handleChange} placeholder="Max attendees" />
+                        <label className="auth-label">Capacity *</label>
+                        <input
+                            className={`auth-input ${errors.capacity ? "auth-input-error" : ""}`}
+                            name="capacity"
+                            type="number"
+                            value={eventForm.capacity}
+                            onChange={handleChange}
+                            placeholder="Max attendees"
+                        />
+                        {errors.capacity && <span className="error-text">{errors.capacity}</span>}
                     </div>
                 </div>
 
+                {/* Date & Time */}
                 <p className="auth-section-label">Date & Time</p>
                 <div className="auth-grid-2">
+                    {/* 🔥 ΑΛΛΑΓΗ: Αντικατάσταση με React DatePicker (Start Time) */}
                     <div className="auth-field">
-                        <label className="auth-label">Start</label>
-                        {errors.startDatetime && <span className="auth-error-inline">⚠️ {errors.startDatetime}</span>}
-                        <input className="auth-input" name="startDatetime" type="datetime-local" value={eventForm.startDatetime} onChange={handleChange} />
+                        <label className="auth-label">Start Time *</label>
+                        <DatePicker
+                            selected={eventForm.startDatetime ? new Date(eventForm.startDatetime) : null}
+                            onChange={(date: Date | null) => {
+                                setEventForm(prev => ({ ...prev, startDatetime: date ? date.toISOString() : "" }));
+                                setErrors(prev => { const { startDatetime, ...rest } = prev; return rest; });
+                            }}
+                            showTimeSelect
+                            timeIntervals={15}
+                            timeFormat="HH:mm"
+                            dateFormat="yyyy-MM-dd  HH:mm"
+                            minDate={new Date()}
+                            placeholderText="Pick start date and time"
+                            className={`auth-input ${errors.startDatetime ? "auth-input-error" : ""}`}
+                        />
+                        {errors.startDatetime && <span className="error-text">{errors.startDatetime}</span>}
                     </div>
+
                     <div className="auth-field">
-                        <label className="auth-label">End</label>
-                        {errors.endDatetime && <span className="auth-error-inline">⚠️ {errors.endDatetime}</span>}
-                        <input className="auth-input" name="endDatetime" type="datetime-local" value={eventForm.endDatetime} onChange={handleChange} />
+                        <label className="auth-label">End Time *</label>
+                        <DatePicker
+                            selected={eventForm.endDatetime ? new Date(eventForm.endDatetime) : null}
+                            onChange={(date: Date | null) => {
+                                setEventForm(prev => ({ ...prev, endDatetime: date ? date.toISOString() : "" }));
+                                setErrors(prev => { const { endDatetime, ...rest } = prev; return rest; });
+                            }}
+                            showTimeSelect
+                            timeIntervals={15}
+                            timeFormat="HH:mm"
+                            dateFormat="yyyy-MM-dd  HH:mm"
+                            minDate={eventForm.startDatetime ? new Date(eventForm.startDatetime) : new Date()}
+                            placeholderText="Pick end date and time"
+                            className={`auth-input ${errors.endDatetime ? "auth-input-error" : ""}`}
+                        />
+                        {errors.endDatetime && <span className="error-text">{errors.endDatetime}</span>}
                     </div>
                 </div>
 
+                {/* Location Section */}
                 <p className="auth-section-label">Location</p>
                 <div className="auth-field">
-                    <label className="auth-label">Search new address</label>
-                    {errors.location && <span className="auth-error-inline">⚠️ {errors.location}</span>}
+                    <label className="auth-label">Search new address via autocomplete</label>
                     <LocationAutocomplete
-                        placeholder="Search new address..."
-                        onSelect={(location) => {
+                        placeholder="Search new address"
+                        onSelect={(location: { address: string; city: string; country: string; zipcode: string; latitude: number; longitude: number }) => {
                             setEventForm(prev => ({
                                 ...prev,
                                 address: location.address,
@@ -363,32 +442,65 @@ export default function EditEventPage() {
                             }
                         }}
                     />
-                    {eventForm.city && (
-                        <div className="location-selected">
-                            <span>📍 {eventForm.address}, {eventForm.city}, {eventForm.country}</span>
-                            {eventForm.latitude && (
-                                <span className="location-coords">
-                                    {Number(eventForm.latitude).toFixed(4)}, {Number(eventForm.longitude).toFixed(4)}
-                                </span>
-                            )}
-                        </div>
-                    )}
+                    {errors.location && <span className="error-text" style={{ marginTop: "0.4rem" }}>{errors.location}</span>}
                 </div>
 
+                <div className="auth-field" style={{ marginTop: "1rem" }}>
+                    <label className="auth-label">Address *</label>
+                    <input
+                        className={`auth-input ${errors.location ? "auth-input-error" : ""}`}
+                        value={eventForm.address}
+                        readOnly
+                        autoComplete="off"
+                        placeholder="Auto-filled via Map"
+                    />
+                </div>
+
+                <div className="auth-grid-2" style={{ marginTop: "1rem" }}>
+                    <div className="auth-field">
+                        <label className="auth-label">Country *</label>
+                        <input
+                            className={`auth-input ${errors.location ? "auth-input-error" : ""}`}
+                            value={eventForm.country}
+                            readOnly
+                            autoComplete="off"
+                            placeholder="Auto-filled"
+                        />
+                    </div>
+                    <div className="auth-field">
+                        <label className="auth-label">City *</label>
+                        <input
+                            className={`auth-input ${errors.location ? "auth-input-error" : ""}`}
+                            value={eventForm.city}
+                            readOnly
+                            autoComplete="off"
+                            placeholder="Auto-filled"
+                        />
+                    </div>
+                </div>
+
+                {/* Description */}
                 <p className="auth-section-label">Description</p>
                 <div className="auth-field">
-                    <label className="auth-label">Description</label>
-                    {errors.description && <span className="auth-error-inline">⚠️ {errors.description}</span>}
-                    <textarea className="auth-input auth-textarea" name="description" value={eventForm.description} onChange={handleChange} placeholder="Describe your event" />
+                    <label className="auth-label">Description *</label>
+                    <textarea
+                        className={`auth-input auth-textarea ${errors.description ? "auth-input-error" : ""}`}
+                        name="description"
+                        value={eventForm.description}
+                        onChange={handleChange}
+                        placeholder="Describe your event"
+                    />
+                    {errors.description && <span className="error-text">{errors.description}</span>}
                 </div>
 
+                {/* Images */}
                 <p className="auth-section-label">Images</p>
                 <div className="auth-field">
-                    {errors.media && <span className="auth-error-inline">⚠️ {errors.media}</span>}
+                    {errors.media && <span className="error-text" style={{ marginBottom: "0.5rem" }}>{errors.media}</span>}
                     {existingMedia.length > 0 && (
                         <>
                             <label className="auth-label">Current images</label>
-                            <div className="media-preview-grid">
+                            <div className="media-preview-grid" style={{ marginBottom: "1rem" }}>
                                 {existingMedia.map(m => (
                                     <div key={m.mediaId} className="media-preview-item">
                                         <img src={mediaUrl(m.photoUrl)} alt="event" className="media-preview-img" />
@@ -399,13 +511,13 @@ export default function EditEventPage() {
                         </>
                     )}
 
-                    <label className="auth-label" style={{ marginTop: existingMedia.length > 0 ? "1rem" : 0 }}>
+                    <label className="auth-label">
                         Add images (JPEG or PNG, up to 5MB each)
                     </label>
                     <input className="auth-input" type="file" accept="image/jpeg,image/png" multiple onChange={handleFilesSelected} />
 
                     {newPreviews.length > 0 && (
-                        <div className="media-preview-grid">
+                        <div className="media-preview-grid" style={{ marginTop: "1rem" }}>
                             {newPreviews.map((src, i) => (
                                 <div key={i} className="media-preview-item">
                                     <img src={src} alt={`new upload ${i + 1}`} className="media-preview-img" />
@@ -416,6 +528,7 @@ export default function EditEventPage() {
                     )}
                 </div>
 
+                {/* Categories */}
                 <p className="auth-section-label">Categories</p>
                 <div className="auth-checkboxes">
                     {availableCategories.map(cat => (
@@ -425,7 +538,9 @@ export default function EditEventPage() {
                         </label>
                     ))}
                 </div>
+                {errors.categories && <span className="error-text">{errors.categories}</span>}
 
+                {/* Ticket Types */}
                 <p className="auth-section-label">Ticket Types</p>
                 {eventForm.ticketTypes.map((ticket, index) => {
                     const nameErr = errors[`ticketName_${index}`];
@@ -436,16 +551,36 @@ export default function EditEventPage() {
                         <div key={index} style={{ marginBottom: "1rem" }}>
                             <div className="ticket-form-row" style={{ marginBottom: "0.25rem" }}>
                                 <div className="auth-field">
-                                    <label className="auth-label">Type Name</label>
-                                    <input className="auth-input" placeholder="e.g. VIP, Standard" value={ticket.name} onChange={e => handleTicketChange(index, "name", e.target.value)} />
+                                    <label className="auth-label">Type Name *</label>
+                                    <input
+                                        className={`auth-input ${nameErr ? "auth-input-error" : ""}`}
+                                        placeholder="e.g. VIP, Standard"
+                                        value={ticket.name}
+                                        onChange={e => handleTicketChange(index, "name", e.target.value)}
+                                    />
                                 </div>
                                 <div className="auth-field">
-                                    <label className="auth-label">Price (€)</label>
-                                    <input className="auth-input" type="number" min="0" step="0.01" placeholder="0.00" value={ticket.price} onChange={e => handleTicketChange(index, "price", e.target.value)} />
+                                    <label className="auth-label">Price (€) *</label>
+                                    <input
+                                        className={`auth-input ${priceErr ? "auth-input-error" : ""}`}
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        value={ticket.price}
+                                        onChange={e => handleTicketChange(index, "price", e.target.value)}
+                                    />
                                 </div>
                                 <div className="auth-field">
-                                    <label className="auth-label">Quantity</label>
-                                    <input className="auth-input" type="number" min="0" placeholder="0" value={ticket.quantity} onChange={e => handleTicketChange(index, "quantity", e.target.value)} />
+                                    <label className="auth-label">Quantity *</label>
+                                    <input
+                                        className={`auth-input ${qtyErr ? "auth-input-error" : ""}`}
+                                        type="number"
+                                        min="0"
+                                        placeholder="0"
+                                        value={ticket.quantity}
+                                        onChange={e => handleTicketChange(index, "quantity", e.target.value)}
+                                    />
                                 </div>
                                 <button type="button" className="admin-btn-reject" onClick={() => removeTicketType(index)}>Remove</button>
                             </div>
@@ -463,6 +598,7 @@ export default function EditEventPage() {
                 <button type="button" className="borderless-button" onClick={addTicketType}>
                     + Add Ticket Type
                 </button>
+                {errors.ticketTypes && <span className="error-text" style={{ marginTop: "0.5rem" }}>{errors.ticketTypes}</span>}
 
                 {globalError && <p className="auth-error">{globalError}</p>}
 
@@ -477,7 +613,7 @@ export default function EditEventPage() {
                     <div className="edit-danger-zone">
                         <div className="edit-danger-zone-text">
                             <strong>Cancel this event</strong>
-                            <span>Attendees will be notified and bookings closed. This can't be undone.</span>
+                            <span>Attendees will be notified and bookings will close. This can't be undone.</span>
                         </div>
 
                         {!confirmCancel ? (
@@ -486,7 +622,7 @@ export default function EditEventPage() {
                             </button>
                         ) : (
                             <div className="confirm-banner">
-                                <p>Are you sure? This will cancel the event and notify all attendees.</p>
+                                <p>Are you sure?</p>
                                 <div className="confirm-banner-actions">
                                     <button type="button" className="admin-btn-reject" onClick={handleCancelEvent}>
                                         Yes, cancel event

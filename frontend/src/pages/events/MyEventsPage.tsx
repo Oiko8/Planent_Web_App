@@ -114,8 +114,10 @@ export default function MyEventsPage() {
                                         {event.title}
                                     </button>
                                 </h3>
-                                <p>{event.eventType} — {event.city}, {event.country}</p>
-                                <p>{new Date(event.startDatetime).toLocaleDateString("el-GR")}</p>
+                                <p className="event-card-meta">{event.eventType} — {event.city}, {event.country}</p>
+                                <p className="event-card-meta" style={{ marginBottom: "0.6rem" }}>
+                                    {new Date(event.startDatetime).toLocaleDateString("el-GR")}
+                                </p>
                                 <span className={`status-badge status-${event.status.toLowerCase()}`}>
                                     {event.status}
                                 </span>
@@ -125,17 +127,17 @@ export default function MyEventsPage() {
                                 {/* View Bookings — hidden for DRAFT (no bookings possible yet) */}
                                 {event.status !== "DRAFT" && (
                                     <button
-                                        className="borderless-button"
+                                        className="event-card-button-secondary"
                                         onClick={() => navigate(`/my-events/${event.eventId}/bookings`)}
                                     >
                                         View Bookings
                                     </button>
                                 )}
 
-                                {/* Edit — always visible except for completed */}
-                                {event.status !== "COMPLETED" && (
+                                {/* Edit — always visible except for completed/cancelled */}
+                                {event.status !== "COMPLETED" && event.status !== "CANCELLED" && (
                                     <button
-                                        className="borderless-button"
+                                        className="event-card-button-secondary"
                                         onClick={() => navigate(`/edit-event/${event.eventId}`)}
                                     >
                                         Edit
@@ -155,7 +157,7 @@ export default function MyEventsPage() {
                                 {/* Delete — only for DRAFT */}
                                 {event.status === "DRAFT" && confirmDeleteId !== event.eventId && (
                                     <button
-                                        className="borderless-button"
+                                        className="event-card-button-secondary"
                                         onClick={() => {
                                             setSuccessMessage("");
                                             setDeleteError("");

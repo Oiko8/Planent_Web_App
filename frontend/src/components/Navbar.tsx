@@ -26,8 +26,15 @@ export default function Navbar() {
 
     return (
         <nav className="navbar">
-            {/* Left: primary navigation */}
+            {/* Left: Logo placeholder */}
             <div className="navbar-left">
+                <span className="navbar-brand" onClick={() => navigate("/")}>
+                    PLANENT
+                </span>
+            </div>
+
+            {/* Center: Main navigation links */}
+            <div className="navbar-center">
                 <button className="nav-link" onClick={() => navigate("/")}>
                     Home
                 </button>
@@ -36,7 +43,7 @@ export default function Navbar() {
                 </button>
             </div>
 
-            {/* Right: account + theme */}
+            {/* Right: Account + Theme */}
             <div className="navbar-right">
                 {user ? (
                     <UserMenu unreadCount={unreadCount} />

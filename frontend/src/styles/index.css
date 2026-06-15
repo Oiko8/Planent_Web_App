@@ -166,13 +166,13 @@ body {
   top: 0;
   z-index: 50;
   display: flex;
-  gap: 2rem;
-  padding: 0.9rem 1.5rem;
-  justify-content: left;
+  justify-content: space-between;
   align-items: center;
+  padding: 0.9rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 
-  /* Lock the navbar to dark colors in BOTH themes.
-     Children that reference these tokens via var() pick up the dark values automatically. */
+  /* Lock the navbar to dark colors in BOTH themes. */
   --bg-surface: #0f172a;
   --text-strong: #f1f5f9;
   --text-primary: #e5e7eb;
@@ -188,21 +188,29 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.navbar-home {
-  justify-content: left;
-  text-decoration: none;
-}
-
-.navbar-search {
-  margin-left: auto;
-  justify-content: right;
+/* 3 equal blocks */
+.navbar-left,
+.navbar-center,
+.navbar-right {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
-/* Shared chip-style button used for all primary navbar items.
-   Visually identical to .user-menu-trigger so HOME / SEARCH / user menu line up. */
+.navbar-left {
+  justify-content: flex-start;
+}
+
+.navbar-center {
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.navbar-right {
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
 .nav-link {
   display: inline-flex;
   align-items: center;
@@ -227,15 +235,13 @@ body {
   border-color: var(--border-weak);
 }
 
-/* Left and right groups inside the navbar */
-.navbar-left,
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.navbar-brand {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  cursor: pointer;
 }
-
-.navbar-right { margin-left: auto; }
 
 .borderless-button {
   background: none;
@@ -468,6 +474,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  position: relative;
 }
 
 .auth-label {
@@ -486,10 +493,45 @@ body {
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
+
 }
 
 .auth-input:focus        { border-color: var(--color-primary-accent); }
 .auth-input::placeholder { color: var(--text-placeholder); }
+
+.auth-input[readonly],
+.auth-input:disabled {
+  cursor: not-allowed !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: var(--text-dim) !important;
+  border-color: var(--border-weak) !important;
+  position: static !important;
+  z-index: auto !important;
+  opacity: 1;
+}
+
+.auth-input[readonly]:focus,
+.auth-input:disabled:focus {
+  border-color: var(--border-weak);
+  box-shadow: none;
+  outline: none;
+}
+
+.auth-input:not(:disabled):not([readonly]) {
+  cursor: text !important;
+  color: var(--text-strong) !important;
+  background: var(--bg-input) !important;
+  position: relative !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+.auth-field div[style*="position: absolute"],
+.auth-field ul,
+.suggestions-dropdown,
+.autocomplete-dropdown {
+  z-index: 99999 !important;
+}
 
 .auth-textarea {
   min-height: 100px;
@@ -542,6 +584,15 @@ body {
 
 .auth-link:hover { text-decoration: underline; }
 
+.auth-card-error {
+  text-align: center;
+  padding: 3.5rem 2rem;
+}
+
+.auth-card-error .auth-button {
+  margin-top: 0;
+}
+
 /* Category checkboxes (CreateEvent) */
 .auth-checkboxes {
   display: flex;
@@ -583,6 +634,29 @@ body {
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
   padding-left: 0.5rem;
+}
+
+.auth-input.auth-input-error {
+  border-color: #ef4444;
+}
+
+.auth-input.auth-input-error:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  display: block;
+  font-weight: 500;
+  animate: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 
@@ -2104,6 +2178,9 @@ body {
    19. REACT-DATEPICKER THEME
    ============================================================ */
 .react-datepicker {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
   background: var(--bg-surface);
   border: 1px solid var(--border-weak);
   color: var(--text-primary);
@@ -2244,54 +2321,53 @@ body {
    ============================================================ */
 
 .edit-event-heading {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .edit-event-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
 }
 
 .edit-event-actions .auth-button {
-    width: auto;
-    padding-inline: 1.75rem;
-    margin-top: 0; /* override the create-page top margin if inherited */
+  width: auto;
+  padding-inline: 1.75rem;
+  margin-top: 0;
 }
 
 .edit-danger-zone {
-    margin-top: 2.5rem;
-    padding: 1.25rem;
-    border: 1px solid #fecaca;
-    background: #fef2f2;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
+  margin-top: 2.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-danger-border);
+  background: var(--color-danger-bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .edit-danger-zone-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .edit-danger-zone-text strong {
-    color: #b91c1c;
-    font-size: 0.98rem;
+  color: var(--color-danger-text-strong);
+  font-size: 0.98rem;
 }
 
 .edit-danger-zone-text span {
-    color: #7f1d1d;
-    font-size: 0.85rem;
-    opacity: 0.85;
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 .confirm-banner {
