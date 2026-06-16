@@ -529,7 +529,7 @@ export default function EditEventPage() {
                 </div>
 
                 {/* Categories */}
-                <p className="auth-section-label">Categories</p>
+                <p className="auth-section-label">Categories *</p>
                 <div className="auth-checkboxes">
                     {availableCategories.map(cat => (
                         <label key={cat.categoryId} className="auth-checkbox-label">
@@ -541,7 +541,7 @@ export default function EditEventPage() {
                 {errors.categories && <span className="error-text">{errors.categories}</span>}
 
                 {/* Ticket Types */}
-                <p className="auth-section-label">Ticket Types</p>
+                <p className="auth-section-label">Ticket Types *</p>
                 {eventForm.ticketTypes.map((ticket, index) => {
                     const nameErr = errors[`ticketName_${index}`];
                     const priceErr = errors[`ticketPrice_${index}`];

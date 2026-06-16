@@ -4,9 +4,9 @@ import { useAuth } from "../../context/AuthContext";
 export default function GuestRoute() {
     const { user } = useAuth();
 
-    // login/register as a signed in user -> redirect to events page
+    // login/register as a signed in user -> redirect to home page
     if (user) {
-        return <Navigate to="/events" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return <Outlet />;

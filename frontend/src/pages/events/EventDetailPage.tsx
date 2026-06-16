@@ -97,6 +97,14 @@ export default function EventDetailPage() {
     const media = event.media ?? [];
     const heroSrc = mediaUrl(media[activeImage]?.photoUrl);
 
+    const startDate = new Date(event.startDatetime);
+    const endDate = new Date(event.endDatetime);
+    const isSameDay = startDate.toLocaleDateString("el-GR") === endDate.toLocaleDateString("el-GR");
+
+    const formattedDateRange = isSameDay
+        ? `${startDate.toLocaleString("el-GR", { dateStyle: "short", timeStyle: "short" })} - ${endDate.toLocaleTimeString("el-GR", { timeStyle: "short" })}`
+        : `${startDate.toLocaleString("el-GR", { dateStyle: "short", timeStyle: "short" })} - ${endDate.toLocaleString("el-GR", { dateStyle: "short", timeStyle: "short" })}`;
+
     return (
         <div className="event-detail-page">
 
@@ -114,11 +122,18 @@ export default function EventDetailPage() {
             {media.length > 0 && (
                 <div className="event-detail-gallery">
                     {heroSrc && (
-                        <img
-                            className="event-detail-gallery-main"
-                            src={heroSrc}
-                            alt={event.title}
-                        />
+                        <a
+                            href={heroSrc}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="event-detail-gallery-main-wrapper"
+                        >
+                            <img
+                                className="event-detail-gallery-main"
+                                src={heroSrc}
+                                alt={event.title}
+                            />
+                        </a>
                     )}
                     {media.length > 1 && (
                         <div className="event-detail-gallery-thumbs">
@@ -143,18 +158,47 @@ export default function EventDetailPage() {
             )}
 
             {/* Meta info */}
-            <div className="event-detail-meta">
-                <span>🎭 {event.eventType}</span>
-                <span>📍 {event.venue}, {event.city}, {event.country}</span>
-                <span>🗓 {new Date(event.startDatetime).toLocaleString("el-GR")}</span>
-                <span>⏰ Ends: {new Date(event.endDatetime).toLocaleString("el-GR")}</span>
-                <span>👥 Capacity: {event.capacity}</span>
+            <div className="event-detail-meta-grid">
+
+                <div className="meta-item">
+                    <div className="meta-icon">🎭</div>
+                    <div className="meta-content">
+                        <span className="meta-label">Event Type</span>
+                        <span className="meta-value">{event.eventType}</span>
+                    </div>
+                </div>
+
+                <div className="meta-item">
+                    <div className="meta-icon">📍</div>
+                    <div className="meta-content">
+                        <span className="meta-label">Location</span>
+                        <span className="meta-value">{event.venue}, {event.city}, {event.country}</span>
+                    </div>
+                </div>
+
+                <div className="meta-item">
+                    <div className="meta-icon">🗓</div>
+                    <div className="meta-content">
+                        <span className="meta-label">Date & Time</span>
+                        <span className="meta-value">{formattedDateRange}</span>
+                    </div>
+                </div>
+
+                <div className="meta-item">
+                    <div className="meta-icon">👥</div>
+                    <div className="meta-content">
+                        <span className="meta-label">Capacity</span>
+                        <span className="meta-value">{event.capacity} people</span>
+                    </div>
+                </div>
+
             </div>
 
             {/* Categories */}
             <div className="event-detail-categories">
                 {event.categories.map(c => (
                     <span key={c.categoryId} className="event-category-tag">
+                        <span className="category-hashtag">#</span>
                         {c.categoryName}
                     </span>
                 ))}

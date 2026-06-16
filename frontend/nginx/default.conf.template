@@ -14,7 +14,8 @@ server {
 
     # proxy for backend
     location ${VITE_API_BASE_URL}/ {
-            proxy_pass ${PROXY_TARGET}${VITE_API_BASE_URL}/;
+            resolver 127.0.0.11 ipv6=off;
+            proxy_pass ${PROXY_TARGET}$request_uri;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

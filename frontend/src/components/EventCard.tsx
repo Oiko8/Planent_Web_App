@@ -23,6 +23,16 @@ export default function EventCard({ event }: EventCardProps) {
     return (
         <div className="event-card">
 
+            <div className="event-card-image-container">
+                {imageSrc ? (
+                    <img src={imageSrc} alt={event.title} className="event-card-image" />
+                ) : (
+                    <div className="event-card-image-placeholder">
+                        {/* No media placeholder */}
+                        <span></span>
+                    </div>
+                )}
+            </div>
             {isClosed && (
                 <span className={`status-badge status-${event.status.toLowerCase()}`}>
                     {event.status}
@@ -31,7 +41,16 @@ export default function EventCard({ event }: EventCardProps) {
 
             <div className="event-card-top">
                 <span className="event-card-type">{event.eventType}</span>
-                <h3 className="event-card-title">{event.title}</h3>
+                {/* Clickable Title */}
+                <h3 className="event-card-title">
+                    <button
+                        type="button"
+                        className="event-title-button"
+                        onClick={() => navigate(`/events/${event.eventId}`)}
+                    >
+                        {event.title}
+                    </button>
+                </h3>
                 <p className="event-card-meta">📍 {event.venue}, {event.city}</p>
                 <p className="event-card-meta">🗓 {formattedDate}</p>
                 {/* summary endpoint sends `descriptionSummary`, not `description` */}

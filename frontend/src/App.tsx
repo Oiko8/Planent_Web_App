@@ -66,7 +66,7 @@ function AppContent() {
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/events/:eventId" element={<EventDetailPage />} />
 
-                {/* GUEST ONLY ROUTES (must not be logged in -> else events page) */}
+                {/* GUEST ONLY ROUTES (must not be logged in -> else homepage) */}
                 <Route element={<GuestRoute />}>
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />

@@ -53,6 +53,27 @@ export default function EventBookingsPage() {
     if (loading && !pageData) return <Loader />;
     if (errorCode) return <ErrorPage code={errorCode} />;
 
+    if (event?.status === "DRAFT") {
+        return (
+            <div className="admin-page">
+                <div className="event-detail-header">
+                    <button className="borderless-button" onClick={() => navigate("/my-events")}>
+                        ← My Events
+                    </button>
+                </div>
+                <div className="booking-success-screen booking-denied-screen" style={{ marginTop: "2rem" }}>
+                    <h2 className="booking-denied-title">🚫 Access Denied</h2>
+                    <p>You cannot view bookings for <strong>draft</strong> events, as they are not published yet.</p>
+                    <div className="booking-denied-actions">
+                        <button className="create-event-button" onClick={() => navigate(-1)}>
+                            ← Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const bookings = pageData?.content ?? [];
     const totalBookings = pageData?.page.totalElements ?? 0;
     const canBroadcast = totalBookings > 0 && event && event.status !== "DRAFT" && event.status !== "CANCELLED";
