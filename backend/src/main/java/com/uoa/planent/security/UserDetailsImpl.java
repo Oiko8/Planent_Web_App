@@ -4,41 +4,33 @@ import com.uoa.planent.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 
 // user details is the information that spring security carries in the background (security context)
-// saving all the info that the actual User model has to save on duplicate queries
 @Getter
 @Builder
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
-    // Auth fields
     private final Integer id;
     private final String username;
     private final String password;
     private final Boolean isApproved;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    // Profile fields
-    private final String firstName;
-    private final String lastName;
-    private final String email;
-    private final String phone;
-    private final String country;
-    private final String city;
-    private final String address;
-    private final String zipcode;
-    private final String afm;
+    public static final String ADMIN_ROLE = "ADMIN";
+    public static final String USER_ROLE = "USER";
 
     public static UserDetailsImpl build(User user) {
-        String roleName = user.getIsAdmin() ? "ADMIN" : "USER";
+        String roleName = user.getIsAdmin() ? ADMIN_ROLE : USER_ROLE;
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
 
         return UserDetailsImpl.builder()
@@ -47,20 +39,16 @@ public class UserDetailsImpl implements UserDetails {
                 .password(user.getPassword())
                 .isApproved(user.getIsApproved())
                 .authorities(authorities)
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .country(user.getCountry())
-                .city(user.getCity())
-                .address(user.getAddress())
-                .zipcode(user.getZipcode())
-                .afm(user.getAfm())
                 .build();
     }
 
+    public boolean isAdmin() {
+        return authorities.stream().anyMatch(a -> Objects.equals(a.getAuthority(), ADMIN_ROLE));
+    }
+
+
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
@@ -70,7 +58,7 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
+    public @NonNull String getUsername() {
         return username;
     }
 

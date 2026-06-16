@@ -103,9 +103,9 @@ public class EventController {
 
 
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (data) + media (multipart)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // sending text (request) + media (media)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<EventResponse> createEvent(@ModelAttribute @Valid EventCreateRequest request, @RequestParam(value = "media", required = false) List<@ValidImage MultipartFile> media, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
+    public ResponseEntity<EventResponse> createEvent(@RequestPart("request") @Valid EventCreateRequest request, @RequestParam(value = "media", required = false) List<@ValidImage MultipartFile> media, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser){
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request, media, currentUser.getId()));
     }
 

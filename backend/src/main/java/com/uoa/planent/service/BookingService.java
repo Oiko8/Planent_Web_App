@@ -41,8 +41,7 @@ public class BookingService {
         if (user == null) return false; // access denied exception by default if false
 
         // check if admin
-        boolean isAdmin = user.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
-        if (isAdmin) return true;
+        if (user.isAdmin()) return true;
 
         // check if attendee (the user that made the booking)
         return bookingRepository.existsByIdAndAttendee_Id(bookingId, user.getId());
@@ -71,7 +70,8 @@ public class BookingService {
         User attendee = userRepository.findById(attendeeId).orElseThrow(() -> new ResourceNotFoundException("User with ID '" + attendeeId + "' not found."));
 
         // get ticket type and lock its row to avoid race conditions (overbooking). eagerly fetch event as well since we use it
-        EventTicketType ticketType = ticketTypeRepository.findByIdWithEventForBooking(request.getTicketTypeId()).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID '" + request.getTicketTypeId() + "' not found."));
+        // lock lasts until the transaction finished
+        EventTicketType ticketType = ticketTypeRepository.findAndLockByIdWithEvent(request.getTicketTypeId()).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID '" + request.getTicketTypeId() + "' not found."));
 
         // organizer cannot book on his own event
         if (Objects.equals(ticketType.getEvent().getOrganizer().getId(), attendeeId)) {
@@ -103,6 +103,10 @@ public class BookingService {
     @Transactional
     public BookingResponse cancelBooking(Integer bookingId) {
         Booking booking = bookingRepository.findByIdWithRelations(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking with ID '" + bookingId + "' not found."));
+
+        // lock ticket type to avoid race conditions (overbooking)
+        int ticketTypeId = booking.getTicketType().getId();
+        ticketTypeRepository.findAndLockById(ticketTypeId).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID " + ticketTypeId + "' not found."));
 
         // try cancelling the booking
         // will throw an exception if unable to

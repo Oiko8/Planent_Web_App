@@ -65,13 +65,13 @@ public class MessageController {
 
 
     @GetMapping("/{messageId}")
-    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)")
+    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal.id)")
     public ResponseEntity<MessageResponse> getMessageById(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
         return ResponseEntity.ok(messageService.getMessageById(messageId, currentUser.getId()));
     }
 
     @PatchMapping("/{messageId}/read")
-    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)") // can only be updated by the receiver, allowing sender as well for frontend simplicity
+    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal.id)") // can only be updated by the receiver, allowing sender as well for frontend simplicity
     public ResponseEntity<Void> markMessageAsRead(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
         messageService.markMessageAsRead(messageId, currentUser.getId());
 
@@ -87,7 +87,7 @@ public class MessageController {
 
 
     @DeleteMapping("/{messageId}")
-    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal)")
+    @PreAuthorize("@messageService.isSenderOrReceiver(#messageId, principal.id)")
     public ResponseEntity<Void> deleteMessage(@PathVariable Integer messageId, @AuthenticationPrincipal(errorOnInvalidType = true) UserDetailsImpl currentUser) {
         messageService.deleteMessage(messageId, currentUser.getId());
 

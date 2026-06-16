@@ -53,8 +53,7 @@ public class EventService {
         if (user == null) return false; // access denied exception by default if false
 
         // check if admin
-        boolean isAdmin = user.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
-        if (isAdmin) return true;
+        if (user.isAdmin()) return true;
 
         // check if organizer
         Integer organizerId = eventRepository.findOrganizerIdById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
@@ -239,9 +238,6 @@ public class EventService {
             addCategories(event, request.getCategoryIds());
         }
 
-        // media (remove or add new)
-        updateEventMedia(event, request.getMediaUrls(), media);
-
         // ticket Types (complex replace)
         if (request.getTicketTypes() != null) {
             updateTicketTypes(event, request.getTicketTypes());
@@ -268,6 +264,8 @@ public class EventService {
         event.validate();
         Event savedEvent = eventRepository.save(event);
 
+        // media (remove or add new) after event is valid
+        updateEventMedia(event, request.getMediaUrls(), media);
         return EventMapper.toResponse(savedEvent);
     }
 

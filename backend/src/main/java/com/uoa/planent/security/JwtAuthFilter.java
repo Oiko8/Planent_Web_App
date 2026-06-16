@@ -8,8 +8,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,39 +19,33 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // get authorization header
         final String authHeader = request.getHeader("Authorization");
         String jwt = null;
-        String username = null;
 
-        // get token and username from Bearer in the authorization header
+        // valid token?
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
+            jwt = authHeader.substring(7); // get the token
             try {
-                username = jwtUtil.extractUsername(jwt);
+                if (SecurityContextHolder.getContext().getAuthentication() == null) { // not authenticated -> authenticate with jwt
+                    // get user from token (exception if malfored/expired)
+                    UserDetailsImpl userDetails = jwtUtil.extractUserDetails(jwt);
+
+                    // authenticate
+                    var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             } catch (JwtException e) {
-                // malformed or expired token — skip authentication
+                // Malformed or Expired Token -> do not set authentication -> next filter
                 filterChain.doFilter(request, response);
                 return;
             }
         }
 
-        // got token and username + isnt already logged in
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            if (jwtUtil.isTokenValid(jwt, userDetails.getUsername())){
-                var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken); // set authentication
-            }
-        }
-
-        filterChain.doFilter(request, response); // to next filter in the chain
+        filterChain.doFilter(request, response);
     }
 }

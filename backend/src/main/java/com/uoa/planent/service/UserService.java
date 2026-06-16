@@ -36,10 +36,7 @@ public class UserService {
     public boolean isUserOwnerOrAdmin(Integer userId, UserDetailsImpl user) {
         if (user == null) return false; // access denied exception by default if false
 
-        boolean isAdmin = user.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN"));
-        boolean isSelf = user.getId().equals(userId);
-
-        return isAdmin || isSelf;
+        return user.getId().equals(userId) || user.isAdmin();
     }
 
 

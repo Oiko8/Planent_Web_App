@@ -61,27 +61,6 @@ public class UserMapper {
                 .build();
     }
 
-    // UserDetailsImpl -> UserResponse
-    public static UserResponse toResponse(UserDetailsImpl userDetails) {
-        if (userDetails == null) return null;
-
-        return UserResponse.builder()
-                .userId(userDetails.getId())
-                .username(userDetails.getUsername())
-                .firstName(userDetails.getFirstName())
-                .lastName(userDetails.getLastName())
-                .email(userDetails.getEmail())
-                .phone(userDetails.getPhone())
-                .country(userDetails.getCountry())
-                .city(userDetails.getCity())
-                .address(userDetails.getAddress())
-                .zipcode(userDetails.getZipcode())
-                .afm(userDetails.getAfm())
-                .isApproved(userDetails.getIsApproved())
-                .isAdmin(userDetails.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ADMIN")))
-                .build();
-    }
-
     public static UserPublicInfo toPublicInfo(User user) {
         if (user == null) return null;
 
