@@ -183,6 +183,12 @@ public class MessageService {
         User sender = userRepository.getReferenceById(senderId); // reference of sender since we just need it for foreign key matching
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event with ID '" + eventId + "' not found."));
 
+        // only published or completed events can broadcast messages
+        // cancelling an event automatically sends a message
+        if (event.getStatus() == Event.EventStatus.DRAFT || event.getStatus() == Event.EventStatus.CANCELLED) {
+            throw new IllegalStateException("Broadcast is only allowed for published or completed events.");
+        }
+
         // Only active (non-cancelled) bookings — cancelled attendees shouldn't get more updates
         List<Booking> activeBookings = bookingRepository.findActiveBookingsByEventId(eventId);
 

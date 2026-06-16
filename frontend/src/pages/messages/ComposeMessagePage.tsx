@@ -1,44 +1,76 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
+import { useAuth } from "../../context/AuthContext";
 import type { EventItem } from "../../types/event";
+import ErrorPage from "../ErrorPage";
+import Loader from "../../components/Loader";
 
 export default function ComposeMessagePage() {
     const [searchParams] = useSearchParams();
     const eventId = searchParams.get("eventId");
     const receiverId = searchParams.get("receiverId");
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [event, setEvent] = useState<EventItem | null>(null);
     const [body, setBody] = useState("");
     const [sending, setSending] = useState(false);
+
+    const [loading, setLoading] = useState(true);
+    const [errorCode, setErrorCode] = useState<404 | 403 | null>(null);
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        if (!eventId) return;
-        api.get(`/events/${eventId}`)
-            .then(res => setEvent(res.data))
-            .catch(() => setError("Failed to load event."));
+        // for plain /messages/compose
+        if (!eventId) {
+            setErrorCode(404);
+            setLoading(false);
+            return;
+        }
+
+        async function fetchEvent() {
+            setLoading(true);
+            try {
+                const response = await api.get(`/events/${eventId}`);
+                setEvent(response.data);
+            } catch (err: any) {
+                const status = err.response?.status;
+                if (status === 403 || status === 404) {
+                    setErrorCode(status);
+                } else {
+                    setErrorCode(404);
+                }
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchEvent();
     }, [eventId]);
+
+    if (loading) return <Loader />;
+    if (errorCode) return <ErrorPage code={errorCode} />;
+    if (!event) return null;
+
+    // if organizer -> need receiverId
+    const isOrganizer = user && event.organizerId === user.userId;
+    if (isOrganizer && !receiverId) {
+        return <ErrorPage code={404} />;
+    }
 
     async function handleSend() {
         if (!body.trim()) {
             setError("Please write a message.");
             return;
         }
-        if (!eventId) {
-            setError("Missing event context.");
-            return;
-        }
 
         // attendee → organizer: receiverId comes from event.organizerId
         // organizer → attendee: receiverId comes from URL param
-        const resolvedReceiverId = receiverId
-            ? Number(receiverId)
-            : event?.organizerId;
+        const resolvedReceiverId = isOrganizer ? Number(receiverId) : event?.organizerId;
 
-        if (!resolvedReceiverId) {
+        if (!resolvedReceiverId || isNaN(resolvedReceiverId)) {
             setError("Cannot determine message recipient.");
             return;
         }

@@ -6,6 +6,7 @@ import { mediaUrl } from "../../api/media";
 import type { EventItem } from "../../types/event";
 import { useAuth } from "../../context/AuthContext";
 import Loader from "../../components/Loader";
+import ErrorPage from "../ErrorPage";
 
 export default function EventDetailPage() {
     const { eventId } = useParams();
@@ -14,7 +15,7 @@ export default function EventDetailPage() {
 
     const [event, setEvent] = useState<EventItem | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [errorCode, setErrorCode] = useState<404 | 403 | null>(null);
 
     // gallery state
     const [activeImage, setActiveImage] = useState(0);
@@ -32,8 +33,13 @@ export default function EventDetailPage() {
                 const response = await api.get(`/events/${eventId}`);
                 setEvent(response.data);
                 setActiveImage(0);
-            } catch (err) {
-                setError("Event not found.");
+            } catch (err: any) {
+                const status = err.response?.status;
+                if (status === 403 || status === 404) {
+                    setErrorCode(status);
+                } else {
+                    setErrorCode(404); // fallback
+                }
             } finally {
                 setLoading(false);
             }
@@ -81,7 +87,7 @@ export default function EventDetailPage() {
     }
 
     if (loading) return <Loader />;
-    if (error) return <p className="header" style={{ color: "red" }}>{error}</p>;
+    if (errorCode) return <ErrorPage code={errorCode} />;
     if (!event) return null;
 
     const selectedTicket = event.ticketTypes.find(t => t.ticketTypeId === selectedTicketTypeId);

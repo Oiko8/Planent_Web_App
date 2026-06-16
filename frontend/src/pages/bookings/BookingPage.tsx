@@ -4,6 +4,7 @@ import api from "../../api/axiosConfig";
 import type { EventItem, TicketTypeResponse } from "../../types/event";
 import { useAuth } from "../../context/AuthContext";
 import Loader from "../../components/Loader";
+import ErrorPage from "../ErrorPage";
 
 export default function BookingPage() {
     const { eventId } = useParams();
@@ -12,6 +13,7 @@ export default function BookingPage() {
 
     const [event, setEvent] = useState<EventItem | null>(null);
     const [loading, setLoading] = useState(true);
+    const [errorCode, setErrorCode] = useState<404 | 403 | null>(null);
     const [selectedTicket, setSelectedTicket] = useState<TicketTypeResponse | null>(null);
     const [numberOfTickets, setNumberOfTickets] = useState(1);
     const [confirmBooking, setConfirmBooking] = useState(false);
@@ -23,8 +25,13 @@ export default function BookingPage() {
             try {
                 const response = await api.get(`/events/${eventId}`);
                 setEvent(response.data);
-            } catch {
-                navigate("/events");
+            } catch (err: any) {
+                const status = err.response?.status;
+                if (status === 403 || status === 404) {
+                    setErrorCode(status);
+                } else {
+                    setErrorCode(404);
+                }
             } finally {
                 setLoading(false);
             }
@@ -50,11 +57,70 @@ export default function BookingPage() {
     }
 
     if (loading) return <Loader />;
+    if (errorCode) return <ErrorPage code={errorCode} />;
     if (!event) return null;
+
+    const isCancelled = event.status === "CANCELLED";
+    const isCompleted = event.status === "COMPLETED";
+    const isFull = event.ticketTypes.every(t => t.available === 0);
 
     const totalCost = selectedTicket
         ? (selectedTicket.price * numberOfTickets).toFixed(2)
         : "0.00";
+
+    if (isCancelled) {
+        return (
+            <div className="booking-page">
+                <h1 className="header">Book Your Place</h1>
+                <div className="booking-success-screen booking-denied-screen">
+                    <h2 className="booking-denied-title">🚫 Event Cancelled</h2>
+                    <p>This event has been <strong>cancelled</strong> by the organizer.</p>
+                    <p>Bookings are no longer accepted for this event.</p>
+                    <div className="booking-denied-actions">
+                        <button className="create-event-button" onClick={() => navigate(-1)}>
+                            ← Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isCompleted) {
+        return (
+            <div className="booking-page">
+                <h1 className="header">Book Your Place</h1>
+                <div className="booking-success-screen booking-denied-screen">
+                    <h2 className="booking-denied-title">🏁 Event Completed</h2>
+                    <p>This event is already <strong>completed</strong>.</p>
+                    <p>You cannot book tickets or attend past events.</p>
+                    <div className="booking-denied-actions">
+                        <button className="create-event-button" onClick={() => navigate(-1)}>
+                            ← Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // trying to book when all tickets are sold out
+    if (isFull && !bookingSuccess) {
+        return (
+            <div className="booking-page">
+                <h1 className="header">Book Your Place</h1>
+                <div className="booking-success-screen booking-denied-screen">
+                    <h2 className="booking-denied-title">🎫 Sold Out</h2>
+                    <p>All tickets for this event have been completely sold out!</p>
+                    <div className="booking-denied-actions">
+                        <button className="create-event-button" onClick={() => navigate(-1)}>
+                            ← Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // redirect guests to login
     if (!user) {

@@ -1,5 +1,5 @@
 // react context, any component can read something from here directly 
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from "react";
 import { User } from "../types/user";
 import api from "../api/axiosConfig";
 
@@ -66,8 +66,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("token");
     }
 
+    const contextValue = useMemo(() => ({
+        user,
+        authLoading,
+        login,
+        logout
+    }), [user, authLoading]); // Re-evaluate only when these change
+
     return (
-        <AuthContext.Provider value={{ user, authLoading, login, logout }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );

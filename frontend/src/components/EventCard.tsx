@@ -18,9 +18,16 @@ export default function EventCard({ event }: EventCardProps) {
     });
 
     const imageSrc = mediaUrl(event.mainMedia?.photoUrl);
+    const isClosed = event.status === "CANCELLED" || event.status === "COMPLETED";
 
     return (
         <div className="event-card">
+
+            {isClosed && (
+                <span className={`status-badge status-${event.status.toLowerCase()}`}>
+                    {event.status}
+                </span>
+            )}
 
             <div className="event-card-top">
                 <span className="event-card-type">{event.eventType}</span>
@@ -39,12 +46,14 @@ export default function EventCard({ event }: EventCardProps) {
                     >
                         More
                     </button>
-                    <button
-                        className="event-card-button-primary"
-                        onClick={() => navigate(`/book/${event.eventId}`)}
-                    >
-                        Book Your Place
-                    </button>
+                    {!isClosed && (
+                        <button
+                            className="event-card-button-primary"
+                            onClick={() => navigate(`/book/${event.eventId}`)}
+                        >
+                            Book Your Place
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

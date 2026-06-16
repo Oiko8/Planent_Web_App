@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import type { EventItem, PageResponse } from "../../types/event";
 import type { BookingItem } from "../../types/bookingData";
+import Loader from "../../components/Loader";
+import ErrorPage from "../ErrorPage";
 
 export default function BroadcastMessagePage() {
     const { eventId } = useParams();
@@ -13,12 +15,15 @@ export default function BroadcastMessagePage() {
     const [body, setBody] = useState("");
     const [confirmSend, setConfirmSend] = useState(false);
     const [sending, setSending] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [errorCode, setErrorCode] = useState<404 | 403 | null>(null);
     const [error, setError] = useState("");
     const [sentTo, setSentTo] = useState<number | null>(null);
 
     // Load event + a single page of bookings just to know "how many can I message"
     useEffect(() => {
         async function fetchContext() {
+            setLoading(true);
             try {
                 const [eventRes, bookingsRes] = await Promise.all([
                     api.get<EventItem>(`/events/${eventId}`),
@@ -29,9 +34,13 @@ export default function BroadcastMessagePage() {
                 setAttendeeCount(bookingsRes.data.page.totalElements);
             } catch (err: any) {
                 const status = err.response?.status;
-                if (status === 403) setError("You are not authorized to broadcast to this event.");
-                else if (status === 404) setError("Event not found.");
-                else setError("Failed to load event details.");
+                if (status === 403 || status === 404) {
+                    setErrorCode(status);
+                } else {
+                    setErrorCode(404);
+                }
+            } finally {
+                setLoading(false);
             }
         }
         fetchContext();
@@ -59,6 +68,37 @@ export default function BroadcastMessagePage() {
         } finally {
             setSending(false);
         }
+    }
+
+    if (loading) return <Loader />;
+    if (errorCode) return <ErrorPage code={errorCode} />;
+    if (!event) return null;
+
+    // cant broadcast for draft/cancelled events
+    const isDraft = event.status === "DRAFT";
+    const isCancelled = event.status === "CANCELLED";
+    if (isDraft || isCancelled) {
+        return (
+            <div className="admin-page">
+                <div className="event-detail-header">
+                    <button
+                        className="borderless-button"
+                        onClick={() => navigate(`/my-events/${eventId}/bookings`)}
+                    >
+                        ← Back to bookings
+                    </button>
+                </div>
+                <div className="booking-success-screen booking-denied-screen" style={{ marginTop: "2rem" }}>
+                    <h2 className="booking-denied-title">🚫 Broadcast Not Allowed</h2>
+                    <p>You cannot send broadcast messages for <strong>{event.status.toLowerCase()}</strong> events.</p>
+                    <div className="booking-denied-actions">
+                        <button className="create-event-button" onClick={() => navigate(-1)}>
+                            ← Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     // Success view

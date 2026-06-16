@@ -939,9 +939,18 @@ body {
   text-align: left;
   transition: border-color 0.2s;
   box-shadow: var(--shadow-card);
+  position: relative;
 }
 
 .event-card:hover { border-color: var(--border-medium); }
+
+.event-card .status-badge {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.5rem;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+}
 
 .event-card-top { flex: 1; }
 

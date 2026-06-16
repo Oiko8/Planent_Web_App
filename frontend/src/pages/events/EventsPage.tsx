@@ -14,6 +14,7 @@ type Filters = {
     maxPrice: string;
     startDate: string;
     endDate: string;
+    status: string;
 };
 
 const EMPTY_FILTERS: Filters = {
@@ -23,6 +24,7 @@ const EMPTY_FILTERS: Filters = {
     maxPrice: "",
     startDate: "",
     endDate: "",
+    status: "",
 };
 
 const DEBOUNCE_MS = 400;
@@ -76,6 +78,7 @@ export default function EventsPage() {
                 if (filters.endDate) {
                     params.endDate = new Date(filters.endDate + "T23:59:59").toISOString();
                 }
+                if (filters.status) params.statuses = filters.status;
 
                 const response = await api.get<PageResponse<EventSummary>>("/events/search", {
                     params,
@@ -94,7 +97,7 @@ export default function EventsPage() {
 
         fetchEvents();
         return () => controller.abort();
-    }, [debouncedText, filters.category, filters.city, filters.maxPrice, filters.startDate, filters.endDate, page]);
+    }, [debouncedText, filters.category, filters.city, filters.maxPrice, filters.startDate, filters.endDate, filters.status, page]);
 
     function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -139,6 +142,20 @@ export default function EventsPage() {
 
                 {/* Secondary filters */}
                 <div className="search-filters">
+                    <div className="search-filter-group">
+                        <label className="search-filter-label">Status</label>
+                        <select
+                            className="search-filter-input"
+                            value={filters.status}
+                            onChange={e => updateFilter("status", e.target.value)}
+                        >
+                            <option value="">All</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+
                     <div className="search-filter-group">
                         <label className="search-filter-label">Category</label>
                         <select

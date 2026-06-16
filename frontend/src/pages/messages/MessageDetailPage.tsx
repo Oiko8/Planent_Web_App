@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import type { MessageFull } from "../../types/message";
 import Loader from "../../components/Loader";
+import ErrorPage from "../ErrorPage";
 
 export default function MessageDetailPage() {
     const { messageId } = useParams();
@@ -10,6 +11,7 @@ export default function MessageDetailPage() {
 
     const [message, setMessage] = useState<MessageFull | null>(null);
     const [loading, setLoading] = useState(true);
+    const [errorCode, setErrorCode] = useState<404 | 403 | null>(null);
     const [error, setError] = useState("");
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -31,9 +33,11 @@ export default function MessageDetailPage() {
                 }
             } catch (err: any) {
                 const status = err.response?.status;
-                if (status === 403) setError("You are not authorized to view this message.");
-                else if (status === 404) setError("Message not found.");
-                else setError(err.response?.data?.detail ?? "Failed to load message.");
+                if (status === 403 || status === 404) {
+                    setErrorCode(status);
+                } else {
+                    setErrorCode(404);
+                }
             } finally {
                 setLoading(false);
             }
@@ -62,19 +66,8 @@ export default function MessageDetailPage() {
     }
 
     if (loading) return <Loader />;
-
-    if (error || !message) {
-        return (
-            <div className="admin-page">
-                <div className="event-detail-header">
-                    <button className="borderless-button" onClick={() => navigate("/messages")}>
-                        ← Messages
-                    </button>
-                </div>
-                <div className="message-error">{error || "Message not found."}</div>
-            </div>
-        );
-    }
+    if (errorCode) return <ErrorPage code={errorCode} />;
+    if (!message) return null;
 
     return (
         <div className="admin-page">
@@ -83,6 +76,8 @@ export default function MessageDetailPage() {
                     ← Messages
                 </button>
             </div>
+
+            {error && <div className="message-error" style={{ marginBottom: "1rem" }}>{error}</div>}
 
             <article className="message-detail">
                 {/* Subject (always the event title — every message is tied to an event) */}

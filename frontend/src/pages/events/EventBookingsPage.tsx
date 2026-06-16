@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import type { EventItem, PageResponse } from "../../types/event";
 import type { BookingItem } from "../../types/bookingData";
 import Loader from "../../components/Loader";
+import ErrorPage from "../ErrorPage";
 
 const PAGE_SIZE = 10;
 
@@ -18,7 +19,7 @@ export default function EventBookingsPage() {
     const [pageData, setPageData] = useState<PageResponse<BookingItem> | null>(null);
     const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [errorCode, setErrorCode] = useState<404 | 403 | null>(null);
 
     useEffect(() => {
         api.get<EventItem>(`/events/${eventId}`)
@@ -29,7 +30,6 @@ export default function EventBookingsPage() {
     useEffect(() => {
         async function fetchBookings() {
             setLoading(true);
-            setError("");
             try {
                 const response = await api.get<PageResponse<BookingItem>>(
                     `/bookings/event/${eventId}`,
@@ -38,12 +38,10 @@ export default function EventBookingsPage() {
                 setPageData(response.data);
             } catch (err: any) {
                 const status = err.response?.status;
-                if (status === 403) {
-                    setError("You are not authorized to view bookings for this event.");
-                } else if (status === 404) {
-                    setError("Event not found.");
+                if (status === 403 || status === 404) {
+                    setErrorCode(status);
                 } else {
-                    setError(err.response?.data?.detail ?? "Failed to load bookings.");
+                    setErrorCode(404);
                 }
             } finally {
                 setLoading(false);
@@ -53,22 +51,11 @@ export default function EventBookingsPage() {
     }, [eventId, page]);
 
     if (loading && !pageData) return <Loader />;
-
-    if (error) {
-        return (
-            <div className="admin-page">
-                <div className="event-detail-header">
-                    <button className="borderless-button" onClick={() => navigate("/my-events")}>
-                        ← My Events
-                    </button>
-                </div>
-                <div className="message-error">{error}</div>
-            </div>
-        );
-    }
+    if (errorCode) return <ErrorPage code={errorCode} />;
 
     const bookings = pageData?.content ?? [];
     const totalBookings = pageData?.page.totalElements ?? 0;
+    const canBroadcast = totalBookings > 0 && event && event.status !== "DRAFT" && event.status !== "CANCELLED";
 
     return (
         <div className="admin-page">
@@ -84,8 +71,8 @@ export default function EventBookingsPage() {
                 {totalBookings} booking{totalBookings !== 1 ? "s" : ""} in total
             </p>
 
-            {/* Broadcast entry point — only shown when there's actually someone to message */}
-            {totalBookings > 0 && (
+            {/* Broadcast entry point — only shown when there's actually someone to message + is published/completed */}
+            {canBroadcast && (
                 <div className="my-events-top-bar">
                     <button
                         className="create-event-button"

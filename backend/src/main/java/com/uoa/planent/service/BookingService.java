@@ -73,7 +73,7 @@ public class BookingService {
         // lock lasts until the transaction finished
         EventTicketType ticketType = ticketTypeRepository.findAndLockByIdWithEvent(request.getTicketTypeId()).orElseThrow(() -> new ResourceNotFoundException("Ticket type with ID '" + request.getTicketTypeId() + "' not found."));
 
-        // organizer cannot book on his own event
+        // organizer cannot book on their own event
         if (Objects.equals(ticketType.getEvent().getOrganizer().getId(), attendeeId)) {
             throw new IllegalArgumentException("Organizers cannot book tickets for their own events.");
         }
