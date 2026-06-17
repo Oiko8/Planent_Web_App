@@ -9,15 +9,15 @@ export default defineConfig({
     https: true,
       port: parseInt(process.env.FRONTEND_DEV_PORT) || 5173,
       strictPort: true,
-      host: true, // for docker container
+      host: true, // 0.0.0.0
       proxy: {
           [process.env.VITE_API_BASE_URL || '/api']: {
-              target: process.env.PROXY_TARGET || `http://host.docker.internal:5000`, // backend target proxy
+              target: process.env.PROXY_TARGET || 'http://backend:5000',
               changeOrigin: true,
               secure: false, // ignore http warnings
           },
           '/media': {
-              target: process.env.PROXY_TARGET || `http://host.docker.internal:5000`,
+              target: process.env.PROXY_TARGET || 'http://backend:5000',
               changeOrigin: true,
               secure: false,
           },
