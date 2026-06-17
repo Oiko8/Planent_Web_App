@@ -1,5 +1,54 @@
 services:
-  prod:
+  mysql-db:
+    image: mysql:9.6.0
+    ports:
+      - "3307:3306"
+    networks:
+      - backend-network # talks to the backend only
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=planent
+    volumes:
+      #  mounts SQL file so Docker runs it on the first boot
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      #  saves the actual database data so it survives container restarts
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_PORT: ${BACKEND_PORT}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    networks:
+      - frontend-network # talks to frontend
+      - backend-network  # talks to the database
+    depends_on:
+      mysql-db:
+        condition: service_healthy # backend waits for database to finish booting
+    volumes:
+      - ./media:/app/media
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_FRONTEND_URLS=${SPRING_FRONTEND_URLS}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL}
+      - SPRING_JPA_DDL_AUTO=${SPRING_JPA_DDL_AUTO}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
+      - SSL_KEYSTORE_PASSWORD=${SSL_KEYSTORE_PASSWORD}
+
+
+  frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -9,13 +58,15 @@ services:
     ports:
       - "${FRONTEND_PROD_PORT}:443"
       - "80:80"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - frontend-network # talks to the backend only
+    depends_on:
+      - backend
     environment:
       - NODE_ENV=production
       - APP_HOST=${APP_HOST}
       - FRONTEND_PROD_PORT=${FRONTEND_PROD_PORT}
-      - PROXY_TARGET=${PROXY_TARGET}
+      - PROXY_TARGET=${BACKEND_PROTOCOL}://backend:${BACKEND_PORT}
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
       # nginx config:
       - host=$$host
@@ -24,34 +75,10 @@ services:
       - remote_addr=$$remote_addr
       - proxy_add_x_forwarded_for=$$proxy_add_x_forwarded_for
       - scheme=$$scheme
- 
-  dev:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-      args:
-        FRONTEND_DEV_PORT: ${FRONTEND_DEV_PORT}
-    ports:
-      - "${FRONTEND_DEV_PORT}:${FRONTEND_DEV_PORT}"
-    environment:
-      - NODE_ENV=development
-      - FRONTEND_DEV_PORT=${FRONTEND_DEV_PORT}
-      - PROXY_TARGET=${PROXY_TARGET}
-      - BACKEND_PORT=${BACKEND_PORT}
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
-      - VITE_GEOAPIFY_API_KEY=${VITE_GEOAPIFY_API_KEY}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend/src
-          target: /app/src
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: ./frontend/package.json
-          target: /app/package.json
-        - action: rebuild
-          path: ./frontend/vite.config.js
-          target: /app/vite.config.js
+
+volumes:
+  mysql-data:
+
+networks:
+  frontend-network:
+  backend-network:
