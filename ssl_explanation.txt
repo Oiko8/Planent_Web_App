@@ -1,7 +1,0 @@
-The application uses TLS for all client-server communication, configured via a PKCS12 keystore loaded by Spring Boot and a corresponding TLS-enabled Vite dev server on the client. For development, a self-signed RSA 2048-bit certificate is used, which the browser flags as untrusted on first visit — this is expected behavior, since browsers only auto-trust certificates issued by recognized Certificate Authorities. In a production deployment, the keystore would contain a CA-issued certificate (e.g. via Let's Encrypt) bound to the application's real domain name, eliminating the warning. The TLS configuration itself (cipher suites, protocol versions, key exchange) is identical in both cases — only the certificate's chain of trust differs.
-
-Όσο η εφαρμογή τρέχει σε localhost το browser που χρησιμοποιείται θα την κάνει flag ως μη secure. Για την χρήση της και για την φυσιολογική λειτουργία των logins, χρειάζεται:
-- επίσκεψη κατευθείαν στο https://localhost:5000/api/auth/login και Click Advanced → Proceed to localhost (unsafe).
-- επίσκεψη στο https://localhost:5173 και click proceed σε όλα τα warnings.
-Ο localhost στον οποίο τρέχουμε τοπικά δεν έχει Certificate Authority. Παρόλα αυτά το encryption λειτουργεί κανονικά.
-Μόλις η εφαρμογή γίνει deploy σε έναν real domain (πχ planent.gr) θα υπάρχει κανονικά browser's trust και δεν θα δηλώνεται ως not secure.

@@ -1,8 +1,10 @@
 services:
   mysql-db:
     image: mysql:9.6.0
-    ports:
-      - "3307:3306"
+    # no open host port for database (frontend url is public only)
+    # uncomment to open it for testing:
+    #ports:
+    #  - "3307:3306"
     networks:
       - backend-network # talks to the backend only
     environment:
@@ -25,8 +27,10 @@ services:
       dockerfile: Dockerfile
       args:
         BACKEND_PORT: ${BACKEND_PORT}
-    ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    # no open host port for backend (frontend url is public only)
+    # uncomment to open it for testing:
+    #ports:
+    #  - "${BACKEND_PORT}:${BACKEND_PORT}"
     networks:
       - frontend-network # talks to frontend
       - backend-network  # talks to the database
