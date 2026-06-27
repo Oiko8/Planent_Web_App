@@ -79,22 +79,9 @@
 % ΚΕΦΑΛΑΙΟ 1: ΕΙΣΑΓΩΓΗ
 % =========================================================
 \section{Εισαγωγή}
-Η παρούσα εργασία υλοποιήθηκε στο πλαίσιο του μαθήματος «Τεχνολογίες Εφαρμογών Διαδικτύου» και είχε ως στόχο τη σχεδίαση και ανάπτυξη μιας ολοκληρωμένης διαδικτυακής εφαρμογής διαχείρισης εκδηλώσεων και ηλεκτρονικών κρατήσεων θέσεων, με την ονομασία \en{Planent}.
+Η παρούσα εργασία υλοποιήθηκε στο πλαίσιο του μαθήματος «\textbf{Τεχνολογίες Εφαρμογών Διαδικτύου}» και είχε ως στόχο τη σχεδίαση και ανάπτυξη μιας ολοκληρωμένης διαδικτυακής εφαρμογής διαχείρισης εκδηλώσεων και ηλεκτρονικών κρατήσεων θέσεων, με την ονομασία \textbf{Planent}.
 
-Η εφαρμογή ακολουθεί την κλασική αρχιτεκτονική \en{web browser / web server}: ο χρήστης αλληλεπιδρά με την υπηρεσία αποκλειστικά μέσω του φυλλομετρητή, ενώ η λογική και τα δεδομένα διαχειρίζονται από ένα \en{Spring Boot} backend που εκθέτει \en{REST API}. Όλη η επικοινωνία πελάτη-εξυπηρετητή πιστοποιείται με χρήση \en{JSON Web Tokens (JWT)} και η εξουσιοδότηση γίνεται βάσει της δραστηριότητας και του ρόλου του χρήστη στο σύστημα.
-
-Στα επόμενα κεφάλαια παρουσιάζονται με συντομία:
-\begin{itemize}
-    \item Η συνολική αρχιτεκτονική του συστήματος και οι τεχνολογίες που χρησιμοποιήθηκαν (Κεφάλαιο 2).
-    \item Οι διαθέσιμες λειτουργίες και οι ρόλοι των χρηστών (Κεφάλαιο 3).
-    \item Η σχεδίαση της σχεσιακής βάσης δεδομένων (Κεφάλαιο 4).
-    \item Η οργάνωση του \en{backend} και τα κυριότερα \en{REST endpoints} (Κεφάλαιο 5).
-    \item Η δομή και τα κυριότερα στοιχεία του \en{frontend} (Κεφάλαιο 6).
-    \item Οι μηχανισμοί ασφάλειας που εφαρμόστηκαν (Κεφάλαιο 7).
-    \item Η εξαγωγή εκδηλώσεων σε \en{XML/JSON} σύμφωνα με το ζητούμενο \en{DTD} (Κεφάλαιο 8).
-    \item Η σχεδίαση του αλγορίθμου συστάσεων (Κεφάλαιο 9).
-    \item Οδηγίες εγκατάστασης και εκτέλεσης (Κεφάλαιο 10) και επίλογος (Κεφάλαιο 11).
-\end{itemize}
+Η εφαρμογή ακολουθεί την κλασική αρχιτεκτονική \textbf{web browser / web server}: ο χρήστης αλληλεπιδρά με την υπηρεσία αποκλειστικά μέσω του web browser, ενώ η λογική και τα δεδομένα διαχειρίζονται από έναν web server που εκθέτει \textbf{REST API}. Όλη η επικοινωνία πελάτη-εξυπηρετητή κρυπτογραφείται μέσω \textbf{SSL} και πιστοποιείται με \textbf{JSON Web Tokens} για την εξουσιοδότηση βάσει της δραστηριότητας και του ρόλου του χρήστη.
 
 \newpage
 
@@ -102,28 +89,30 @@
 % ΚΕΦΑΛΑΙΟ 2: ΑΡΧΙΤΕΚΤΟΝΙΚΗ ΣΥΣΤΗΜΑΤΟΣ
 % =========================================================
 \section{Αρχιτεκτονική Συστήματος}
-Το σύστημα είναι οργανωμένο σε τρία ανεξάρτητα \en{deployable} τμήματα: τη βάση δεδομένων (\en{\textbf{Database}}), το νωτιαίο άκρο (\en{\textbf{Backend}}) και τη διεπαφή χρήστη (\en{\textbf{Frontend}}). Η επικοινωνία μεταξύ των επιμέρους τμημάτων δεν πραγματοποιείται απευθείας μέσω εκτεθειμένου \en{HTTPS}, αλλά βασίζεται στην αρχιτεκτονική των \en{\textbf{containers}}. Συγκεκριμένα, χρησιμοποιείται \en{\textbf{Reverse Proxy}} μέσω του \en{\textbf{Nginx} (Frontend Web Server)}, ο οποίος αναλαμβάνει αποκλειστικά το \en{\textbf{SSL termination}} στην πλευρά του \en{Frontend}, ενώ η εσωτερική δρομολόγηση και ανταλλαγή δεδομένων του \en{\textbf{REST API}} προς το \en{Backend} και τη βάση εκτελείται μέσω απομονωμένων εσωτερικών δικτύων Docker (\en{\textbf{Docker networks}}) τοπικά.
+Το σύστημα είναι οργανωμένο σε τρία ανεξάρτητα \en{deployable} τμήματα: τη βάση δεδομένων (\en{\textbf{Database}}), το νωτιαίο άκρο (\en{\textbf{Backend}}) και τη διεπαφή χρήστη (\en{\textbf{Frontend}}), τα οποία εκτελούνται μέσα σε αυτόνομα και απομονωμένα \en{Docker containers}. Η βασική σχεδιαστική προσέγγιση της εφαρμογής είναι ότι ο έξω κόσμος έχει πρόσβαση αποκλειστικά και μόνο στο \en{Frontend}. Η επικοινωνία μεταξύ των υπόλοιπων επιμέρους τμημάτων δεν εκτίθεται απευθείας στο διαδίκτυο, αλλά πραγματοποιείται εσωτερικά μέσω απομονωμένων δικτύων Docker (\textbf{Docker networks}) τοπικά.
 
-Με αυτή τη σχεδίαση εγγυάται η μέγιστη δυνατή ασφάλεια, καθώς η εξωτερική πρόσβαση επιτρέπεται αποκλειστικά και μόνο μέσω του \en{Frontend} το οποίο προστατεύεται από το πρωτόκολλο \en{\textbf{HTTPS}} χρησιμοποιώντας (\en{self-signed}) \en{\textbf{SSL certificate}}. Παράλληλα, επειδή η επεξεργασία των πιστοποιητικών και η αποκρυπτογράφηση της κίνησης σταματά στον \en{Nginx Reverse Proxy} (\en{SSL termination}), το \en{Backend} απαλλάσσεται πλήρως από το υπολογιστικό βάρος των \en{cryptographic handshakes}, διατηρώντας την απόδοση και την ταχύτητα απόκρισης των \en{endpoints} στο μέγιστο βαθμό.
+Κεντρικό ρόλο στην σχεδίαση αυτή παίζει ο \textbf{Nginx}, ο οποίος λειτουργεί ως \textbf{Web Server} και \textbf{Reverse Proxy} στην πλευρά του \en{Frontend}. Ο Nginx ακούει στις δημόσιες θύρες \textbf{443} (HTTPS) αλλά και \textbf{80} (HTTP), ώστε να ανακατευθύνει αυτόματα κάθε μη ασφαλή σύνδεση στην ασφαλή, όπου και εκτελείται το \textbf{SSL termination} μέσω ενός (\en{self-signed}) SSL πιστοποιητικού. Αυτή η σχεδίαση επιτρέπει στο \textbf{API} της εφαρμογής να ζει απευθείας μέσα στην ίδια θύρα του \en{Frontend}, με αποτέλεσμα, όταν η \en{React} εφαρμογή χρειάζεται δεδομένα από κάποιο \en{API Endpoint}, να στέλνει το αίτημα στο κατάλληλο endpoint με το πρόθεμα \en{\texttt{/api}} (\en{\texttt{https://localhost/api/}}). Ο \en{Nginx} αναχαιτίζει αυτό αίτημα, το αποκρυπτογραφεί (\en{SSL termination}) και το δρομολογεί άμεσα στο εσωτερικό, απομονωμένο \en{container} του \en{Backend} μέσω του απλού, μη κρυπτογραφημένου πρωτοκόλλου \en{HTTP}.
+
+Με αυτή την αρχιτεκτονική σχεδίαση επιτυγχάνεται διπλό όφελος για την εφαρμογή. Από τη μία πλευρά, εγγυάται η μέγιστη δυνατή ασφάλεια, καθώς το \en{Backend} και η βάση δεδομένων δεν εκθέτουν καμία θύρα πρόσβασης στο εξωτερικό περιβάλλον, παραμένοντας αόρατα στον έξω κόσμο. Από την άλλη πλευρά, επειδή η επεξεργασία των πιστοποιητικών (SSL) σταματά στον \en{proxy}, το \en{Backend} απαλλάσσεται πλήρως από το υπολογιστικό βάρος της διαχείρισης των κρυπτογραφικών υπολογισμών, διατηρώντας υψηλή απόδοση και ταχύτητα απόκρισης.
+
 
 \subsection{Συνοπτική Επισκόπηση Frontend}
 Το \en{\textbf{Frontend}} είναι μια \en{\textbf{Single-Page Application (SPA)}} υλοποιημένη με τη βιβλιοθήκη \en{\textbf{React}} και γραμμένη σε \en{\textbf{TypeScript}}. Κατά τη φάση της παραγωγής, η εφαρμογή μεταγλωττίζεται σε βελτιστοποιημένα στατικά αρχεία (\en{HTML, CSS, JS}) μέσω του εργαλέιου \en{\textbf{Vite}} και σερβίρεται αποδοτικά από τον \en{\textbf{Nginx}}.
 
-Η πλοήγηση πραγματοποιείται στην πλευρά του πελάτη μέσω \en{\textbf{React Router}}, αποφεύγοντας τις επαναφορτώσεις σελίδων. Η διαχείριση της κατάστασης (όπως τα στοιχεία του χρήστη, το \en{JSON Web Token} και το \en{light/dark theme}) επιτυγχάνεται μέσω του \en{\textbf{React Context API}} (\en{AuthContext} και \en{ThemeContext}). Η επικοινωνία με το \en{Backend} υλοποιείται μέσω της βιβλιοθήκης \en{\textbf{Axios}}, που προσαρτά αυτόματα το \en{JSON Web Token} ως \en{\textbf{Bearer} token} στο \en{\textbf{Authorization Header}} κάθε εξερχόμενου αιτήματος.
+Η πλοήγηση πραγματοποιείται στην πλευρά του πελάτη μέσω \en{\textbf{React Router}}, αποφεύγοντας τις επαναφορτώσεις σελίδων. Η διαχείριση της κατάστασης (όπως τα στοιχεία του χρήστη, το \en{JSON Web Token} και το \en{light/dark theme}) επιτυγχάνεται μέσω του \en{\textbf{React Context API}} (\en{AuthContext} και \en{ThemeContext}). Η επικοινωνία με το REST API (\en{Backend}) υλοποιείται μέσω της βιβλιοθήκης \en{\textbf{Axios}}, που προσαρτά αυτόματα το \en{JSON Web Token} ως \en{\textbf{Bearer} token} στο \en{\textbf{Authorization Header}} κάθε εξερχόμενου αιτήματος.
 
 \subsection{Συνοπτική Επισκόπηση Backend}
 Το \en{\textbf{Backend}} της εφαρμογής έχει αναπτυχθεί με τη χρήση του \en{\textbf{Spring Boot 4}} σε \en{\textbf{Java 21}}, υιοθετώντας τη στρωματοποιημένη αρχιτεκτονική (\en{\textbf{Layered Architecture}}) για τον σαφή διαχωρισμό των αρμοδιοτήτων (\en{Separation of Concerns}). Η αρχιτεκτονική αυτή δομείται στα εξής επίπεδα:
 \begin{itemize}[label=\textbullet]
     \item \en{\textbf{Controllers:}} Υπεύθυνοι για την έκθεση του \en{\textbf{REST API}} της εφαρμογής. Δέχονται τα \en{HTTP} αιτήματα (\en{GET, POST} κ.λπ.), ελέγχουν αν τα δεδομένα που στέλνει ο χρήστης είναι σωστά μέσω \en{validation} στα \en{\textbf{DTOs}} και στη συνέχεια αναθέτουν την εκτέλεση της λογικής στα \en{Services}, επιστρέφοντας την τελική απάντηση.
-    \item \en{\textbf{Services:}} Ενσωματώνουν την επιχειρησιακή λογική (\en{business logic}) και τους κανόνες του συστήματος (π.χ. έλεγχος διαθεσιμότητας θέσεων πριν από μια κράτηση). Επίσης, διαχειρίζονται τις συναλλαγές (\en{\textbf{transactions}}) στη βάση δεδομένων μέσω των \en{Repositories}, εξασφαλίζοντας ότι μια ενέργεια είτε θα πετύχει ολοκληρωτικά είτε θα ακυρωθεί αν προκύψει κάποιο σφάλμα (\en{rollback}).
-    \item \en{\textbf{Repositories:}} Διεπαφές (\en{interfaces}) του \en{\textbf{Spring Data JPA}} οι οποίες, σε συνδυασμό με το \en{\textbf{Hibernate}} (\en{\textbf{ORM}}), επιτρέπουν την αλληλεπίδραση με τη \en{\textbf{MySQL}} βάση δεδομένων χρησιμοποιώντας αντικείμενα της \en{Java} αντί για χειροκίνητα \en{queries}. Παρέχουν έτοιμες τις βασικές λειτουργίες αποθήκευσης και διαγραφής (\en{\textbf{CRUD}}), καθώς και τη δυνατότητα για δυναμικές αναζητήσεις.
-    \item \en{\textbf{Models (Entities):}} Οι κλάσεις της \en{Java} που αντιστοιχούν ακριβώς στους πίνακες της βάσης δεδομένων (όπως \en{User, Event, Booking}). Ορίζουν τη δομή των δεδομένων, τις σχέσεις μεταξύ τους (\en{one-to-many, many-to-many}) και τους περιορισμούς των πεδίων.
-    \item \en{\textbf{DTOs (Data Transfer Objects):}} Ξεχωριστά μοντέλα δεδομένων που χρησιμοποιούνται αποκλειστικά για τη μεταφορά πληροφοριών στα \en{Requests} και \en{Responses}. Χρησιμοποιούνται για να μην εκτίθενται τα πραγματικά \en{entities} της βάσης στο διαδίκτυο, επιτρέποντάς μας να φιλτράρουμε την πληροφορία και να στέλνουμε στο \en{Frontend} μόνο τα απαραίτητα πεδία.
+    \item \en{\textbf{Services:}} Ενσωματώνουν την επιχειρησιακή λογική και τους κανόνες του συστήματος (π.χ. έλεγχος διαθεσιμότητας θέσεων πριν από μια κράτηση). Επίσης, διαχειρίζονται τις συναλλαγές (\en{\textbf{transactions}}) στη βάση δεδομένων μέσω των \en{Repositories}, εξασφαλίζοντας ότι μια ενέργεια είτε θα πετύχει ολοκληρωτικά είτε θα ακυρωθεί αν προκύψει κάποιο σφάλμα (\en{rollback}).
+    \item \en{\textbf{Repositories:}} Διεπαφές (\en{interfaces}) του \en{\textbf{Spring Data JPA}} οι οποίες, σε συνδυασμό με το \en{\textbf{Hibernate}} (\en{\textbf{ORM}}), επιτρέπουν την αλληλεπίδραση με τη \en{\textbf{MySQL}} βάση δεδομένων χρησιμοποιώντας αντικείμενα της \en{Java} αντί για χειροκίνητα \en{queries}. Παρέχουν έτοιμες τις βασικές λειτουργίες αποθήκευσης και διαγραφής (\en{\textbf{CRUD}}), καθώς και τη δυνατότητα για δυναμικές αναζητήσεις (dynamic queries).
+    \item \en{\textbf{Models (Entities):}} Οι κλάσεις της \en{Java} που αντιστοιχούν ακριβώς στους πίνακες της βάσης δεδομένων (όπως \en{User, Event, Booking}). Ορίζουν τη δομή των δεδομένων, τις σχέσεις μεταξύ τους (\en{one-to-many, many-to-many}) και τους περιορισμούς των πεδίων (όπως είναι και στην βάση).
+    \item \en{\textbf{DTOs (Data Transfer Objects):}} Ξεχωριστά μοντέλα δεδομένων που χρησιμοποιούνται αποκλειστικά για τη μεταφορά πληροφοριών στα \en{Requests} και \en{Responses}. Χρησιμοποιούνται για να μην εκτίθενται τα πραγματικά \en{entities} της βάσης στο διαδίκτυο, επιτρέποντάς μας να φιλτράρουμε την πληροφορία, στέλνοντας μόνο τα απαραίτητα πεδία στο \en{Frontend}.
 \end{itemize}
 
-Η ασφάλεια της εφαρμογής και ο έλεγχος πρόσβασης των χρηστών βασίζονται καθολικά στο \en{\textbf{Spring Security}}, το οποίο αναλαμβάνει τη \en{stateless} αυθεντικοποίηση μέσω \en{JWT} και την εξουσιοδότηση βάσει ρόλων.
+Η ασφάλεια της εφαρμογής και ο έλεγχος πρόσβασης των χρηστών βασίζονται καθολικά στο \en{\textbf{Spring Security}}, το οποίο αναλαμβάνει την αρχική αυθεντικοποίηση μέσω login, την μετέπειτα \en{stateless} αυθεντικοποίηση μέσω \en{JWT} και, τελευταία, την εξουσιοδότηση βάσει ρόλων.
 
-\vspace{1cm}
 \begin{table}[h!]
     \centering
     \small
@@ -151,9 +140,9 @@
 % ΚΕΦΑΛΑΙΟ 3: ΛΕΙΤΟΥΡΓΙΕΣ & ΡΟΛΟΙ ΧΡΗΣΤΩΝ
 % =========================================================
 \section{Λειτουργίες \& Ρόλοι Χρηστών}
-Αν και στην πράξη οι χρήστες διαχωρίζονται ανάλογα με τη δραστηριότητά τους μέσα στην πλατφόρμα, σε επίπεδο κώδικα και ασφάλειας (\en{Spring Security}) το σύστημα υποστηρίζει ουσιαστικά **δύο βασικούς ρόλους**: τον Διαχειριστή (\en{\texttt{ADMIN}}) και τον εγγεγραμμένο Χρήστη (\en{\texttt{USER}}), πέρα φυσικά από τον μη συνδεδεμένο Επισκέπτη.
+Αν και στην πράξη οι χρήστες διαχωρίζονται ανάλογα με τη δραστηριότητά τους μέσα στην πλατφόρμα, σε επίπεδο κώδικα και ασφάλειας (\en{Spring Security}) το σύστημα υποστηρίζει ουσιαστικά δύο βασικούς ρόλους: τον Διαχειριστή (\en{\texttt{ADMIN}}) και τον εγγεγραμμένο Χρήστη (\en{\texttt{USER}}), πέρα φυσικά από τον μη συνδεδεμένο Επισκέπτη.
 
-Η σχεδιαστική λεπτομέρεια της εφαρμογής είναι ότι οι ιδιότητες του «Συμμετέχοντα» και του «Διοργανωτή» δεν αποτελούν ξεχωριστούς στατικούς ρόλους στη βάση δεδομένων, αλλά, κάθε απλός εγγεγραμμένος χρήστης (\en{\texttt{USER}}) μπορεί να λειτουργήσει και με τις δύο ιδιότητες δυναμικά. Το δικαίωμα να επεξεργαστεί, να προβάλει ή να ακυρώσει μια εκδήλωση ή μια κράτηση ελέγχεται από το \en{Backend} με βάση το αν ο τρέχων χρήστης είναι ο δημιουργός της εκάστοτε οντότητας μέσω ελέγχου ιδιοκτησίας (\en{Pre-Authorization}).
+Η σχεδιαστική λεπτομέρεια της εφαρμογής είναι ότι οι ιδιότητες του «Συμμετέχοντα» και του «Διοργανωτή» δεν αποτελούν ξεχωριστούς στατικούς ρόλους στη βάση δεδομένων, αλλά, κάθε απλός εγγεγραμμένος χρήστης (\en{\texttt{USER}}) μπορεί να λειτουργήσει και με τις δύο ιδιότητες δυναμικά. Το δικαίωμα να επεξεργαστεί, να προβάλει ή να ακυρώσει μια εκδήλωση ή μια κράτηση ελέγχεται από το \en{Backend} με βάση το αν ο τρέχων χρήστης είναι ο δημιουργός της εκάστοτε οντότητας μέσω ελέγχου ιδιοκτησίας.
 
 \subsection{Επισκέπτης (\en{Guest})}
 Είναι ο μη συνδεδεμένος χρήστης της εφαρμογής. Οι δυνατότητές του περιορίζονται αποκλειστικά στην περιήγηση:
@@ -185,190 +174,229 @@
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 4: ΣΧΕΔΙΑΣΗ ΒΑΣΗΣ ΔΕΔΟΜΕΝΩΝ
 % =========================================================
-    \section{Σχεδίαση Βάσης Δεδομένων}
-    Η σχεδίαση της σχεσιακής βάσης δεδομένων έγινε με γνώμονα τις λειτουργικές απαιτήσεις της εφαρμογής, αλλά και την απόλυτη συμβατότητα με το ζητούμενο \en{\textbf{Document Type Definition (DTD)}} για την ομαλή εξαγωγή των δεδομένων. Ως Σύστημα Διαχείρισης Βάσεων Δεδομένων (\en{RDBMS}) χρησιμοποιείται η \en{\textbf{MySQL}} με την \textbf{InnoDB} ως \en{storage engine}, η οποία εξασφαλίζει την ακεραιότητα των δεδομένων μέσω ξένων κλειδιών (\en{foreign keys}), μοναδικών περιορισμών (\en{unique keys}) και βασικών κανόνων ελέγχου (π.χ. περιορισμός \en{\texttt{available <= quantity}} στα εισιτήρια). Η σύνδεση του \en{backend} με τη βάση υλοποιείται με το \en{Hibernate} ως \en{ORM} εργαλείο.
+\section{Σχεδίαση Βάσης Δεδομένων}
+Η σχεδίαση της σχεσιακής βάσης δεδομένων έγινε με γνώμονα τις λειτουργικές απαιτήσεις της εφαρμογής, αλλά και την συμβατότητα με το ζητούμενο \en{\textbf{Document Type Definition (DTD)}} για την εξαγωγή των δεδομένων. Ως Σύστημα Διαχείρισης Βάσεων Δεδομένων (\en{RDBMS}) χρησιμοποιείται η \en{\textbf{MySQL}} με την \textbf{InnoDB} ως \en{storage engine}, η οποία εξασφαλίζει την ακεραιότητα των δεδομένων μέσω ξένων κλειδιών (\en{foreign keys}), μοναδικών περιορισμών (\en{unique keys}) και βασικών κανόνων ελέγχου (π.χ. περιορισμός \en{\texttt{available <= quantity}} στα εισιτήρια). Οι πίνακες της βάσης είναι:
 
-    \begin{table}[H]
-        \centering
-        \small
-        \begin{tabularx}{\textwidth}{lX}
-        \toprule
-        \textbf{Πίνακας} & \textbf{Συνοπτική περιγραφή} \\
-        \midrule
-        \en{\texttt{User}} & Στοιχεία χρήστη (\en{username, password hash}, στοιχεία επικοινωνίας, διεύθυνση, γεωγραφική θέση, ΑΦΜ, ρόλος \en{admin}, κατάσταση έγκρισης). \\
-        \addlinespace[1pt]
-        \en{\texttt{Event}} & Εκδηλώσεις (τίτλος, τύπος, χώρος, διεύθυνση/γεωγραφικές συντεταγμένες, χρόνοι έναρξης/λήξης, χωρητικότητα, περιγραφή, κατάσταση: \en{DRAFT / PUBLISHED / COMPLETED / CANCELLED, organizer}). \\
-        \addlinespace[1pt]
-        \en{\texttt{Category}} & Προκαθορισμένη λίστα κατηγοριών (\en{Music, Sports, Conference}, κ.λπ.). \\
-        \addlinespace[1pt]
-        \en{\texttt{Event\_Category}} & Πίνακας ένωσης \en{Event} $\leftrightarrow$ \en{Category} (πολλαπλές κατηγορίες ανά εκδήλωση). \\
-        \addlinespace[1pt]
-        \en{\texttt{Event\_TicketType}} & Τύποι εισιτηρίων για κάθε εκδήλωση (όνομα, τιμή, ποσότητα, διαθέσιμα). \\
-        \addlinespace[1pt]
-        \en{\texttt{Event\_Media}} & Προαιρετικές φωτογραφίες (\en{file path} στον δίσκο) ανά εκδήλωση. \\
-        \addlinespace[1pt]
-        \en{\texttt{Booking}} & Κρατήσεις (\en{attendee, ticket\_type}, πλήθος εισιτηρίων, συνολικό κόστος, χρονοσήμανση, κατάσταση: \en{PENDING / CONFIRMED / CANCELLED}). \\
-        \addlinespace[1pt]
-        \en{\texttt{Message}} & Μηνύματα μεταξύ χρηστών (\en{sender, receiver, event}, σώμα, \en{isRead}, σημαίες λογικής διαγραφής \en{deletedBySender/deletedByReceiver}). \\
-        \addlinespace[1pt]
-        \en{\texttt{User\_Event\_Interaction}} & Το σκορ (\en{rating}) που προκύπτει από τις προβολές ή τις κρατήσεις σε εκδηλώσεις για κάθε χρήστη. Πίνακας εισόδου για την εκπαίδευση του αλγορίθμου συστάσεων. \\
-        \addlinespace[1pt]
-        \en{\texttt{User\_Recommendation\_Vector}} & Οι λανθάνοντες παράγοντες (\en{latent factors}) και το \en{bias} για κάθε χρήστη για τον υπολογισμό των προσωποποιημένων προτάσεων. \\
-        \addlinespace[1pt]
-        \en{\texttt{Event\_Recommendation\_Vector}} & Οι λανθάνοντες παράγοντες (\en{latent factors}) και το \en{bias} για κάθε εκδήλωση για τον υπολογισμό των προσωποποιημένων προτάσεων. \\
-        \addlinespace[1pt]
-        \en{\texttt{Recommendation\_Config}} & Πίνακας μιας σειράς που κρατάει το καθολικό σφάλμα (\en{global bias}) και τις υπερπαραμέτρους εκπαίδευσης (\en{learning rate, epochs, regularization}) του αλγορίθμου. \\
-        \bottomrule
-        \end{tabularx}
-        \caption{Πίνακες της Βάσης Δεδομένων}
-    \end{table}
+\vspace{-0.25cm}
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{Πίνακας} & \textbf{Συνοπτική περιγραφή} \\
+    \midrule
+    \en{\texttt{User}} & Στοιχεία χρήστη (\en{username, password hash}, στοιχεία επικοινωνίας, διεύθυνση, γεωγραφική θέση, ΑΦΜ, ρόλος \en{admin}, κατάσταση έγκρισης). \\
+    \addlinespace[1pt]
+    \en{\texttt{Event}} & Εκδηλώσεις (τίτλος, τύπος, χώρος, διεύθυνση/γεωγραφικές συντεταγμένες, χρόνοι έναρξης/λήξης, χωρητικότητα, περιγραφή, κατάσταση: \en{DRAFT / PUBLISHED / COMPLETED / CANCELLED, organizer}). \\
+    \addlinespace[1pt]
+    \en{\texttt{Category}} & Προκαθορισμένη λίστα κατηγοριών (\en{Music, Sports, Conference}, κ.λπ.). \\
+    \addlinespace[1pt]
+    \en{\texttt{Event\_Category}} & Πίνακας ένωσης \en{Event} $\leftrightarrow$ \en{Category} (πολλαπλές κατηγορίες ανά εκδήλωση). \\
+    \addlinespace[1pt]
+    \en{\texttt{Event\_TicketType}} & Τύποι εισιτηρίων για κάθε εκδήλωση (όνομα, τιμή, ποσότητα, διαθέσιμα). \\
+    \addlinespace[1pt]
+    \en{\texttt{Event\_Media}} & Προαιρετικές φωτογραφίες (\en{file path} στον δίσκο) ανά εκδήλωση. \\
+    \addlinespace[1pt]
+    \en{\texttt{Booking}} & Κρατήσεις (\en{attendee, ticket\_type}, πλήθος εισιτηρίων, συνολικό κόστος, χρονοσήμανση, κατάσταση: \en{PENDING / CONFIRMED / CANCELLED}). \\
+    \addlinespace[1pt]
+    \en{\texttt{Message}} & Μηνύματα μεταξύ χρηστών (\en{sender, receiver, event}, σώμα, \en{isRead}, σημαίες λογικής διαγραφής \en{deletedBySender/deletedByReceiver}). \\
+    \addlinespace[1pt]
+    \en{\texttt{User\_Event\_Interaction}} & Το σκορ (\en{rating}) που προκύπτει από τις προβολές ή τις κρατήσεις σε εκδηλώσεις για κάθε χρήστη. Πίνακας εισόδου για την εκπαίδευση του αλγορίθμου συστάσεων. \\
+    \addlinespace[1pt]
+    \en{\texttt{User\_Recommendation\_Vector}} & Οι λανθάνοντες παράγοντες (\en{latent factors}) και το \en{bias} για κάθε χρήστη για τον υπολογισμό των προσωποποιημένων προτάσεων. \\
+    \addlinespace[1pt]
+    \en{\texttt{Event\_Recommendation\_Vector}} & Οι λανθάνοντες παράγοντες (\en{latent factors}) και το \en{bias} για κάθε εκδήλωση για τον υπολογισμό των προσωποποιημένων προτάσεων. \\
+    \addlinespace[1pt]
+    \en{\texttt{Recommendation\_Config}} & Πίνακας μιας σειράς που κρατάει το καθολικό σφάλμα (\en{global bias}) και τις υπερπαραμέτρους εκπαίδευσης (\en{learning rate, epochs, regularization}) του αλγορίθμου. \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
 
-    \subsection{Βασικές Σχέσεις και Περιορισμοί}
-    \begin{itemize}
-        \item Κάθε εκδήλωση συνδέεται με ακριβώς έναν διοργανωτή (\en{User}) και μπορεί να ανήκει σε πολλές κατηγορίες (\en{\textbf{Many-to-Many}}).
-        \item Κάθε εκδήλωση έχει έναν ή περισσότερους τύπους εισιτηρίων. Το άθροισμα των ποσοτήτων ελέγχεται από το \en{\textbf{Event Service}} ώστε να μην υπερβαίνει τη συνολική χωρητικότητα.
-        \item Κάθε κράτηση δείχνει σε έναν συγκεκριμένο τύπο εισιτηρίου, ο οποίος διαθέτει το πεδίο \en{available} που μειώνεται ατομικά με κάθε επιτυχμένη κράτηση. Το \en{\textbf{Booking Service}} αναλαμβάνει να κλειδώσει με \en{\textbf{Pessimistic Lock}} τη συγκεκριμένη εγγραφή στη βάση μέχρι να ολοκληρωθεί ή να αποτύχει η κράτηση. Έτσι, αποφεύγεται το \en{data race condition} στην περίπτωση όπου δύο χρήστες επιχειρήσουν να κάνουν κράτηση ταυτόχρονα στο ίδιο εισιτήριο.
-        \item Στη διαγραφή εκδήλωσης ορίζονται αντίστοιχα \en{cascade rules} μέσω \en{JPA} (\en{\textbf{CascadeType.ALL} + \textbf{orphanRemoval}}) για τα \en{media}, τις κατηγορίες και τους τύπους εισιτηρίων, εξασφαλίζοντας πως δεν θα υπάρχουν ορφανές εγγραφές.
-        \item Τα μηνύματα διαγράφονται οριστικά από τη βάση μόνο εφόσον και οι δύο σημαίες, \en{deletedBySender} και \en{deletedByReceiver}, έχουν τεθεί σε αληθείς από τους αντίστοιχους χρήστες.
-    \end{itemize}
 
-    \subsection{Αρχικοποίηση}
-    Κατά την πρώτη εκκίνηση του \en{Backend} (\en{\texttt{PlanentApplication.initDatabase}}) δημιουργείται αυτόματα ένας ενσωματωμένος διαχειριστής με \en{\textbf{admin}} όνομα χρήστη και κωδικό πρόσβασης, αν δεν υπάρχει ήδη. Επιπλέον, αρχικοποιούνται αυτόματα και οι βασικές κατηγορίες εκδηλώσεων της πλατφόρμας.
+\subsection{Βασικοί Περιορισμοί}
+\begin{itemize}
+    \item \textbf{Σχέσεις Πινάκων:} Η διασύνδεση των δεδομένων βασίζεται σε περιορισμούς ξένων κλειδιών (\en{Foreign Keys}). Οι πολυμερείς σχέσεις, όπως αυτή μεταξύ εκδηλώσεων και κατηγοριών, επιλύονται με τη χρήση του πίνακα ένωσης \en{\texttt{Event\_Category}} (\en{Many-to-Many}).
+    \item \textbf{\en{Cascade Rules}:} Στη διαγραφή μιας εκδήλωσης έχει οριστεί κανόνας \en{\texttt{CascadeType.ALL}} σε συνδυασμό με \en{\texttt{orphanRemoval}} σε επίπεδο \en{JPA}. Με αυτόν τον τρόπο, η διαγραφή μιας εγγραφής στον πίνακα \en{\texttt{Event}} πυροδοτεί την αυτόματη εκκαθάριση των αντίστοιχων εξαρτημένων εγγραφών στους πίνακες των πολυμέσων (\en{\texttt{Event\_Media}}), των τύπων εισιτηρίων (\en{\texttt{Event\_TicketType}}) και των κατηγοριών, αποτρέποντας την ύπαρξη ορφανών δεδομένων.
+    \item \textbf{Περιορισμοί Τιμών:} Ο πίνακας των εισιτηρίων ενσωματώνει κανόνα ελέγχου ο οποίος διασφαλίζει ότι ο αριθμός των διαθέσιμων εισιτηρίων δεν μπορεί ποτέ να ξεπεράσει την αρχική ποσότητα (\en{\texttt{available <= quantity}}), λειτουργώντας ως μια επιπλέον δικλείδα ασφαλείας στο επίπεδο της βάσης.
+\end{itemize}
 
-    \newpage
+
+\subsection{Αρχικοποίηση}
+Κατά την πρώτη εκκίνηση του \en{Backend} (\en{\texttt{PlanentApplication\#initDatabase}}) δημιουργείται αυτόματα ένας ενσωματωμένος διαχειριστής με \en{\textbf{admin}} όνομα χρήστη και κωδικό πρόσβασης. Επιπλέον, αρχικοποιούνται αυτόματα και οι βασικές κατηγορίες εκδηλώσεων της πλατφόρμας.
+
+\newpage
 
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 5: BACKEND — REST API
 % =========================================================
-    \section{Backend — REST API}
-    Το \en{\textbf{Backend}} εκθέτει ένα \en{\textbf{RESTful API}} με αρχικό \en{context path} \en{\textbf{/api}} που καταναλώνεται αποκλειστικά από το \en{Frontend}. Όλα τα αιτήματα προωθούνται εσωτερικά μέσω του \en{Nginx Reverse Proxy} και, εκτός από τα δημόσια μονοπάτια, απαιτούν την ύπαρξη ενός έγκυρου \en{\textbf{JWT}} στο \en{Authorization Header} ως \en{Bearer token}. Το \en{\textbf{JSON Web Token}} κουβαλάει τις ακόλουθες πληροφορίες (\en{claims}) για τον χρήστη:
-    \begin{itemize}
-        \item \en{\textbf{User ID} (\texttt{userId}):} Το μοναδικό αναγνωριστικό (\en{ID}) του χρήστη στη βάση δεδομένων.
-        \item \en{\textbf{Username} (\texttt{subject}):} Το μοναδικό όνομα χρήστη (\en{username}) με το οποίο έγινε η σύνδεση.
-        \item \en{\textbf{Role} (\texttt{isAdmin}):} Μια \en{boolean} τιμή που δείχνει αν ο χρήστης είναι διαχειριστής ή όχι, η οποία μεταφράζεται σε δικαιώματα \en{\texttt{ADMIN}} ή \en{\texttt{USER}} (\en{Authorities}) μέσα στην εφαρμογή. Αυτό επιτρέπει στο σύστημα να αναγνωρίζει τον ρόλο χωρίς επιπλέον κλήση στη βάση δεδομένων.
-    \end{itemize}
+\section{Backend — REST API}
+Το \en{\textbf{Backend}} εκθέτει ένα \en{\textbf{RESTful API}} με αρχικό \en{context path} \en{\textbf{/api}} που καταναλώνεται από το \en{Frontend}. Όλα τα αιτήματα προωθούνται εσωτερικά από το Frontend μέσω του \en{Nginx Reverse Proxy} και, εκτός από τα δημόσια endpoints, απαιτούν την ύπαρξη ενός έγκυρου \en{\textbf{JWT}} στο \en{Authorization Header} ως \en{Bearer token}. Το \en{\textbf{JSON Web Token}} κουβαλάει τις ακόλουθες πληροφορίες (\en{claims}) για τον χρήστη:
+\begin{itemize}
+    \item \en{\textbf{User ID} (\texttt{userId}):} Το μοναδικό αναγνωριστικό (\en{ID}) του χρήστη στη βάση δεδομένων.
+    \item \en{\textbf{Username} (\texttt{subject}):} Το μοναδικό όνομα χρήστη (\en{username}) με το οποίο έγινε η σύνδεση.
+    \item \en{\textbf{Role} (\texttt{isAdmin}):} Μια \en{boolean} τιμή που δείχνει αν ο χρήστης είναι διαχειριστής ή όχι, η οποία μεταφράζεται σε δικαιώματα \en{\texttt{ADMIN}} ή \en{\texttt{USER}} (\en{Authorities}) μέσα στην εφαρμογή. Αυτό επιτρέπει στο σύστημα να αναγνωρίζει τον βασικό ρόλο χωρίς επιπλέον κλήση στη βάση δεδομένων.
+\end{itemize}
 
-    Η διαδικασία αυθεντικοποίησης ελέγχεται αυτόματα σε κάθε αίτηση μέσω του custom φίλτρου \en{\textbf{JwtAuthFilter}}, το οποίο επικυρώνει την υπογραφή του \en{token} και φορτώνει τα στοιχεία του χρήστη στο \en{Security Context} του \en{Spring Boot}.
+Η διαδικασία αυθεντικοποίησης ελέγχεται αυτόματα σε κάθε αίτηση μέσω του φίλτρου \en{\textbf{JwtAuthFilter}}, το οποίο επικυρώνει την υπογραφή του \en{token} και φορτώνει τα παραπάνω βασικά στοιχεία του χρήστη στο \en{Security Context} του \en{Spring Boot}.
 
-    \subsection{Συνοπτικοί Πίνακες Endpoints}
+\subsection{Συνοπτικοί Πίνακες Endpoints}
 
-    \subsubsection{Αυθεντικοποίηση \& Διαχείριση Χρηστών (/auth , /users)}
-    \begin{table}[h!]
-        \centering
-        \small
-        \begin{tabularx}{\textwidth}{llX}
-        \toprule
-        \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
-        \midrule
-        \en{POST} & \en{\texttt{/auth/register}} & Εγγραφή νέου χρήστη στο σύστημα (\en{public}, απαιτεί έγκριση από \en{admin}). \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/auth/login}} & Σύνδεση χρήστη και έκδοση του \en{JWT} (\en{public}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/users/me}} & Επιστροφή των στοιχείων προφίλ του τρέχοντος χρήστη. \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/users/\{userId\}}} & Προβολή προφίλ συγκεκριμένου χρήστη (\en{owner} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{PATCH} & \en{\texttt{/users/\{userId\}}} & Ενημέρωση στοιχείων χρήστη (\en{owner} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/users}} & Λίστα όλων των εγγεγραμμένων χρηστών (\en{admin only}). \\
-        \addlinespace[1pt]
-        \en{PATCH} & \en{\texttt{/users/\{userId\}/approve}} & Έγκριση αίτησης εγγραφής διοργανωτή (\en{admin only}). \\
-        \addlinespace[1pt]
-        \en{DELETE} & \en{\texttt{/users/\{userId\}}} & Απόρριψη αίτησης ή διαγραφή χρήστη (\en{admin only}). \\
-        \bottomrule
-        \end{tabularx}
-    \end{table}
+\subsubsection{Αυθεντικοποίηση \& Διαχείριση Χρηστών (/auth , /users)}
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
+    \midrule
+    \en{POST} & \en{\texttt{/auth/register}} & Εγγραφή νέου χρήστη στο σύστημα (\en{public}, απαιτεί έγκριση από \en{admin}). \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/auth/login}} & Σύνδεση χρήστη και έκδοση του \en{JWT} (\en{public}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/users/me}} & Επιστροφή των στοιχείων προφίλ του τρέχοντος χρήστη. \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/users/\{userId\}}} & Προβολή προφίλ συγκεκριμένου χρήστη (\en{owner} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{PATCH} & \en{\texttt{/users/\{userId\}}} & Ενημέρωση στοιχείων χρήστη (\en{owner} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/users}} & Λίστα όλων των εγγεγραμμένων χρηστών (\en{admin only}). \\
+    \addlinespace[1pt]
+    \en{PATCH} & \en{\texttt{/users/\{userId\}/approve}} & Έγκριση αίτησης εγγραφής διοργανωτή (\en{admin only}). \\
+    \addlinespace[1pt]
+    \en{DELETE} & \en{\texttt{/users/\{userId\}}} & Απόρριψη αίτησης ή διαγραφή χρήστη (\en{admin only}). \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
 
-    \subsubsection{Διαχείριση Εκδηλώσεων (/events)}
-    \begin{table}[H]
-        \centering
-        \small
-        \begin{tabularx}{\textwidth}{llX}
-        \toprule
-        \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
-        \midrule
-        \en{GET} & \en{\texttt{/events}} & Σελίδες προτεινόμενων και ορατών εκδηλώσεων (\en{public}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/events/\{eventId\}}} & Προβολή εκδήλωσης (\en{public}, εμφανίζει \en{drafts} μόνο στον \en{organizer}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/events/search}} & Σελιδοποιημένη αναζήτηση προτεινώμενων εκδηλώσεων με φίλτρα (\en{public}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/events/categories}} & Επιστροφή όλων των διαθέσιμων κατηγοριών εκδηλώσεων (\en{public}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/events/my-events}} & Σελίδες των εκδηλώσεων του συνδεδεμένου διοργανωτή. \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/events}} & Δημιουργία εκδήλωσης με κείμενο και αρχεία πολυμέσων. \\
-        \addlinespace[1pt]
-        \en{PATCH} & \en{\texttt{/events/\{eventId\}}} & Ενημέρωση στοιχείων και εικόνων εκδήλωσης (\en{organizer} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{DELETE} & \en{\texttt{/events/\{eventId\}}} & Διαγραφή εκδήλωσης από τη βάση δεδομένων (\en{organizer} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/events/\{eventId\}/view}} & Καταγραφή προβολής εκδήλωσης για το σύστημα συστάσεων. \\
-        \bottomrule
-        \end{tabularx}
-    \end{table}
+\subsubsection{Διαχείριση Εκδηλώσεων (/events)}
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
+    \midrule
+    \en{GET} & \en{\texttt{/events}} & Σελίδες προτεινόμενων και ορατών εκδηλώσεων (\en{public}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/events/\{eventId\}}} & Προβολή εκδήλωσης (\en{public}, εμφανίζει \en{drafts} μόνο στον \en{organizer}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/events/search}} & Σελιδοποιημένη αναζήτηση προτεινώμενων εκδηλώσεων με φίλτρα (\en{public}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/events/categories}} & Επιστροφή όλων των διαθέσιμων κατηγοριών εκδηλώσεων (\en{public}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/events/my-events}} & Σελίδες των εκδηλώσεων του συνδεδεμένου διοργανωτή. \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/events}} & Δημιουργία εκδήλωσης με κείμενο και αρχεία πολυμέσων. \\
+    \addlinespace[1pt]
+    \en{PATCH} & \en{\texttt{/events/\{eventId\}}} & Ενημέρωση στοιχείων και εικόνων εκδήλωσης (\en{organizer} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{DELETE} & \en{\texttt{/events/\{eventId\}}} & Διαγραφή εκδήλωσης από τη βάση δεδομένων (\en{organizer} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/events/\{eventId\}/view}} & Καταγραφή προβολής εκδήλωσης για το σύστημα συστάσεων. \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
 
-    \subsubsection{Διαχείριση Κρατήσεων (/bookings)}
-    \begin{table}[h!]
-        \centering
-        \small
-        \begin{tabularx}{\textwidth}{llX}
-        \toprule
-        \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
-        \midrule
-        \en{GET} & \en{\texttt{/bookings/my-bookings}} & Προβολή των κρατήσεων του συνδεδεμένου χρήστη. \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/bookings/event/\{eventId\}}} & Σελίδες κρατήσεων μιας εκδήλωσης (\en{organizer} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/bookings/\{bookingId\}}} & Ανάκτηση συγκεκριμένης κράτησης βάσει \en{ID} (\en{attendee} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/bookings}} & Δημιουργία νέας κράτησης εισιτηρίων με \en{atomic} έλεγχο. \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/bookings/\{bookingId\}/cancel}} & Ακύρωση υπάρχουσας κράτησης (\en{attendee} ή \en{admin}). \\
-        \bottomrule
-        \end{tabularx}
-    \end{table}
+\subsubsection{Διαχείριση Κρατήσεων (/bookings)}
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
+    \midrule
+    \en{GET} & \en{\texttt{/bookings/my-bookings}} & Προβολή των κρατήσεων του συνδεδεμένου χρήστη. \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/bookings/event/\{eventId\}}} & Σελίδες κρατήσεων μιας εκδήλωσης (\en{organizer} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/bookings/\{bookingId\}}} & Ανάκτηση συγκεκριμένης κράτησης βάσει \en{ID} (\en{attendee} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/bookings}} & Δημιουργία νέας κράτησης εισιτηρίων με \en{atomic} έλεγχο. \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/bookings/\{bookingId\}/cancel}} & Ακύρωση υπάρχουσας κράτησης (\en{attendee} ή \en{admin}). \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
 
-    \newpage
+\newpage
 
-    \subsubsection{Σύστημα Μηνυμάτων \& Εξαγωγές (/messages , /admin/export)}
-    \begin{table}[h!]
-        \centering
-        \small
-        \begin{tabularx}{\textwidth}{llX}
-        \toprule
-        \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
-        \midrule
-        \en{GET} & \en{\texttt{/messages/inbox}} & Ανάκτηση των εισερχόμενων μηνυμάτων του χρήστη. \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/messages/sent}} & Ανάκτηση των απεσταλμένων μηνυμάτων του χρήστη. \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/messages/unread-count}} & Επιστροφή του αριθμού των μη αναγνωσμένων μηνυμάτων. \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/messages/broadcast/\{eventId\}}} & Μαζική αποστολή μηνύματος σε συμμετέχοντες (\en{organizer} ή \en{admin}). \\
-        \addlinespace[1pt]
-        \en{GET} & \en{\texttt{/messages/\{messageId\}}} & Προβολή συγκεκριμένου μηνύματος βάσει \en{ID}. \\
-        \addlinespace[1pt]
-        \en{PATCH} & \en{\texttt{/messages/\{messageId\}/read}} & Σήμανση ενός μηνύματος ως αναγνωσμένο (\en{receiver only}). \\
-        \addlinespace[1pt]
-        \en{POST} & \en{\texttt{/messages}} & Αποστολή νέου προσωπικού μηνύματος στον διοργανωτή μιας εκδήλωσης (απαιτεί κράτηση στην εκδήλωση). \\
-        \addlinespace[1pt]
-        \en{DELETE} & \en{\texttt{/messages/\{messageId\}}} & Λογική διαγραφή μηνύματος από τον χρήστη. \\
-        \midrule
-        \en{GET} & \en{\texttt{/admin/export/events}} & Εξαγωγή όλων των εκδηλώσεων σε \en{XML} ή \en{JSON} (\en{admin only}). \\
-        \bottomrule
-        \end{tabularx}
-    \end{table}
+\subsubsection{Σύστημα Μηνυμάτων \& Εξαγωγές (/messages , /admin/export)}
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Method} & \textbf{Endpoint} & \textbf{Περιγραφή} \\
+    \midrule
+    \en{GET} & \en{\texttt{/messages/inbox}} & Ανάκτηση των εισερχόμενων μηνυμάτων του χρήστη. \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/messages/sent}} & Ανάκτηση των απεσταλμένων μηνυμάτων του χρήστη. \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/messages/unread-count}} & Επιστροφή του αριθμού των μη αναγνωσμένων μηνυμάτων. \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/messages/broadcast/\{eventId\}}} & Μαζική αποστολή μηνύματος σε συμμετέχοντες (\en{organizer} ή \en{admin}). \\
+    \addlinespace[1pt]
+    \en{GET} & \en{\texttt{/messages/\{messageId\}}} & Προβολή συγκεκριμένου μηνύματος βάσει \en{ID}. \\
+    \addlinespace[1pt]
+    \en{PATCH} & \en{\texttt{/messages/\{messageId\}/read}} & Σήμανση ενός μηνύματος ως αναγνωσμένο (\en{receiver only}). \\
+    \addlinespace[1pt]
+    \en{POST} & \en{\texttt{/messages}} & Αποστολή νέου προσωπικού μηνύματος στον διοργανωτή μιας εκδήλωσης (απαιτεί κράτηση στην εκδήλωση). \\
+    \addlinespace[1pt]
+    \en{DELETE} & \en{\texttt{/messages/\{messageId\}}} & Λογική διαγραφή μηνύματος από τον χρήστη. \\
+    \midrule
+    \en{GET} & \en{\texttt{/admin/export/events}} & Εξαγωγή όλων των εκδηλώσεων σε \en{XML} ή \en{JSON} (\en{admin only}). \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
 
-    \subsection{Διαχείριση Πολυμέσων}
-    Για τη διαχείριση και την αποθήκευση των εικόνων χρησιμοποιείται η υπηρεσία \en{\textbf{FileSystemStorageService}}, η οποία αποθηκεύει ή διαγράφει αρχεία από τον προκαθορισμένο φάκελο αποθήκευσης στον δίσκο (φάκελος \en{media/}).
 
-    Όταν ανεβαίνει μια νέα εικόνα, η υπηρεσία δημιουργεί έναν ξεχωριστό υποφάκελο με βάση το \en{ID} της εκδήλωσης (\en{\texttt{media/\{eventId\}}}), «καθαρίζει» το όνομα του αρχείου για την αποφυγή επιθέσεων τύπου \en{path traversal} και το μετατρέπει σε μορφή \en{\textbf{.webp}} για εξοικονόμηση χώρου. Μέσω της βιβλιοθήκης \en{\textbf{Thumbnailator}}, η εικόνα περιορίζεται σε μέγιστη διάσταση \en{\textbf{1200x1200px}}, συμπιέζεται στο \en{\textbf{80\%}} της αρχικής της ποιότητας και αφαιρούνται όλα τα ευαίσθητα μεταδεδομένα (\en{\textbf{metadata}}) για λόγους ασφαλείας.
+\subsection{Υλοποίηση Επιχειρησιακής Λογικής (\en{Services})}
+Η λογική της εφαρμογής βρίσκεται στο επίπεδο των υπηρεσιών (\en{Services}), όπου τηρούνται όλοι οι επιχειρησιακοί κανόνες και οι μηχανισμοί διασφάλισης των δεδομένων:
 
-    \subsection{Διαχείριση Σφαλμάτων}
-    Όλα τα σφάλματα κανάλιζονται μέσα από έναν \en{\textbf{GlobalExceptionHandler} (@RestControllerAdvice)}, ο οποίος μετατρέπει τα \en{domain exceptions} (\en{ValidationException, ResourceNotFoundException, AccessDeniedException} κ.ά.) σε τυποποιημένες \en{\textbf{RFC 7807} ProblemDetail JSON responses} με κατάλληλο \en{HTTP status} και επεξηγηματικό μήνυμα λάθους.
+\subsubsection{Διαχείριση Εκδηλώσεων (\en{Events})}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Κύκλος ζωής:} Για την αυτόματη ενημέρωση των εκδηλώσεων, χρησιμοποιείται ένας background scheduler (\en{@Scheduled}) που εκτελείται κάθε 15 λεπτά. Αυτός τρέχει ένα query στη βάση που βρίσκει όσα \en{PUBLISHED} events έχουν λήξει με βάση την τρέχουσα ώρα και αλλάζει την κατάστασή τους σε \en{COMPLETED}.
+    \item \textbf{Περιορισμοί κατάστασης:} Δεν επιτρέπεται να γίνει τροποποίηση σε εκδήλωση που είναι ήδη ακυρωμένη ή ολοκληρωμένη, ούτε και επιτρέπεται να διαγραφτεί ένα δημοσιευμένο event αν αυτό έχει ήδη συγκεντρώσει έστω και μία κράτηση.
+    \item \textbf{Επικύρωση κατά create/update:} Κατά τη διαχείριση μιας εκδήλωσης, διασφαλίζεται πως όλα τα δεδομένα είναι έγκυρα πριν αποθηκευτούν στην βάση δεδομένων. Συγκεκριμένα ελέγχεται ότι το άθροισμα των ποσοτήτων όλων των επιμέρους τύπων δεν ξεπερνά τη συνολική χωρητικότητα του χώρου, οτι ο διοργανωτής δεν μειώνει την ποσότητα κάτω από τον αριθμό των θέσεων που έχουν ήδη πουληθεί κ.α.. Αυτο επιτυγχάνεται στο τέλος του create και του update, όπου καλείται η κεντρική μέθοδος \en{event.validate()}, η οποία ελέγχει συνολικά την οντότητα (ημερομηνίες, χωρητικότητες, ύπαρξη εισιτηρίων και κατηγοριών για δημοσιευμένα events) ώστε να διασφαλιστεί ότι τα πάντα έχουν ενημερωθεί σωστά και είναι έγκυρα πριν το τελικό save. Να σημειωθεί πως τα draft events μπορουν να εχουν ελλιπη πεδία κατά την ενημέρωση τους, ωστόσο, πρέπει να συμπληρωθούν για να επιτραπεί η δημοσίευση τους.
+    \item \textbf{Σύστημα αρχείων και rollback:} Κατά την επεξεργασία των πολυμέσων, τα αρχεία αποθηκεύονται στον δίσκο, ο οποίος όμως δεν υποστηρίζει transactional rollback όπως η βάση δεδομένων. Για τον λόγο αυτό, οι διαδρομές των αρχείων που ανεβαίνουν καταγράφονται σε μια λίστα και, αν υπάρξει οποιοδήποτε σφάλμα πριν το τελικό save στη βάση, ένα \en{catch} block σβήνει αμέσως τα αρχεία από το filesystem για να μην μείνουν ορφανά.
+    \item \textbf{Υλοποίηση συστάσεων:} Οι υπολογισμοί του αλγορίθμου \en{Matrix Factorization} έχουν ενσωματωθεί απευθείας στα SQL queries της βάσης. Για τη διαχείριση του προβλήματος του \en{cold start} ή των επισκεπτών, χρησιμοποιείται η SQL συνάρτηση \en{COALESCE}, η οποία μηδενίζει τους λανθάνοντες παράγοντες και επιστρέφει ως baseline σκορ μόνο το γενικό bias (τη δημοτικότητα) της εκδήλωσης.
+    \item \textbf{Caching:} Επειδή όλοι οι επισκέπτες βλέπουν τις ίδιες προτεινόμενες εκδηλώσεις, αυτές αποθηκεύονται στην τοπική προσωρινή μνήμη (cache) για την άμεση πρόσβαση τους, χωρίς queries στην βάση. Αυτή η cache αδειάζει καθολικά κάθε φορά που εκτελείται δημιουργία, τροποποίηση, διαγραφή ή η αυτοματοποιημένη ολοκλήρωση μιας εκδήλωσης προκειμένου να διατηρηθεί η εγκυρότητα/επικαιροποίηση των δεδομένων.
+\end{itemize}
 
-    \newpage
+\subsubsection{Διαχείριση Κρατήσεων (\en{Bookings})}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Δημιουργία κρατήσεων:} Κατά την αγορά εισιτηρίων, προκειμένου να αποφευχθούν συνθήκες ανταγωνισμού (\en{race conditions}) και υπερκρατήσεις, το σύστημα εφαρμόζει απαισιόδοξο κλείδωμα (\en{pessimistic lock}) στην εγγραφή του συγκεκριμένου τύπου εισιτηρίου στη βάση. Ακόμη, απαγορεύεται στους διοργανωτές να κλείνουν εισιτήρια για τις δικές τους εκδηλώσεις.
+    \item \textbf{Ακύρωση κρατήσεων:} Παρόμοια και εδω κλειδώνεται η εγγραφή του εισιτηρίου πρώτα πριν ακυρωθεί η κράτηση και έπειτα επιστρέφονται οι θέσεις στο διαθέσιμο απόθεμα. Δεν επιτρέπεται ακύρωση σε COMPLETED events.
+\end{itemize}
+
+\subsubsection{Σύστημα Μηνυμάτων (\en{Messages})}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Κανόνες επικοινωνίας:} Επιτρέπεται η ανταλλαγή μηνυμάτων αποκλειστικά ανάμεσα στον διοργανωτή μιας εκδήλωσης και σε έναν χρήστη που έχει ενεργή κράτηση σε αυτήν, ενώ απαγορεύεται η αποστολή μηνύματος στον εαυτό μας. Παράλληλα, παρέχεται η δυνατότητα μαζικής ενημέρωσης (\en{broadcast}) από τον διοργανωτή προς όλους τους ενεργούς συμμετέχοντες.
+    \item \textbf{Διαγραφή μηνυμάτων:} Εφαρμόζεται λογική διαγραφή μέσω των flags \en{deletedBySender} και \en{deletedByReceiver}. Το μήνυμα κρύβεται από τον χρήστη που το διέγραψε και η πραγματική διαγραφή από τη βάση δεδομένων εκτελείται αυτόματα μόνο όταν και οι δύο πλευρές επιλέξουν να το διαγράψουν.
+\end{itemize}
+
+\subsubsection{Γενικότερα}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Έλεγχος δικαιωμάτων:} Ενέργειες όπως τροποποίηση ή διαγραφή εκδηλώσεων προστατεύεται από μια μεθόδους ελέγχου όπως \en{isOrganizerOrAdmin} που επιτρέπει την πρόσβαση μόνο αν ο χρήστης είναι διαχειριστής ή ο διοργανωτής της εκδήλωσης. Αυτο επιβάλλεται και στην διαχείριση κρατήσεων και στην διαχείριση του προφιλ χρήστη.
+    \item \textbf{Ασύγχρονα γεγονότα:} Για να μην καθυστερεί η απόκριση αιτήματος, σύνθετες ενέργειες όπως η ακύρωση κρατήσεων και η μαζική αποστολή ειδοποιήσεων λόγω ακύρωσης ενός event γίνονται ασύγχρονα. Το service δημοσιεύει ένα event μέσω του \en{ApplicationEventPublisher} και ένας listener αναλαμβάνει την εκτέλεση μετά την επιτυχή ολοκλήρωση της κύριας συναλλαγής/αιτήματος.
+\end{itemize}
+
+
+
+
+
+
+
+\subsection{Διαχείριση Πολυμέσων}
+Για τη διαχείριση και την αποθήκευση των εικόνων χρησιμοποιείται η υπηρεσία \en{\textbf{FileSystemStorageService}}, η οποία αποθηκεύει ή διαγράφει αρχεία από τον προκαθορισμένο φάκελο αποθήκευσης στον δίσκο (default \en{media/ στον ριζικό κατάλογο της εφαρμογής}).
+
+Όταν ανεβαίνει μια νέα εικόνα, η υπηρεσία δημιουργεί έναν ξεχωριστό υποφάκελο με βάση το \en{ID} της εκδήλωσης (\en{\texttt{media/\{eventId\}}}), «καθαρίζει» το όνομα του αρχείου για την αποφυγή επιθέσεων τύπου \en{path traversal} και το μετατρέπει σε μορφή \en{\textbf{.webp}}. Μέσω της βιβλιοθήκης \en{\textbf{Thumbnailator}}, η εικόνα περιορίζεται σε μέγιστη διάσταση \en{\textbf{1200x1200px}}, συμπιέζεται στο \en{\textbf{80\%}} της αρχικής της ποιότητας και αφαιρούνται όλα τα metadata για λόγους ασφαλείας.
+
+
+\subsection{Διαχείριση Σφαλμάτων}
+Όλα τα σφάλματα διαχειρίζονται μέσα από έναν \en{\textbf{GlobalExceptionHandler}}, ο οποίος μετατρέπει τα \en{domain exceptions} (\en{ValidationException, ResourceNotFoundException, AccessDeniedException} κ.ά.) σε τυποποιημένες \en{\textbf{RFC 7807} ProblemDetail JSON responses} με κατάλληλο \en{HTTP status} και επεξηγηματικό μήνυμα λάθους.
+
+\newpage
 
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 6: FRONTEND — REACT ΕΦΑΡΜΟΓΗ
@@ -391,7 +419,7 @@
         \begin{itemize}[leftmargin=0.6cm, itemsep=2pt]
             \item \en{\texttt{/login}} : Σελίδα σύνδεσης στο σύστημα (\en{\texttt{LoginPage}}).
             \item \en{\texttt{/register}} : Σελίδα εγγραφής νέου λογαριασμού (\en{\texttt{RegisterPage}}).
-            \item \en{\texttt{/pending-approval}} : Σελίδα ενημέρωσης για την εκκρεμή έγκριση του διοργανωτή (\en{\texttt{PendingApprovalPage}}).
+            \item \en{\texttt{/pending-approval}} : Σελίδα ενημέρωσης για την εκκρεμή έγκριση του διαχειριστή (\en{\texttt{PendingApprovalPage}}).
         \end{itemize}
 
     \item \textbf{Προστατευμένες Διαδρομές (\en{Protected Routes}):} Χρησιμοποιούν το φίλτρο \en{\texttt{ProtectedRoute}} και απαιτούν ο χρήστης να έχει κάνει αυθεντικοποίηση με έγκυρο \en{JWT}, αλλιώς μεταφέρεται αυτόματα στη σελίδα σύνδεσης.
@@ -412,18 +440,15 @@
         \end{itemize}
 \end{itemize}
 
-Σε περίπτωση πρόσβασης κάποιας προστατευμένης διαδρομής από έναν χρήστη που δεν έχει πρόσβαση (π.χ. σε \en{edit-event} διαδρομή με event στο οποίο δεν είναι ο διοργανωτής) τότε ο χρήστης μεταβαίνει σε προσαρμοσμένη σελίδα σφάλματος (\en{\texttt{ErrorPage}}) με κωδικό \textbf{\en{404 Unauthorized}}.
+Σε περίπτωση πρόσβασης κάποιας προστατευμένης διαδρομής από έναν συνδεδεμένο χρήστη που δεν έχει πρόσβαση (π.χ. σε \en{edit-event} διαδρομή με event στο οποίο δεν είναι ο διοργανωτής) τότε ο χρήστης μεταβαίνει σε προσαρμοσμένη σελίδα σφάλματος (\en{\texttt{ErrorPage}}) με κωδικό \textbf{\en{403 Unauthorized}}.
 
-Παρόμοια, αν πληκτρολογηθεί μια διεύθυνση που δεν αντιστοιχεί σε καμία από τις παραπάνω ή αφορά \en{event / booking} που δεν υπάρχει τότε εμφανίζεται η σελίδα σφάλματος αλλά με κωδικό \textbf{\en{404 Not Found}}.
+Παρόμοια, αν πληκτρολογηθεί μια διεύθυνση που δεν αντιστοιχεί σε καμία από τις παραπάνω ή αφορά \en{event/booking} που δεν υπάρχει τότε εμφανίζεται πάλι η σελίδα σφάλματος αλλά με κωδικό \textbf{\en{404 Not Found}}.
 
 \subsection{Επιλεγμένες Σχεδιαστικές Αποφάσεις}
 \begin{itemize}[label=\textbullet, leftmargin=*]
-    \item \textbf{Διαχωρισμός Μπάρας Πλοήγησης (Conditional Navbar):} Μέσω ελέγχου στο \en{\texttt{location.pathname}}, η εφαρμογή αναγνωρίζει αν ο χρήστης βρίσκεται στον πίνακα διαχείρισης. Αν ο χρήστης είναι \en{admin} και βρίσκεται στη διαδρομή \en{\texttt{/admin}}, το σύστημα εμφανίζει το ειδικό \en{\texttt{AdminNavbar}}, ενώ σε οποιαδήποτε άλλη σελίδα φορτώνει το κανονικό \en{\texttt{Navbar}} της εφαρμογής.
-    \item \textbf{Αποκλειστικότητα Διαχειριστή (Admin Interceptor):} Στο κεντρικό component έχει υλοποιηθεί ένα \en{\texttt{useEffect}} το οποίο λειτουργεί ως \en{interceptor}. Αν συνδεθεί χρήστης με ρόλο διαχειριστή, το σύστημα τον ανακατευθύνει αμέσως στο \en{\texttt{/admin}} και του απαγορεύει την πλοήγηση στις σελίδες των απλών χρηστών.
+    \item \textbf{Αποκλειστικότητα Διαχειριστή (Admin Interceptor):} Αν συνδεθεί χρήστης με ρόλο διαχειριστή, το σύστημα τον ανακατευθύνει αμέσως στο \en{\texttt{/admin}} και του απαγορεύει την πλοήγηση στις σελίδες των απλών χρηστών.
     \item \textbf{Επιβεβαίωση Ενεργειών:} Στην ολοκλήρωση των κρατήσεων όπως και στην διαγραφή των εκδηλώσεων εμφανίζεται ένα επιβεβαιωτικό \en{dialog} πριν την οριστική αποστολή του αιτήματος, για την αποφυγή λανθασμένων ενεργειών.
-    \item \textbf{Διαδραστικοί Χάρτες:} Ενσωματώνεται διαδραστικός χάρτης \en{OpenStreetMap} με τη βιβλιοθήκη \en{\textbf{Leaflet}} για την οπτική απεικόνιση των τοποθεσιών των εκδηλώσεων.
-    \item \textbf{Αυτόματη Συμπλήρωση Τοποθεσίας:} Χρήση του \en{\texttt{LocationAutocomplete}} component για την αυτόματη εύρεση και συμπλήρωση γεωγραφικών συντεταγμένων κατά τη δημιουργία μιας εκδήλωσης μέσω του \en{\textbf{Geoapify}}.
-    \item \textbf{Badge Μη Αναγνωσμένων Μηνυμάτων:} Υπάρχει αυτόματη ενημέρωση του \en{unread badge} στο \en{navbar} για τα νέα μηνύματα.
+    \item \textbf{Αυτόματη Συμπλήρωση Τοποθεσίας:} Χρήση του \en{\texttt{LocationAutocomplete}} component για την αυτόματη εύρεση και συμπλήρωση γεωγραφικών συντεταγμένων κατά τη δημιουργία μιας εκδήλωσης μέσω του \en{\textbf{Geoapify}}. Έχει απαγορευτεί η χειροκίνητη πληκτρολόγηση των διευθύνσεων, πόλης κ.τ.λπ. για την διευκολία στην εύρεση και αποθήκευση των γεογραφικών συντεταγμένων.
     \item \textbf{Κοινό Component Σελιδοποίησης:} Δημιουργήθηκε ένα ενιαίο \en{\texttt{Pagination}} component το οποίο επαναχρησιμοποιείται αυτούσιο σε όλες τις σελιδοποιημένες λίστες της εφαρμογής (εκδηλώσεις, κρατήσεις, εισερχόμενα).
     \item \textbf{Υποστήριξη Light/Dark Themes:} Πλήρης υποστήριξη εναλλαγής εμφάνισης με τη χρήση \en{CSS variables} για ομοιόμορφη εμπειρία χρήσης.
 \end{itemize}
@@ -433,83 +458,91 @@
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 7: ΑΣΦΑΛΕΙΑ
 % =========================================================
-    \section{Ασφάλεια}
-    Η ασφάλεια της πλατφόρμας υλοποιήθηκε σε όλα τα επίπεδα της εφαρμογής, εξασφαλίζοντας την ακεραιότητα των δεδομένων, την προστασία των χρηστών και την αποδοτική διαχείριση των πόρων του συστήματος.
+\section{Ασφάλεια}
+Η ασφάλεια της πλατφόρμας υλοποιήθηκε σε όλα τα επίπεδα της εφαρμογής, εξασφαλίζοντας την ακεραιότητα των δεδομένων, την προστασία των χρηστών και την αποδοτική διαχείριση των πόρων του συστήματος.
 
-    \subsection{Κρυπτογραφημένη Επικοινωνία (SSL/TLS)}
-    Η κρυπτογραφημένη επικοινωνία εξασφαλίζεται στην πύλη εισόδου της εφαρμογής. Συγκεκριμένα, ο \en{Nginx Reverse Proxy} αναλαμβάνει εξολοκλήρου το \en{SSL termination} χρησιμοποιώντας ένα (\en{self-signed}) \en{SSL certificate}, προστατεύοντας όλη την εξωτερική κίνηση των χρηστών μέσω του πρωτοκόλλου \en{HTTPS}. Μετά την αποκρυπτογράφηση από τον \en{Nginx}, τα αιτήματα δρομολογούνται με ασφάλεια στο \en{Backend} εσωτερικά μέσω του απομονωμένου \en{Docker network} με \en{HTTP} .
+\subsection{Κρυπτογραφημένη Επικοινωνία (SSL/TLS)}
+Η κρυπτογραφημένη επικοινωνία εξασφαλίζεται στην πύλη εισόδου της εφαρμογής. Ο \en{Nginx Reverse Proxy} αναλαμβάνει εξολοκλήρου το \en{SSL termination} χρησιμοποιώντας ένα (\en{self-signed}) \en{SSL certificate}, προστατεύοντας όλη την εξωτερική κίνηση των χρηστών μέσω του πρωτοκόλλου \en{HTTPS}. Μετά την αποκρυπτογράφηση από τον \en{Nginx}, τα αιτήματα δρομολογούνται με ασφάλεια στο \en{Backend} εσωτερικά μέσω του απομονωμένου \en{Docker network} χρησιμοποιώντας το απλό πρωτόκολλο \en{HTTP}.
 
-    \subsection{Αποθήκευση Κωδικών}
-    Για την προστασία των λογαριασμών, όλοι οι κωδικοί πρόσβασης των χρηστών αποθηκεύονται στη βάση δεδομένων αποκλειστικά σε κρυπτογραφημένη μορφή (\en{hashed}) χρησιμοποιώντας τον αλγόριθμο \en{BCrypt} μέσω του \en{\texttt{PasswordEncoder} bean} του \en{Spring Security}. Το σύστημα έχει σχεδιαστεί έτσι ώστε οι κωδικοί να μην εκτίθενται ποτέ σε κανένα \en{DTO} ή \en{HTTP response}.
+\subsection{Δικτυακή Απομόνωση (\en{Docker Networks})}
+Για τη μέγιστη δυνατή ασφάλεια του συστήματος, τα \en{docker containers} επικοινωνούν μέσω δύο εντελώς ανεξάρτητων εσωτερικών δικτύων: το \en{\texttt{frontend-network}} και το \en{\texttt{backend-network}}. Η απομόνωση αυτή υλοποιείται ως εξής:
+\begin{itemize}[leftmargin=*]
+    \item \en{\textbf{Database}}: Ανήκει αποκλειστικά στο \en{\texttt{backend-network}} ώστε να επικοινωνεί μόνο με το \en{Backend}. Δεν εκθέτει καμία θύρα στο εξωτερικό σύστημα (\en{no open host ports}), αποκλείοντας οποιαδήποτε απευθείας πρόσβαση από το διαδίκτυο ή από το ίδιο το \en{Frontend}.
+    \item \en{\textbf{Backend}}: Λειτουργεί ως γέφυρα μεταξύ των δύο δικτύων καθώς είναι συνδεδεμένο και στο \en{\texttt{frontend-network}} (για να δέχεται αιτήματα από τον \en{proxy}) και στο \en{\texttt{backend-network}} (για να μιλάει με τη βάση). Οι θύρες του προς τον έξω κόσμο είναι επίσης κλειστές ώστε να αποτρέπεται η απευθείας HTTP επικοινωνία μ'αυτό απο την θύρα του.
+    \item \en{\textbf{Frontend}}: Είναι συνδεδεμένο στο \texttt{frontend-network} και είναι το μοναδικό τμήμα της εφαρμογής που εκθέτει θύρες στον εξωτερικό κόσμο (\en{\texttt{80}} και \en{\texttt{443}}). Ο \en{Nginx Reverse Proxy} δέχεται τα εξωτερικά αιτήματα και αναλαμβάνει να τα προωθήσει με ασφάλεια στο \en{backend} εσωτερικά.
+\end{itemize}
+Συνεπώς, κανένα εξωτερικό αίτημα δεν μπορεί να φτάσει στο \en{Backend} ή στη βάση δεδομένων χωρίς να περάσει υποχρεωτικά από τον έλεγχο και τη δρομολόγηση του \en{reverse proxy}. Ακόμη, και να υπάρξει security vulnerability στον Nginx που να επιτρέπει τον έλεγχο του με root δικαιώματα, δεν θα είναι, τουλάχιστον, εφικτή η πρόσβαση στην βάση δεδομένων.
 
-    \subsection{JSON Web Tokens}
-    Η αυθεντικοποίηση στην εφαρμογή είναι πλήρως \en{stateless}. Κατά τη διαδικασία του \en{login}, εκδίδεται ένα \en{JWT (HS256)} με διάρκεια ζωής μίας ώρας και έπειτα, σε κάθε επόμενο αίτημα, το φίλτρο \en{\texttt{JwtAuthFilter}} ελέγχει την υπογραφή του \en{token} μέσω της βιβλιοθήκης \en{jjwt} και, εφόσον είναι έγκυρο, αναλαμβάνει αυτόματα τη φόρτωση των στοιχείων του χρήστη στο \en{SecurityContext} της εφαρμογής.
+\subsection{Αποθήκευση Κωδικών}
+Για την προστασία των λογαριασμών, όλοι οι κωδικοί πρόσβασης των χρηστών αποθηκεύονται στη βάση δεδομένων αποκλειστικά σε κρυπτογραφημένη μορφή (\en{hashed}) χρησιμοποιώντας τον αλγόριθμο \en{BCrypt}. Το σύστημα έχει σχεδιαστεί έτσι ώστε οι κωδικοί να μην εκτίθενται ποτέ σε κανένα \en{DTO} ή \en{HTTP response}.
 
-    \subsection{Εξουσιοδότηση Βάσει Ρόλου}
-    Η διαχείριση των δικαιωμάτων γίνεται με σαφή διαχωρισμό τόσο στο \en{Security Config} όσο και σε επίπεδο \en{Controller}. Συγκεκριμένα, στο \en{\texttt{SecurityFilterChain}} ορίζονται οι καθολικοί κανόνες, όπου τα μονοπάτια \en{\texttt{/auth/**}} και οι αναζητήσεις εκδηλώσεων (\en{\texttt{GET /events/**}}) είναι ελεύθερα προσβάσιμα από όλους (\en{permitAll}) ενώ για τις υπόλοιπες ενέργειες απαιτείται αυθεντικοποίηση, με τον έλεγχο των δικαιωμάτων να γίνεται με τη χρήση του annotation \en{\texttt{@PreAuthorize}} στους \en{Controllers}.
+\subsection{JSON Web Tokens}
+Η αυθεντικοποίηση στην εφαρμογή είναι πλήρως \en{stateless}. Κατά τη διαδικασία του \en{login}, εκδίδεται ένα \en{JWT (HS256)} με διάρκεια ζωής μίας ώρας και έπειτα, σε κάθε επόμενο αίτημα, το φίλτρο \en{\texttt{JwtAuthFilter}} ελέγχει την υπογραφή του \en{token} μέσω της βιβλιοθήκης \en{jjwt} και, εφόσον είναι έγκυρο, αναλαμβάνει αυτόματα τη φόρτωση των στοιχείων του χρήστη στο \en{SecurityContext} της εφαρμογής.
 
-    \subsection{Προστασία από Spam / Σπατάλη Πόρων}
-    \begin{itemize}[leftmargin=*]
-    \item \en{\textbf{CORS}:} Αυστηρά ρυθμισμένο στο \en{Spring Security} ώστε να δέχεται αιτήματα αποκλειστικά από το \en{URL} του \en{frontend}, μπλοκάροντας κακόβουλες εξωτερικές κλήσεις.
-    \item \en{\textbf{XSS Protection}:} Η βιβλιοθήκη \en{React} προστατεύει την εφαρμογή από επιθέσεις \en{Cross-Site Scripting} κάνοντας αυτόματα \en{escape} οποιαδήποτε τιμή απεικονίζεται στο περιβάλλον εργασίας. Με αυτόν τον τρόπο, κακόβουλα κείμενα ή εντολές κώδικα που τυχόν προσπαθήσει να εισάγει ένας χρήστης αντιμετωπίζονται ως απλό κείμενο και δεν εκτελούνται ποτέ στον φυλλομετρητή.
-    \item \item \en{\textbf{Stateless Sessions}:} Η εφαρμογή δεν διατηρεί \en{session} στον \en{server}, αποτρέποντας έτσι επιθέσεις τύπου \en{session fixation} και μειώνοντας τη χρήση μνήμης.
-    \item \en{\textbf{Validation}:} Κάθε εισερχόμενο αίτημα ελέγχεται στην πλευρά του \en{Backend} με τη χρήση του \en{Jakarta Bean Validation} (\en{\texttt{@NotBlank, @Min, @Email}} στα \en{DTOs}), απορρίπτοντας αμέσως άκυρα δεδομένα πριν αυτά φτάσουν στη βάση.
-    \end{itemize}
+\subsection{Εξουσιοδότηση Βάσει Ρόλου}
+Η διαχείριση των δικαιωμάτων γίνεται με σαφή διαχωρισμό τόσο στο \en{Security Config} όσο και σε επίπεδο \en{Controller}. Συγκεκριμένα, στο \en{\texttt{SecurityFilterChain}} ορίζονται οι καθολικοί κανόνες, δηλαδή ότι τα μονοπάτια \en{\texttt{/auth/**}} και οι αναζητήσεις εκδηλώσεων (\en{\texttt{GET /events/**}}) είναι ελεύθερα προσβάσιμα από όλους (\en{permitAll}). Για τις υπόλοιπες ενέργειες που απαιτείται αυθεντικοποίηση και έλεγχος των δικαιωμάτων, αυτό επιτυγχάνεται με τη χρήση του annotation \en{\texttt{@PreAuthorize}} στους \en{Controllers}.
 
-    \newpage
+\subsection{Προστασία από Spam / Σπατάλη Πόρων}
+\begin{itemize}[leftmargin=*]
+    \item \en{\textbf{CORS}:} Αυστηρά ρυθμισμένο στο \en{Spring Security} ώστε να δέχεται αιτήματα αποκλειστικά από το \en{URL} του \en{frontend}.
+    \item \en{\textbf{XSS Protection}:} Η βιβλιοθήκη \en{React} προστατεύει την εφαρμογή από επιθέσεις \en{Cross-Site Scripting} κάνοντας αυτόματα \en{escape} οποιαδήποτε τιμή απεικονίζεται στο περιβάλλον εργασίας. Με αυτόν τον τρόπο, κακόβουλα κείμενα ή εντολές κώδικα που τυχόν προσπαθήσει να εισάγει ένας χρήστης αντιμετωπίζονται ως απλό κείμενο και δεν εκτελούνται ποτέ στον browser.
+    \item \en{\textbf{Validation}:} Κάθε εισερχόμενο αίτημα ελέγχεται στην πλευρά του \en{Backend} με τη χρήση του \en{Jakarta Bean Validation} στα DTOs (π.χ. \en{\texttt{@NotBlank, @Min, @Email}}), απορρίπτοντας αμέσως άκυρα ή κακόβουλα δεδομένα πριν αυτά φτάσουν στη βάση.
+\end{itemize}
+
+\newpage
 
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 8: ΕΞΑΓΩΓΗ ΕΚΔΗΛΩΣΕΩΝ ΣΕ XML / JSON
 % =========================================================
-    \section{Εξαγωγή Εκδηλώσεων σε XML / JSON}
-    Ο διαχειριστής της εφαρμογής έχει τη δυνατότητα να εξάγει όλες τις καταχωρημένες εκδηλώσεις του συστήματος σε δομημένη μορφή αρχείου μέσω του \en{endpoint} \en{\texttt{/admin/export/events}} ορίζοντας την παράμετρο \en{\texttt{?format=xml}} ή \en{\texttt{?format=json}}. Η υλοποίηση αυτή βασίζεται σε ξεχωριστά, ειδικά σχεδιασμένα \en{Export DTOs} (\en{\texttt{EventsExport}}), τα οποία γίνονται \en{serialize} με τη χρήση των \en{\texttt{XmlMapper}} και \en{\texttt{JsonMapper}} της βιβλιοθήκης \en{Jackson}.
+\section{Εξαγωγή Εκδηλώσεων σε XML / JSON}
+Ο διαχειριστής της εφαρμογής έχει τη δυνατότητα να εξάγει όλες τις καταχωρημένες εκδηλώσεις του συστήματος σε δομημένη μορφή αρχείου μέσω του \en{endpoint} \en{\texttt{/admin/export/events}} ορίζοντας την URL παράμετρο \en{\texttt{?format=xml}} ή \en{\texttt{?format=json}}. Η υλοποίηση αυτή βασίζεται σε ξεχωριστά, ειδικά σχεδιασμένα \en{Export DTOs} (\en{\texttt{EventsExport}}), τα οποία γίνονται \en{serialize} με τη χρήση των \en{\texttt{XmlMapper}} και \en{\texttt{JsonMapper}} της βιβλιοθήκης \en{Jackson}.
 
-    \subsection{Συμβατότητα με το DTD}
-    Για να εξασφαλιστεί η απόλυτη συμβατότητα με τους κανόνες και τη δομή του ζητούμενου \en{DTD} κατά την παραγωγή του \en{XML} αρχείου, χρησιμοποιούνται οι κατάλληλες \en{annotations} της \en{Jackson} πάνω από τα πεδία των \en{DTOs}:
-    \begin{itemize}[leftmargin=*]
+\subsection{Συμβατότητα με το DTD}
+Για να εξασφαλιστεί η απόλυτη συμβατότητα με τους κανόνες και τη δομή του ζητούμενου \en{DTD} κατά την παραγωγή του \en{XML} αρχείου, χρησιμοποιούνται οι κατάλληλες \en{annotations} της \en{Jackson} πάνω από τα πεδία των \en{DTOs}:
+\begin{itemize}[leftmargin=*]
     \item \en{\textbf{\texttt{@JsonPropertyOrder}}}: Χρησιμοποιείται για να επιβάλει μια αυστηρά καθορισμένη σειρά στα στοιχεία του \en{XML}, ώστε να μην αποτυγχάνει η επικύρωση λόγω ανακατέματος των πεδίων.
     \item \en{\textbf{\texttt{@JacksonXmlProperty(localName = "...")}}}: Μας επιτρέπει να αντιστοιχίσουμε τις ιδιότητες της \en{Java} με ονόματα στοιχείων που ξεκινούν με κεφαλαία γράμματα, ακολουθώντας τις ονοματολογίες του \en{DTD}.
     \item \en{\textbf{\texttt{@JacksonXmlProperty(isAttribute = true)}}}: Ορίζει ποια πεδία (όπως τα \en{\texttt{EventID, Latitude, Longitude, AvailableTickets}}) πρέπει να εμφανίζονται ως ιδιότητες (\en{attributes}) μέσα στο tag του στοιχείου και όχι ως εμφωλευμένα tags.
     \item \en{\textbf{\texttt{@JacksonXmlElementWrapper}}}: Αναλαμβάνει να δημιουργήσει τα απαραίτητα στοιχεία-φακέλους (\en{wrappers}) για τη σωστή οργάνωση των λιστών, όπως για παράδειγμα τα tags \en{\texttt{<TicketTypes>}} και \en{\texttt{<Bookings>}}.
     \item \en{\textbf{\texttt{@JsonInclude}}}: Ρυθμίζεται στην τιμή \en{\texttt{NON\_NULL}} ώστε αν κάποια πεδία (όπως οι φωτογραφίες μιας εκδήλωσης) είναι άδεια, να μην εμφανίζονται καθόλου στο τελικό αρχείο, αποτρέποντας τη δημιουργία άκυρων κενών tags.
-    \end{itemize}
+\end{itemize}
 
-    Η \en{JSON} εκδοχή του αρχείου εξαγωγής παράγεται αυτόματα από τα ίδια ακριβώς \en{DTOs}, χρησιμοποιώντας τον έτοιμο \en{\texttt{JsonMapper}} που παρέχει το \en{Spring Boot} και τη μέθοδο \en{\texttt{writerWithDefaultPrettyPrinter()}} για βέλτιστη αναγνωσιμότητα.
+Η \en{JSON} εκδοχή του αρχείου εξαγωγής παράγεται αυτόματα από τα ίδια ακριβώς \en{DTOs}, χρησιμοποιώντας τον έτοιμο \en{\texttt{JsonMapper}} που παρέχει το \en{Spring Boot} και τη μέθοδο \en{\texttt{writerWithDefaultPrettyPrinter()}} για βέλτιστη αναγνωσιμότητα.
 
-    \subsection{Λήψη Αρχείου}
-    Όποιο format και αν επιλεγεί, η απάντηση επιστρέφεται από το \en{Backend} με το κατάλληλο \en{Content-Type header} και με τη ρύθμιση \en{\texttt{Content-Disposition: attachment}} το οποίο αναγκάζει τον \en{browser} του χρήστη να ξεκινήσει την λήψη (\en{download}) του αρχείου στον υπολογιστή του διαχειριστή.
+\subsection{Λήψη Αρχείου}
+Όποιο format και αν επιλεγεί, η απάντηση επιστρέφεται από το \en{Backend} με το κατάλληλο \en{Content-Type header} και με τη ρύθμιση \en{\texttt{Content-Disposition: attachment}} το οποίο αναγκάζει τον \en{browser} του χρήστη να ξεκινήσει την λήψη (\en{download}) του αρχείου στον υπολογιστή του διαχειριστή.
 
-    \newpage
+\newpage
 
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 9: ΑΛΓΟΡΙΘΜΟΣ ΣΥΣΤΑΣΕΩΝ
 % =========================================================
-    \section{Αλγόριθμος Συστάσεων}
-    Η εφαρμογή ενσωματώνει μια μηχανή προσωποποιημένων προτάσεων εκδηλώσεων για κάθε συνδεδεμένο χρήστη, βασισμένη στον αλγόριθμο \en{Biased Matrix Factorization (BMF)}. Ο αλγόριθμος αυτός αναλύει το ιστορικό αλληλεπιδράσεων (προβολές και κρατήσεις) που είναι αποθηκευμένο στον πίνακα \en{\texttt{User\_Event\_Interaction}} και προβλέπει το ενδιαφέρον ενός χρήστη για μελλοντικές εκδηλώσεις.
+\section{Αλγόριθμος Συστάσεων}
+Η εφαρμογή ενσωματώνει μια μηχανή προσωποποιημένων προτάσεων εκδηλώσεων για κάθε συνδεδεμένο χρήστη, βασισμένη στον αλγόριθμο \en{Biased Matrix Factorization (BMF)}. Ο αλγόριθμος αυτός αναλύει το ιστορικό αλληλεπιδράσεων (προβολές και κρατήσεις σε κρατήσεις) που είναι αποθηκευμένο στον πίνακα \en{\texttt{User\_Event\_Interaction}} και προβλέπει το ενδιαφέρον ενός χρήστη για μελλοντικές εκδηλώσεις.
 
-    \subsection{Μαθηματικό Μοντέλο}
-    Η πρόβλεψη του σκορ προτίμησης $\hat{r}_{u,i}$ ενός χρήστη $u$ για μια εκδήλωση $i$ υπολογίζεται σύμφωνα με τη μαθηματική σχέση:
-    $$\hat{r}_{u,i} = \mu + b_u + b_i + \sum_{k=1}^{K} P_{u,k} \cdot Q_{i,k}$$
+\subsection{Μαθηματικό Μοντέλο}
+Η πρόβλεψη του σκορ προτίμησης $\hat{r}_{u,i}$ ενός χρήστη $u$ για μια εκδήλωση $i$ υπολογίζεται σύμφωνα με τη μαθηματική σχέση:
+$$\hat{r}_{u,i} = \mu + b_u + b_i + \sum_{k=1}^{K} P_{u,k} \cdot Q_{i,k}$$
 
-    Όπου οι μεταβλητές ορίζονται ως εξής:
-    \begin{itemize}[leftmargin=*]
+Όπου οι μεταβλητές ορίζονται ως εξής:
+\begin{itemize}[leftmargin=*]
     \item $\mu$ : Η καθολική τάση του συστήματος (\en{global bias}), η οποία είναι αποθηκευμένη στον πίνακα \en{\texttt{Recommendation\_Config}}.
     \item $b_u$ : Η προσωπική τάση του χρήστη (\en{user bias}), που αντικατοπτρίζει πόσο αυστηρός ή ελαστικός είναι γενικά στις επιλογές του.
     \item $b_i$ : Η τάση της εκδήλωσης (\en{item bias}), που δείχνει τη γενική δημοτικότητα της συγκεκριμένης εκδήλωσης στην πλατφόρμα.
-    \item $P_u, Q_i$ : Τα διανύσματα των λανθανόντων παραγόντων (\en{latent factors}) για τον χρήστη και την εκδήλωση αντίστοιχα, με μέγεθος $K = 3$. Η εσωτερική τους γινόμενη αναπαράσταση αποτυπώνει τη συνάφεια των κρυφών χαρακτηριστικών του χρήστη με το προφίλ της εκδήλωσης.
-    \end{itemize}
+    \item $P_u, Q_i$ : Τα διανύσματα των λανθανόντων παραγόντων (\en{latent factors}) για τον χρήστη και την εκδήλωση αντίστοιχα. Η εσωτερική τους γινόμενη αναπαράσταση αποτυπώνει τη συνάφεια των κρυφών χαρακτηριστικών του χρήστη με την συγκεκριμένη εκδήλωση.
+\end{itemize}
 
-    \subsection{Εκπαίδευση και Υπερπαράμετροι}
-    Η εκπαίδευση του μοντέλου πραγματοποιείται μέσω της μεθόδου της Στοχαστικής Κλιμάκωσης Δυναμικού (\en{Stochastic Gradient Descent - SGD}). Κατά την εκκίνηση, οι λανθάνοντες παράγοντες αρχικοποιούνται με τυχαίες μικρές τιμές. Οι παράμετροι εκπαίδευσης ελέγχονται από τον πίνακα ρυθμίσεων και έχουν οριστεί με βάση τις βέλτιστες δοκιμές:
-    \begin{itemize}[leftmargin=*]
+\subsection{Εκπαίδευση και Υπερπαράμετροι}
+Η εκπαίδευση του μοντέλου πραγματοποιείται μέσω της μεθόδου της Στοχαστικής Κλιμάκωσης Δυναμικού (\en{Stochastic Gradient Descent - SGD}). Κατά την εκκίνηση, οι λανθάνοντες παράγοντες αρχικοποιούνται με τυχαίες μικρές τιμές. Οι παράμετροι εκπαίδευσης ελέγχονται από τον πίνακα ρυθμίσεων και έχουν οριστεί με βάση τις βέλτιστες δοκιμές:
+\begin{itemize}[leftmargin=*]
     \item \textbf{Εποχές (\en{Epochs}):} Το μοντέλο εκτελεί $60$ πλήρεις κύκλους εκπαίδευσης πάνω στα δεδομένα για τη βελτιστοποίηση των τιμών.
     \item \textbf{Ρυθμός Μάθησης (\en{Learning Rate}):} Ορίστηκε σταθερά στην τιμή $0.025$ για την ομαλή σύγκλιση του αλγορίθμου χωρίς αποκλίσεις.
     \item \textbf{Κανονικοποίηση (\en{Regularization}):} Εφαρμόζεται συντελεστής $0.03$ για την αποφυγή του φαινομένου της υπερπροσαρμογής (\en{overfitting}), εξασφαλίζοντας ότι οι συστάσεις θα παραμείνουν γενικευμένες και ποιοτικές.
-    \end{itemize}
+\end{itemize}
 
-    Οι τελικές τιμές των διανυσμάτων αποθηκεύονται στους πίνακες \en{\texttt{User\_Recommendation\_Vector}} και \en{\texttt{Event\_Recommendation\_Vector}}, επιτρέποντας στο \en{Backend} να παράγει άμεσα και σε πραγματικό χρόνο τις σελιδοποιημένες προτάσεις κατά την κλήση των δημόσιων \en{endpoints}.
+Οι τελικές τιμές των διανυσμάτων αποθηκεύονται στους πίνακες \en{\texttt{User\_Recommendation\_Vector}} και \en{\texttt{Event\_Recommendation\_Vector}}, επιτρέποντας στο \en{Backend} να παράγει άμεσα και σε πραγματικό χρόνο τις σελιδοποιημένες προτάσεις κατά την κλήση των δημόσιων \en{endpoints}.
 
-    \newpage
+\newpage
 
 % =========================================================
 % ΚΕΦΑΛΑΙΟ 10: ΟΔΗΓΙΕΣ ΕΓΚΑΤΑΣΤΑΣΗΣ & ΕΚΤΕΛΕΣΗΣ
@@ -517,12 +550,54 @@
 \section{Οδηγίες Εγκατάστασης \& Εκτέλεσης}
 
 \subsection{Προαπαιτούμενα}
-\begin{itemize}[label=\textbullet]
-    \item \en{Java 21 (JDK)}
-    \item \en{Maven 3.9+} (ή χρήση του \en{mvnw})
-    \item \en{Node.js 20+} και \en{npm 10+}
-    \item \en{MySQL Server 8+}
+\begin{itemize}
+    \item \textbf{\href{https://www.docker.com/products/docker-desktop/}{Docker Desktop}} (installed and running)
 \end{itemize}
+
+\subsection{Τοπική Εγκατάσταση \& Εκτέλεση}
+
+\begin{enumerate}
+    \item Ανοίξτε ένα τερματικό στον ριζικό κατάλογο της εφαρμογής (\en{\texttt{Planent\_Web\_App/}})
+    \item Εκτελέστε την ακόλουθη εντολή για να ξεκινήσουν όλες τις υπηρεσίες (\en{docker containers}):
+\end{enumerate}
+
+\begin{lstlisting}[language=bash]
+docker compose up --build
+\end{lstlisting}
+Αυτό κατασκευάζει και εκκινεί αυτόματα τα containers της \en{\textbf{Βάσης Δεδομένων}}, του \en{\textbf{Backend}} και του \en{\textbf{Frontend}} μέσα σε απομονωμένα εσωτερικά δίκτυα \en{Docker}.
+
+\subsection{Πρόσβαση στην Εφαρμογή}
+
+Μόλις όλα τα containers τεθούν σε λειτουργία, η εφαρμογή (ιστότοπος) θα είναι διαθέσιμη στη διεύθυνση \textbf{\href{https://localhost}{https://localhost}}.
+
+Η εφαρμογή επιβάλλει τη χρήση HTTPS χρησιμοποιώντας ένα τοπικό αυτο-υπογεγραμμένο (self-signed) πιστοποιητικό SSL, επομένως ο περιηγητής (browser) θα εμφανίσει μια προειδοποίηση "Η σύνδεσή σας δεν είναι ιδιωτική" (``Your connection is not private''). Απλώς κάντε κλικ στο \texttt{Advanced} (Για προχωρημένους) και στη συνέχεια στο \texttt{Proceed to localhost (unsafe)} (Συνέχεια σε localhost).
+
+Ένας προεπιλεγμένος χρήστης διαχειριστή (admin) δημιουργείται επίσης αυτόματα με όνομα χρήστη και κωδικό πρόσβασης \texttt{admin} (μπορεί να αλλάξει στο \texttt{backend/src/main/java/com/uoa/planent/PlanentApplication\#initDatabase}).
+
+
+\subsection{Τερματισμός \& Επαναφορά:}
+\begin{lstlisting}[language=bash]
+docker compose down
+\end{lstlisting}
+Όλα τα αποθηκευμένα δεδομένα διατηρούνται με ασφάλεια στον volume \texttt{mysql-data} που δημιουργήθηκε από το container της \textbf{Βάσης Δεδομένων}, ακόμη και μετά τον τερματισμό.
+Εκτελέστε ξανά την εφαρμογή με \texttt{docker compose up}, ή ξανά με flag \texttt{--build} εάν έχουν αλλάξει αρχεία.
+
+
+\subsection{Καθαρισμός \& Διαγραφή:}
+Για να αφαιρέσετε τα docker αρχεία που δημιουργήθηκαν για αυτήν την εφαρμογή, χρησιμοποιήστε μία από τις ακόλουθες εντολές:
+
+\vspace{1\baselineskip}
+\noindent \textbf{1. Μόνο Containers \& Images (χωρίς το volume της Βάσης Δεδομένων):}
+\begin{lstlisting}[language=bash]
+docker compose down --rmi all
+\end{lstlisting}
+
+\vspace{1\baselineskip}
+\noindent \textbf{1. Τα πάντα (μαζι με το volume της Βάσης Δεδομένων):}
+\begin{lstlisting}[language=bash]
+docker compose down -v --rmi all
+\end{lstlisting}
+
 
 \newpage
 
