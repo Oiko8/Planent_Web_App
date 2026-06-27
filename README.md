@@ -1,7 +1,7 @@
 ﻿# Planent Web Application
 A full-stack web application designed for event management and online ticket booking,
 developed as a university project for the **Internet Application Technologies** course at **DIT UoA**. It follows a modern web browser/server architecture,
-powered by a secure **Java Spring Boot REST API** backend, a **React + TypeScript** frontend and a **MySQL** database.
+powered by a **React + TypeScript** frontend, **Java Spring Boot REST API** backend and **MySQL** database.
 
 ### Pre-requisites:
 * **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (installed and running)
